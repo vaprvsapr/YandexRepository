@@ -1,37 +1,21 @@
+using EventManager.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var errors = context.ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage);
-
-            var apiResult = new EventManager.Models.ApiResult
-            {
-                Success = false,
-                StatusCode = System.Net.HttpStatusCode.BadRequest,
-                Message = string.Join("; ", errors),
-                DateTime = DateTime.Now
-            };
-
-            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiResult);
-        };
-    });
-
-builder.Services.AddOpenApi();
+builder.Services.AddInfrastructure();
+builder.Services.AddVisualization();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
 app.MapControllers();
 
 app.Run();
