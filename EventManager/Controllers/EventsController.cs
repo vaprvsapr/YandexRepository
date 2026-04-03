@@ -13,7 +13,7 @@ namespace EventManager.Controllers;
 /// </remarks>
 /// <param name="eventService">Сервис, реализующий бизнес-логику для операций с событиями.</param>
 [ApiController]
-[Route("[controller]")]
+[Route("events")]
 public class EventsController(IEventService eventService) : ControllerBase
 {
     private readonly IEventService _eventService = eventService;
