@@ -17,28 +17,6 @@ public static partial class DependencyInjectionExtensions
         services.AddSingleton<IEventRepository, EventRepository>();
         services.AddScoped<IEventService, EventService>();
 
-        // Конфигурация обработки ошибок валидации модели
-        services.AddControllers()
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.InvalidModelStateResponseFactory = context =>
-                {
-                    var errors = context.ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage);
-
-                    var apiResult = new EventManager.Models.ApiResult
-                    {
-                        Success = false,
-                        StatusCode = System.Net.HttpStatusCode.BadRequest,
-                        Message = string.Join("; ", errors),
-                        DateTime = DateTime.Now
-                    };
-
-                    return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiResult);
-                };
-            });
-
         return services;
     }
 }
