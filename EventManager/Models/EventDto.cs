@@ -28,13 +28,13 @@ public class EventDto : IValidatableObject
     /// Время начала события, обязательное для заполнения, должно быть меньше времени окончания события
     /// </summary>
     [Required(ErrorMessage = "startAt обязателен для заполнения.")]
-    public required DateTime StartAt { get; set; }
+    public required DateTime? StartAt { get; set; }
 
     /// <summary>
     /// Время окончания события, обязательное для заполнения, должно быть больше времени начала события
     /// </summary>
     [Required(ErrorMessage = "endAt обязателен для заполнения.")]
-    public required DateTime EndAt { get; set; }
+    public required DateTime? EndAt { get; set; }
 
     /// <summary>
     /// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки.

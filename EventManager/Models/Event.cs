@@ -26,10 +26,10 @@ public class Event
     /// <summary>
     /// Время начала события.
     /// </summary>
-    public required DateTime StartAt { get; set; }
+    public required DateTime? StartAt { get; set; }
 
     /// <summary>
     /// Время окончания события.
     /// </summary>
-    public required DateTime EndAt { get; set; }
+    public required DateTime? EndAt { get; set; }
 }
