@@ -12,22 +12,31 @@ public class EventService(IEventRepository eventRepository) : IEventService
     /// <inheritdoc/>
     public bool CreateEvent(EventDto newEventDto)
     {
-        return _eventRepository.Add(EventDto.ToEvent(newEventDto));
+        var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == newEventDto.Id);
+        if (existingEvent == null)
+        {
+            _eventRepository.Add(EventMapper.ToEvent(newEventDto));
+            return true;
+        }
+        return false;
     }
 
     /// <inheritdoc/>
     public bool DeleteEvent(int id)
     {
-        return _eventRepository.Delete(id);
+        var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
+        if (existingEvent != null)
+        {
+            _eventRepository.Delete(existingEvent);
+            return true;
+        }
+        return false;
     }
 
     /// <inheritdoc/>
     public PaginatedResultDto GetAllEvents(GetQuery query)
     {
         IEnumerable<Event> events = _eventRepository.GetAll();
-
-        // Заранее находим количество событий до фильтрации для корректной пагинации
-        int totalCount = events.Count();
 
         // Фильтрация
         if (!string.IsNullOrEmpty(query.Title))
@@ -39,28 +48,31 @@ public class EventService(IEventRepository eventRepository) : IEventService
         if (query.To.HasValue)
             events = events.Where(e => e.EndAt <= query.To.Value);
 
-        // Пагинация
-        events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize);
-
         return new PaginatedResultDto()
-        { 
-            Events = events.Select(EventDto.ToEventDto), 
-            TotalCount = totalCount, 
-            PageSize = query.PageSize, 
-            Page = query.Page 
+        {
+            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventDto), // Пагинация
+            TotalCount = events.Count(),
+            PageSize = query.PageSize,
+            Page = query.Page
         };
     }
 
     /// <inheritdoc/>
     public EventDto? GetEvent(int id)
     {
-        var eventById = _eventRepository.GetById(id);
-        return eventById == null ? null : EventDto.ToEventDto(eventById);
+        var eventById = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
+        return eventById == null ? null : EventMapper.ToEventDto(eventById);
     }
 
     /// <inheritdoc/>
     public bool UpdateEvent(int id, EventDto updatedEventDto)
     {
-        return _eventRepository.Update(id, EventDto.ToEvent(updatedEventDto));
+        var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
+        if (existingEvent != null)
+        {
+            _eventRepository.Update(id, EventMapper.ToEvent(updatedEventDto));
+            return true;
+        }
+        return false;
     }
 }

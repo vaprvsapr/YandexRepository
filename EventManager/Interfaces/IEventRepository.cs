@@ -23,22 +23,22 @@ public interface IEventRepository
     /// <summary>
     /// Добавляет новое событие в репозиторий.
     /// </summary>
-    /// <param name="newEvent">Событие, которое требуется добавить.</param>
+    /// <param name="eventToAdd">Событие, которое требуется добавить.</param>
     /// <returns><see langword="true"/>, если событие успешно добавлено; в противном случае — <see langword="false"/>.</returns>
-    bool Add(Event newEvent);
+    void Add(Event eventToAdd);
 
     /// <summary>
     /// Обновляет существующее событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
-    /// <param name="updatedEvent">Новые данные события.</param>
+    /// <param name="eventToUpdate">Новые данные события.</param>
     /// <returns><see langword="true"/>, если событие успешно обновлено; в противном случае — <see langword="false"/>.</returns>
-    bool Update(int id, Event updatedEvent);
+    void Update(int id, Event eventToUpdate);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором из репозитория.
     /// </summary>
-    /// <param name="id">Идентификатор события.</param>
+    /// <param name="eventToDelete">Событие, которое требуется удалить.</param>
     /// <returns><see langword="true"/>, если событие успешно удалено; в противном случае — <see langword="false"/>.</returns>
-    bool Delete(int id);
+    void Delete(Event eventToDelete);
 }

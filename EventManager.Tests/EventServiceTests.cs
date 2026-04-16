@@ -1,0 +1,302 @@
+﻿namespace EventManager.Tests;
+using Moq;
+using EventManager.Interfaces;
+using EventManager.Models;
+using EventManager.Services;
+
+public class EventServiceTests
+{
+    private readonly List<Event> _events = new List<Event>()
+    {
+        new Event { Id = 1, Title = "First", StartAt = new DateTime(0), EndAt = new DateTime(1) },
+        new Event { Id = 2, Title = "Second", StartAt = new DateTime(1), EndAt = new DateTime(2) },
+        new Event { Id = 3, Title = "Third", StartAt = new DateTime(2), EndAt = new DateTime(3) },
+        new Event { Id = 4, Title = "Fourth", StartAt = new DateTime(3), EndAt = new DateTime(4) },
+        new Event { Id = 5, Title = "Fifth", StartAt = new DateTime(4), EndAt = new DateTime(5) },
+        new Event { Id = 6, Title = "Sixth", StartAt = new DateTime(5), EndAt = new DateTime(6) },
+        new Event { Id = 7, Title = "Seventh", StartAt = new DateTime(6), EndAt = new DateTime(7)},
+        new Event { Id = 8, Title = "Eighth", StartAt = new DateTime(7), EndAt = new DateTime(8) },
+        new Event { Id = 9, Title = "Ninth", StartAt = new DateTime(8), EndAt = new DateTime(9) },
+        new Event { Id = 10, Title = "Tenth", StartAt = new DateTime(9), EndAt = new DateTime(10) },
+        new Event { Id = 11, Title = "Eleventh", StartAt = new DateTime(10), EndAt = new DateTime(11) }
+    };
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "CreateEvent")]
+    public void CreateEvent_CreatingValidEvent_ReturnsTrue()
+    {
+        // Arrange
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.Add(It.IsAny<Event>()));
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+
+        // Act
+        var result = eventService.CreateEvent(
+            new EventDto
+            {
+                Id = 12,
+                Title = "Test title",
+                StartAt = new DateTime(),
+                EndAt = new DateTime().AddHours(1),
+            });
+
+        // Assert
+        Assert.True(result);
+        mockRepository.Verify(m => m.Add(It.IsAny<Event>()), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "CreateEvent")]
+    public void CreateEvent_CreatingInvalidEvent_ReturnsFalse()
+    {
+        // Arrange
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+
+        // Act
+        var result = eventService.CreateEvent(
+            new EventDto
+            {
+                Id = 1,
+                Title = "Test title",
+                StartAt = new DateTime(),
+                EndAt = new DateTime().AddHours(1),
+            });
+
+        // Assert
+        Assert.False(result);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetAllEvents")]
+    public void GetAllEvents_WithoutFiltration_ReturnsEvents()
+    {
+        // Arrange
+
+        GetQuery query = new GetQuery();
+
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+
+        // Act
+        var result = eventService.GetAllEvents(query);
+
+        // Assert
+        Assert.Equal(_events.Count, result.TotalCount);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetAllEvents")]
+    public void GetAllEvents_WithTitleFiltration_ReturnsEvents()
+    {
+        // Arrange
+        GetQuery query = new GetQuery() { Title = "th" };
+
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+
+        // Act
+        var result = eventService.GetAllEvents(query);
+
+        // Assert
+        Assert.Equal(9, result.TotalCount);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetAllEvents")]
+    public void GetAllEvents_WithDateFiltration_ReturnsEvents()
+    {
+        // Arrange
+        GetQuery fromQuery = new GetQuery() { From = new DateTime(5)};
+        GetQuery toQuery = new GetQuery() { To = new DateTime(5) };
+        GetQuery fromToQuery = new GetQuery() { From = new DateTime(4), To = new DateTime(6) };
+
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+
+        // Act
+        var fromQueryResult = eventService.GetAllEvents(fromQuery);
+        var toQueryResult = eventService.GetAllEvents(toQuery);
+        var fromToQueryResult = eventService.GetAllEvents(fromToQuery);
+
+        // Assert
+        Assert.Equal(6, fromQueryResult.TotalCount);
+        Assert.Equal(5, toQueryResult.TotalCount);
+        Assert.Equal(2, fromToQueryResult.TotalCount);
+        mockRepository.Verify(m => m.GetAll(), Times.Exactly(3));
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetAllEvents")]
+    public void GetAllEvents_WithCombinedFiltration_ReturnsEvents()
+    {
+        // Arrange
+        GetQuery query = new GetQuery() { Title = "I", From = new DateTime(4), To = new DateTime(8) };
+
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+
+        // Act
+        var result = eventService.GetAllEvents(query);
+
+        // Assert
+        Assert.Equal(3, result.TotalCount);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetEvent")]
+    public void GetEvent_ExistingId_ReturnsEvent()
+    {
+        // Arrange
+        int existingId = 1;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.GetEvent(existingId);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(existingId, result.Id);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetEvent")]
+    public void GetEvent_NonExistingId_ReturnsNull()
+    {
+        // Arrange
+        int nonExistingId = 999;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.GetEvent(nonExistingId);
+        // Assert
+        Assert.Null(result);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "UpdateEvent")]
+    public void UpdateEvent_ExistingId_ReturnsTrue()
+    {
+        // Arrange
+        int existingId = 1;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.Update(existingId, It.IsAny<Event>()));
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.UpdateEvent(existingId, new EventDto { 
+            Id = existingId, 
+            Title = "Updated Event",
+            StartAt = new DateTime(0), 
+            EndAt = new DateTime(1) 
+        });
+        // Assert
+        Assert.True(result);
+        mockRepository.Verify(m => m.Update(existingId, It.IsAny<Event>()), Times.Once);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "UpdateEvent")]
+    public void UpdateEvent_NonExistingId_ReturnsFalse()
+    {
+        // Arrange
+        int nonExistingId = 999;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.UpdateEvent(nonExistingId, new EventDto
+        {
+            Id = nonExistingId,
+            Title = "Updated Event",
+            StartAt = new DateTime(0),
+            EndAt = new DateTime(1)
+        });
+        // Assert
+        Assert.False(result);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "UpdateEvent")]
+    public void UpdateEvent_InvalidDate_ReturnsFalse()
+    {
+        // Arrange
+        int existingId = 1;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.UpdateEvent(existingId, new EventDto
+        {
+            Id = existingId,
+            Title = "Updated Event",
+            StartAt = new DateTime(1),
+            EndAt = new DateTime(0)
+        });
+        // Assert
+        Assert.False(result);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "DeleteEvent")]
+    public void DeleteEvent_ExistingId_ReturnsTrue()
+    {
+        // Arrange
+        int existingId = 1;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.Delete(It.IsAny<Event>()));
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.DeleteEvent(existingId);
+        // Assert
+        Assert.True(result);
+        mockRepository.Verify(m => m.Delete(It.IsAny<Event>()), Times.Once);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    [Trait("Subcategory", "DeleteEvent")]
+    public void DeleteEvent_NonExistingId_ReturnsFalse()
+    {
+        // Arrange
+        int nonExistingId = 999;
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.DeleteEvent(nonExistingId);
+        // Assert
+        Assert.False(result);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+}
