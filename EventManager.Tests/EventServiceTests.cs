@@ -7,8 +7,8 @@ using System.ComponentModel.DataAnnotations;
 
 public class EventServiceTests
 {
-    private readonly List<Event> _events = new List<Event>()
-    {
+    private readonly List<Event> _events =
+    [
         new Event { Id = 1, Title = "First", StartAt = new DateTime(0), EndAt = new DateTime(1) },
         new Event { Id = 2, Title = "Second", StartAt = new DateTime(1), EndAt = new DateTime(2) },
         new Event { Id = 3, Title = "Third", StartAt = new DateTime(2), EndAt = new DateTime(3) },
@@ -20,7 +20,7 @@ public class EventServiceTests
         new Event { Id = 9, Title = "Ninth", StartAt = new DateTime(8), EndAt = new DateTime(9) },
         new Event { Id = 10, Title = "Tenth", StartAt = new DateTime(9), EndAt = new DateTime(10) },
         new Event { Id = 11, Title = "Eleventh", StartAt = new DateTime(10), EndAt = new DateTime(11) }
-    };
+    ];
 
     [Fact]
     [Trait("Category", "EventService")]
@@ -80,7 +80,7 @@ public class EventServiceTests
     {
         // Arrange
 
-        GetQuery query = new GetQuery();
+        GetQuery query = new();
 
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
@@ -100,7 +100,7 @@ public class EventServiceTests
     public void GetAllEvents_WithTitleFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new GetQuery() { Title = "th" };
+        GetQuery query = new() { Title = "th" };
 
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
@@ -120,9 +120,9 @@ public class EventServiceTests
     public void GetAllEvents_WithDateFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery fromQuery = new GetQuery() { From = new DateTime(5)};
-        GetQuery toQuery = new GetQuery() { To = new DateTime(5) };
-        GetQuery fromToQuery = new GetQuery() { From = new DateTime(4), To = new DateTime(6) };
+        GetQuery fromQuery = new() { From = new DateTime(5)};
+        GetQuery toQuery = new() { To = new DateTime(5) };
+        GetQuery fromToQuery = new() { From = new DateTime(4), To = new DateTime(6) };
 
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
@@ -146,7 +146,7 @@ public class EventServiceTests
     public void GetAllEvents_WithCombinedFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new GetQuery() { Title = "I", From = new DateTime(4), To = new DateTime(8) };
+        GetQuery query = new() { Title = "I", From = new DateTime(4), To = new DateTime(8) };
 
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
@@ -166,7 +166,7 @@ public class EventServiceTests
     public void GetAllEvents_Pagination_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new GetQuery() { Page = 4, PageSize = 3 };
+        GetQuery query = new() { Page = 4, PageSize = 3 };
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);

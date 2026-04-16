@@ -2,17 +2,25 @@
 
 namespace EventManager.ExceptionHandling;
 
-public class GlobalExceptionHandlingMiddleware
+/// <summary>
+/// Глобальный middleware для обработки необработанных исключений в ASP.NET Core приложении. 
+/// Этот middleware перехватывает все исключения, которые не были обработаны в других местах приложения, 
+/// и возвращает стандартизированный JSON-ответ с информацией об ошибке. Он также логирует детали исключения, 
+/// включая HTTP метод, путь запроса и идентификатор запроса, что помогает в диагностике и отладке проблем в приложении.
+/// </summary>
+/// <param name="next"></param>
+/// <param name="logger"></param>
+public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger;
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger = logger;
 
-    public GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
+    /// <summary>
+    /// Метод, который вызывается для каждого HTTP запроса. 
+    /// Он оборачивает выполнение следующего middleware в конвейере в блок try-catch,
+    /// </summary>
+    /// <param name="httpContext"></param>
+    /// <returns></returns>
     public async Task InvokeAsync(HttpContext httpContext)
     {
         try

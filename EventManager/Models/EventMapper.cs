@@ -1,5 +1,9 @@
 ﻿namespace EventManager.Models;
 
+
+/// <summary>
+/// Маппер для преобразования между DTO моделью данных события и моделью данных события.
+/// </summary>
 public class EventMapper
 {
     /// <summary>
