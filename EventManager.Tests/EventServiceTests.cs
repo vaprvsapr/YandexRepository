@@ -1,8 +1,9 @@
 ﻿namespace EventManager.Tests;
-using Moq;
 using EventManager.Interfaces;
 using EventManager.Models;
 using EventManager.Services;
+using Moq;
+using System.ComponentModel.DataAnnotations;
 
 public class EventServiceTests
 {
@@ -161,6 +162,28 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
+    [Trait("Subcategory", "GetAllEvents")]
+    public void GetAllEvents_Pagination_ReturnsEvents()
+    {
+        // Arrange
+        GetQuery query = new GetQuery() { Page = 4, PageSize = 3 };
+        var mockRepository = new Mock<IEventRepository>();
+        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventService = new EventService(mockRepository.Object);
+        // Act
+        var result = eventService.GetAllEvents(query);
+        // Assert
+        Assert.Equal(11, result.TotalCount);
+        Assert.Equal(3, result.PageSize);
+        Assert.Equal(4, result.Page);
+        Assert.Equal(2, result.Events.Count());
+        Assert.Equal(_events[^2].Id, result.Events.ToList()[0].Id);
+        Assert.Equal(_events[^1].Id, result.Events.ToList()[1].Id);
+        mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
     [Trait("Subcategory", "GetEvent")]
     public void GetEvent_ExistingId_ReturnsEvent()
     {
@@ -241,27 +264,26 @@ public class EventServiceTests
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
+    // С этим тестом вопрос. Валидация - проходит, когда мы отправляем Http запрос. 
+    // В тестовом же проекте, мы запросов не отправляем
     [Fact]
     [Trait("Category", "EventService")]
     [Trait("Subcategory", "UpdateEvent")]
     public void UpdateEvent_InvalidDate_ReturnsFalse()
     {
         // Arrange
-        int existingId = 1;
-        var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var eventService = new EventService(mockRepository.Object);
-        // Act
-        var result = eventService.UpdateEvent(existingId, new EventDto
+        var invalidEventDto = new EventDto
         {
-            Id = existingId,
-            Title = "Updated Event",
+            Id = 1,
+            Title = "Invalid Event",
             StartAt = new DateTime(1),
             EndAt = new DateTime(0)
-        });
+        };
+        // Act
+        var validationResult = ValidateModel(invalidEventDto);
         // Assert
-        Assert.False(result);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        Assert.Contains("Время окончания события должно быть позже времени начала.", 
+            validationResult?.First()?.ErrorMessage ?? string.Empty);
     }
 
     [Fact]
@@ -298,5 +320,18 @@ public class EventServiceTests
         // Assert
         Assert.False(result);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
+    }
+
+    /// <summary>
+    /// Выполняет валидацию модели через DataAnnotations.
+    /// </summary>
+    private static List<ValidationResult> ValidateModel(object model)
+    {
+        var results = new List<ValidationResult>();
+        var context = new ValidationContext(model);
+
+        Validator.TryValidateObject(model, context, results, validateAllProperties: true);
+
+        return results;
     }
 }

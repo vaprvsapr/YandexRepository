@@ -51,13 +51,10 @@ public class GlobalExceptionHandlingMiddleware
         await httpContext.Response.WriteAsJsonAsync(error);
     }
 
-    private static int MapStatusCode(Exception ex)
+    private static int MapStatusCode(Exception ex) => ex switch
     {
-        return ex switch
-        {
-            ValidationException ve => StatusCodes.Status400BadRequest,
-            KeyNotFoundException nfe => StatusCodes.Status404NotFound,
-            _ => StatusCodes.Status500InternalServerError
-        };
-    }
+        ValidationException => StatusCodes.Status400BadRequest,
+        KeyNotFoundException => StatusCodes.Status404NotFound,
+        _ => StatusCodes.Status500InternalServerError
+    };
 }
