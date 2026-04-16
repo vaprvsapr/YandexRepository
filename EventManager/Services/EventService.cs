@@ -21,9 +21,23 @@ public class EventService(IEventRepository eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public IReadOnlyCollection<EventDto> GetAllEvents()
+    public IReadOnlyCollection<EventDto> GetAllEvents(GetQuery query)
     {
-        return _eventRepository.GetAll().Select(EventDto.ToEventDto).ToList().AsReadOnly();
+        IEnumerable<Event> events = _eventRepository.GetAll();
+
+        if (!string.IsNullOrEmpty(query.Title))
+            events = events.Where(e => e.Title.Contains(query.Title, StringComparison.OrdinalIgnoreCase));
+
+        if (query.From.HasValue)
+            events = events.Where(e => e.StartAt >= query.From.Value);
+
+        if (query.To.HasValue)
+            events = events.Where(e => e.EndAt <= query.To.Value);
+
+        return events
+            .Select(EventDto.ToEventDto)
+            .ToList()
+            .AsReadOnly();
     }
 
     /// <inheritdoc/>

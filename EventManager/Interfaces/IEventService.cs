@@ -18,7 +18,7 @@ public interface IEventService
     /// Возвращает коллекцию всех доступных событий.
     /// </summary>
     /// <returns>Коллекция объектов <see cref="EventDto"/>. Если события отсутствуют, возвращается пустая коллекция.</returns>
-    public IReadOnlyCollection<EventDto> GetAllEvents();
+    public IReadOnlyCollection<EventDto> GetAllEvents(GetQuery query);
 
     /// <summary>
     /// Создает новое событие на основе предоставленных данных.

@@ -26,9 +26,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [Produces("application/json")]
     [HttpGet]
-    public ActionResult<IReadOnlyCollection<EventDto>> GetAllEvents()
+    public ActionResult<IReadOnlyCollection<EventDto>> GetAllEvents([FromQuery] GetQuery query)
     {
-        var events = _eventService.GetAllEvents();
+        var events = _eventService.GetAllEvents(query);
         return Ok(events);
     }
 
