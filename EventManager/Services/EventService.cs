@@ -1,6 +1,7 @@
 ﻿using EventManager.Interfaces;
 using EventManager.Models;
 
+
 namespace EventManager.Services;
 
 /// <inheritdoc/>
@@ -21,10 +22,14 @@ public class EventService(IEventRepository eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public IReadOnlyCollection<EventDto> GetAllEvents(GetQuery query)
+    public PaginatedResultDto GetAllEvents(GetQuery query)
     {
         IEnumerable<Event> events = _eventRepository.GetAll();
 
+        // Заранее находим количество событий до фильтрации для корректной пагинации
+        int totalCount = events.Count();
+
+        // Фильтрация
         if (!string.IsNullOrEmpty(query.Title))
             events = events.Where(e => e.Title.Contains(query.Title, StringComparison.OrdinalIgnoreCase));
 
@@ -34,10 +39,16 @@ public class EventService(IEventRepository eventRepository) : IEventService
         if (query.To.HasValue)
             events = events.Where(e => e.EndAt <= query.To.Value);
 
-        return events
-            .Select(EventDto.ToEventDto)
-            .ToList()
-            .AsReadOnly();
+        // Пагинация
+        events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize);
+
+        return new PaginatedResultDto()
+        { 
+            Events = events.Select(EventDto.ToEventDto), 
+            TotalCount = totalCount, 
+            PageSize = query.PageSize, 
+            Page = query.Page 
+        };
     }
 
     /// <inheritdoc/>
