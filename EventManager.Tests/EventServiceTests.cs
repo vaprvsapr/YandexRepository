@@ -176,9 +176,9 @@ public class EventServiceTests
         Assert.Equal(11, result.TotalCount);
         Assert.Equal(3, result.PageSize);
         Assert.Equal(4, result.Page);
-        Assert.Equal(2, result.Events.Count());
-        Assert.Equal(_events[^2].Id, result.Events.ToList()[0].Id);
-        Assert.Equal(_events[^1].Id, result.Events.ToList()[1].Id);
+        Assert.Equal(2, result.Events?.Count() ?? 0);
+        Assert.Equal(_events[^2].Id, result.Events?.ToList()[0].Id);
+        Assert.Equal(_events[^1].Id, result.Events?.ToList()[1].Id);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 

@@ -25,5 +25,4 @@ public class PaginatedResultDto
     /// Номер страницы.
     /// </summary>
     public int Page { get; init; } = 1;
-
 }
