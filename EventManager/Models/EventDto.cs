@@ -5,7 +5,7 @@ namespace EventManager.Models;
 /// <summary>
 /// DTO модель данных события
 /// </summary>
-public class EventDto : IValidatableObject
+public class EventDto// : IValidatableObject
 {
     /// <summary>
     /// ID события, обязательное для заполнения при обновлении и удалении, не должно быть изменяемым при создании
@@ -24,27 +24,50 @@ public class EventDto : IValidatableObject
     /// </summary>
     public string Description { get; set; } = string.Empty;
 
+    private DateTime? _startAt;
     /// <summary>
     /// Время начала события, обязательное для заполнения, должно быть меньше времени окончания события
     /// </summary>
-    [Required(ErrorMessage = "startAt обязателен для заполнения.")]
-    public required DateTime? StartAt { get; set; }
 
+    [Required(ErrorMessage = "startAt обязателен для заполнения.")]
+    public required DateTime? StartAt 
+    { 
+        get { return _startAt; }
+        set 
+        {
+            if (_endAt == null || value < _endAt)
+                _startAt = value;
+            else
+                throw new ValidationException("Время начала события должно быть меньше времени окончания события.");
+        }
+    }
+
+    private DateTime? _endAt;
     /// <summary>
     /// Время окончания события, обязательное для заполнения, должно быть больше времени начала события
     /// </summary>
     [Required(ErrorMessage = "endAt обязателен для заполнения.")]
-    public required DateTime? EndAt { get; set; }
-
-    /// <summary>
-    /// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки.
-    /// </summary>
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (EndAt <= StartAt)
-            yield return new ValidationResult(
-                "Время окончания события должно быть позже времени начала.",
-                [nameof(EndAt)]
-            );
+    public required DateTime? EndAt 
+    { 
+        get { return _endAt; }
+        set 
+        {
+            if (_startAt == null || _startAt < value)
+                _endAt = value;
+            else
+                throw new ValidationException("Время окончания события должно быть больше времени начала события.");
+        }
     }
+
+    ///// <summary>
+    ///// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки.
+    ///// </summary>
+    //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    //{
+    //    if (EndAt <= StartAt)
+    //        yield return new ValidationResult(
+    //            "Время окончания события должно быть позже времени начала.",
+    //            [nameof(EndAt)]
+    //        );
+    //}
 }
