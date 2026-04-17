@@ -23,7 +23,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// </summary>
     /// <returns>Коллекция событий.</returns>
     /// <response code="200">Возвращается успешный ответ с коллекцией событий и HTTP статус-кодом 200 OK.</response>
+    /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
     [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpGet]
     public ActionResult<IReadOnlyCollection<EventDto>> GetAllEvents([FromQuery] GetQuery query)
@@ -55,8 +57,10 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <param name="newEvent">Данные нового события, которые необходимо создать.</param>
     /// <returns>Информация о созданном событии.</returns>
     /// <response code="201">Возвращается успешный ответ с данными созданного события и HTTP статус-кодом 201 Created.</response>
-    /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие или обнаружены ошибки валидации.</response>
+    /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
+    /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие.</response>
     [ProducesResponseType((int)HttpStatusCode.Created)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [HttpPost]
