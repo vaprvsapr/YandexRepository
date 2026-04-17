@@ -11,27 +11,23 @@ public class EventService(IEventRepository eventRepository) : IEventService
     private readonly IEventRepository _eventRepository = eventRepository;
 
     /// <inheritdoc/>
-    public bool CreateEvent(EventDto newEventDto)
+    public void CreateEvent(EventDto newEventDto)
     {
         var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == newEventDto.Id);
         if (existingEvent == null)
-        {
             _eventRepository.Add(EventMapper.ToEvent(newEventDto));
-            return true;
-        }
-        return false;
+        else
+            throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
     }
 
     /// <inheritdoc/>
-    public bool DeleteEvent(int id)
+    public void DeleteEvent(int id)
     {
         var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
         if (existingEvent != null)
-        {
             _eventRepository.Delete(existingEvent);
-            return true;
-        }
-        return false;
+        else
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
     }
 
     /// <inheritdoc/>
@@ -59,14 +55,17 @@ public class EventService(IEventRepository eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public EventDto? GetEvent(int id)
+    public EventDto GetEvent(int id)
     {
         var eventById = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
-        return eventById == null ? null : EventMapper.ToEventDto(eventById);
+        if (eventById != null)
+            return EventMapper.ToEventDto(eventById);
+        else
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
     }
 
     /// <inheritdoc/>
-    public bool UpdateEvent(int id, EventPutDto updatedEventDto)
+    public void UpdateEvent(int id, EventPutDto updatedEventDto)
     {
         var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
         if (existingEvent != null)
@@ -79,8 +78,8 @@ public class EventService(IEventRepository eventRepository) : IEventService
                 EndAt = updatedEventDto.EndAt ?? existingEvent.EndAt
             };
             _eventRepository.Update(id, updatedEvent);
-            return true;
         }
-        return false;
+        else
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
     }
 }

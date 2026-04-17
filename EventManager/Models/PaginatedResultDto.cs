@@ -9,20 +9,20 @@ public class PaginatedResultDto
     /// <summary>
     /// События на странице.
     /// </summary>
-    public IEnumerable<EventDto>? Events { get; init; }
+    public required IEnumerable<EventDto>? Events { get; init; }
 
     /// <summary>
     /// Общее число событий, удовлетворяющих условиям фильтрации.
     /// </summary>
-    public int TotalCount { get; init; }
+    public required int TotalCount { get; init; }
 
     /// <summary>
     /// Количество элементов страницы.
     /// </summary>
-    public int PageSize { get; init; } = 10;
+    public required int PageSize { get; init; } = 10;
 
     /// <summary>
     /// Номер страницы.
     /// </summary>
-    public int Page { get; init; } = 1;
+    public required int Page { get; init; } = 1;
 }

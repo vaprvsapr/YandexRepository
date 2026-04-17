@@ -25,7 +25,7 @@ public interface IEventService
     /// </summary>
     /// <param name="newEvent">Данные нового события.</param>
     /// <returns><see langword="true"/>, если событие успешно создано; в противном случае — <see langword="false"/>.</returns>
-    public bool CreateEvent(EventDto newEvent);
+    public void CreateEvent(EventDto newEvent);
 
     /// <summary>
     /// Обновляет существующее событие с указанным идентификатором.
@@ -33,12 +33,12 @@ public interface IEventService
     /// <param name="id">Идентификатор события.</param>
     /// <param name="updatedEvent">Новые данные события.</param>
     /// <returns><see langword="true"/>, если событие успешно обновлено; в противном случае — <see langword="false"/>.</returns>
-    public bool UpdateEvent(int id, EventPutDto updatedEvent);
+    public void UpdateEvent(int id, EventPutDto updatedEvent);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns><see langword="true"/>, если событие успешно удалено; в противном случае — <see langword="false"/>.</returns>
-    public bool DeleteEvent(int id);
+    public void DeleteEvent(int id);
 }

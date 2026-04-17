@@ -34,7 +34,7 @@ public class EventServiceTests
         var eventService = new EventService(mockRepository.Object);
 
         // Act
-        var result = eventService.CreateEvent(
+        eventService.CreateEvent(
             new EventDto
             {
                 Id = 12,
@@ -44,7 +44,6 @@ public class EventServiceTests
             });
 
         // Assert
-        Assert.True(result);
         mockRepository.Verify(m => m.Add(It.IsAny<Event>()), Times.Once);
     }
 
@@ -59,7 +58,7 @@ public class EventServiceTests
         var eventService = new EventService(mockRepository.Object);
 
         // Act
-        var result = eventService.CreateEvent(
+        eventService.CreateEvent(
             new EventDto
             {
                 Id = 1,
@@ -69,7 +68,6 @@ public class EventServiceTests
             });
 
         // Assert
-        Assert.False(result);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
@@ -229,7 +227,7 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.UpdateEvent(existingId, 
+        eventService.UpdateEvent(existingId, 
             new EventPutDto 
             {  
                 Title = "Updated Event",
@@ -237,7 +235,6 @@ public class EventServiceTests
                 EndAt = new DateTime(1) 
             });
         // Assert
-        Assert.True(result);
         mockRepository.Verify(m => m.Update(existingId, It.IsAny<Event>()), Times.Once);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
@@ -253,7 +250,7 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.UpdateEvent(nonExistingId, 
+        eventService.UpdateEvent(nonExistingId, 
             new EventPutDto
             {
                 Title = "Updated Event",
@@ -261,7 +258,6 @@ public class EventServiceTests
                 EndAt = new DateTime(1)
             });
         // Assert
-        Assert.False(result);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
@@ -277,9 +273,8 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.DeleteEvent(existingId);
+        eventService.DeleteEvent(existingId);
         // Assert
-        Assert.True(result);
         mockRepository.Verify(m => m.Delete(It.IsAny<Event>()), Times.Once);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
@@ -295,9 +290,8 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.DeleteEvent(nonExistingId);
+        eventService.DeleteEvent(nonExistingId);
         // Assert
-        Assert.False(result);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 }

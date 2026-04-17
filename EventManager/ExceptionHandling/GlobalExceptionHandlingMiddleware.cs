@@ -52,8 +52,10 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
 
         var error = new ProblemDetails
         {
+            Type = ex.GetType().Name,
+            Title = ex.Message,
             Status = statusCode,
-            Detail = ex.Message
+            Detail = $"Class: {ex.Source}, Method: {ex.TargetSite?.Name}",
         };
 
         await httpContext.Response.WriteAsJsonAsync(error);
@@ -63,6 +65,7 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
     {
         ValidationException => StatusCodes.Status400BadRequest,
         KeyNotFoundException => StatusCodes.Status404NotFound,
+        InvalidOperationException => StatusCodes.Status409Conflict,
         _ => StatusCodes.Status500InternalServerError
     };
 }

@@ -55,15 +55,15 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <param name="newEvent">Данные нового события, которые необходимо создать.</param>
     /// <returns>Информация о созданном событии.</returns>
     /// <response code="201">Возвращается успешный ответ с данными созданного события и HTTP статус-кодом 201 Created.</response>
-    /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если не удалось создать событие или обнаружены ошибки валидации.</response>
+    /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие или обнаружены ошибки валидации.</response>
     [ProducesResponseType((int)HttpStatusCode.Created)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [HttpPost]
     public ActionResult<EventDto> PostEvent([FromBody] EventDto newEvent)
     {
-        var isPosted = _eventService.CreateEvent(newEvent);
-        return isPosted ? CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent) : BadRequest();
+        _eventService.CreateEvent(newEvent);
+        return CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent);
     }
 
     /// <summary>
@@ -82,8 +82,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpPut("{id:int}")]
     public ActionResult PutEvent([FromRoute] int id, [FromBody] EventPutDto updatedEvent)
     {
-        var isUpdated = _eventService.UpdateEvent(id, updatedEvent);
-        return isUpdated ? Ok() : NotFound();
+        _eventService.UpdateEvent(id, updatedEvent);
+        return Ok();
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult Delete([FromRoute] int id)
     {
-        var isDeleted = _eventService.DeleteEvent(id);
-        return isDeleted ? NoContent() : NotFound();
+        _eventService.DeleteEvent(id);
+        return NoContent();
     }
 }
