@@ -50,7 +50,7 @@ public class EventServiceTests
     [Fact]
     [Trait("Category", "EventService")]
     [Trait("Subcategory", "CreateEvent")]
-    public void CreateEvent_CreatingInvalidEvent_ReturnsFalse()
+    public void CreateEvent_CreatingInvalidEvent_ThrowsException()
     {
         // Arrange
         var mockRepository = new Mock<IEventRepository>();
@@ -58,16 +58,17 @@ public class EventServiceTests
         var eventService = new EventService(mockRepository.Object);
 
         // Act
-        eventService.CreateEvent(
+
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(() => eventService.CreateEvent(
             new EventDto
             {
                 Id = 1,
                 Title = "Test title",
                 StartAt = new DateTime(),
                 EndAt = new DateTime().AddHours(1),
-            });
-
-        // Assert
+            }));
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
@@ -209,9 +210,9 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.GetEvent(nonExistingId);
+        
         // Assert
-        Assert.Null(result);
+        Assert.Throws<KeyNotFoundException>(() => eventService.GetEvent(nonExistingId));
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
@@ -242,7 +243,7 @@ public class EventServiceTests
     [Fact]
     [Trait("Category", "EventService")]
     [Trait("Subcategory", "UpdateEvent")]
-    public void UpdateEvent_NonExistingId_ReturnsFalse()
+    public void UpdateEvent_NonExistingId_ThrowsException()
     {
         // Arrange
         int nonExistingId = 999;
@@ -250,14 +251,15 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        eventService.UpdateEvent(nonExistingId, 
+
+        // Assert
+        Assert.Throws<KeyNotFoundException>(() => eventService.UpdateEvent(nonExistingId,
             new EventPutDto
             {
                 Title = "Updated Event",
                 StartAt = new DateTime(0),
                 EndAt = new DateTime(1)
-            });
-        // Assert
+            }));
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
@@ -282,7 +284,7 @@ public class EventServiceTests
     [Fact]
     [Trait("Category", "EventService")]
     [Trait("Subcategory", "DeleteEvent")]
-    public void DeleteEvent_NonExistingId_ReturnsFalse()
+    public void DeleteEvent_NonExistingId_ThrowsException()
     {
         // Arrange
         int nonExistingId = 999;
@@ -290,8 +292,9 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        eventService.DeleteEvent(nonExistingId);
+
         // Assert
+        Assert.Throws<KeyNotFoundException>(() => eventService.DeleteEvent(nonExistingId));
         mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 }
