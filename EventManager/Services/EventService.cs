@@ -1,7 +1,5 @@
 ﻿using EventManager.Interfaces;
 using EventManager.Models;
-using System.Reflection.Metadata.Ecma335;
-
 
 namespace EventManager.Services;
 
@@ -13,21 +11,19 @@ public class EventService(IEventRepository eventRepository) : IEventService
     /// <inheritdoc/>
     public void CreateEvent(EventDto newEventDto)
     {
-        var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == newEventDto.Id);
-        if (existingEvent == null)
-            _eventRepository.Add(EventMapper.ToEvent(newEventDto));
-        else
+        var existingEvent = _eventRepository.GetById(newEventDto.Id);
+        if (existingEvent != null)
             throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
+        _eventRepository.Add(EventMapper.ToEvent(newEventDto));
     }
 
     /// <inheritdoc/>
     public void DeleteEvent(int id)
     {
-        var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
-        if (existingEvent != null)
-            _eventRepository.Delete(existingEvent);
-        else
+        var existingEvent = _eventRepository.GetById(id);
+        if (existingEvent == null)
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+        _eventRepository.Delete(existingEvent);
     }
 
     /// <inheritdoc/>
@@ -57,30 +53,28 @@ public class EventService(IEventRepository eventRepository) : IEventService
     /// <inheritdoc/>
     public EventDto GetEvent(int id)
     {
-        var eventById = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
-        if (eventById != null)
-            return EventMapper.ToEventDto(eventById);
-        else
+        var eventById = _eventRepository.GetById(id);
+        if (eventById == null)
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+        return EventMapper.ToEventDto(eventById);
     }
 
     /// <inheritdoc/>
     public void UpdateEvent(int id, EventPutDto updatedEventDto)
     {
-        var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
-        if (existingEvent != null)
-        {
-            EventDto updatedEvent = new()
-            { 
-                Id = id,
-                Title = updatedEventDto.Title ?? existingEvent.Title,
-                Description = updatedEventDto.Description ?? existingEvent.Description,
-                StartAt = updatedEventDto.StartAt ?? existingEvent.StartAt,
-                EndAt = updatedEventDto.EndAt ?? existingEvent.EndAt
-            };
-            _eventRepository.Update(id, EventMapper.ToEvent(updatedEvent));
-        }
-        else
+        var existingEvent = _eventRepository.GetById(id);
+        if (existingEvent == null)
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+
+        // Использую Dto, чтобы спровоцировать валидацию в свойствах. Это ок?
+        EventDto updateEventDto = new()
+        {
+            Id = id,
+            Title = updatedEventDto.Title ?? existingEvent.Title,
+            Description = updatedEventDto.Description ?? existingEvent.Description,
+            StartAt = updatedEventDto.StartAt ?? existingEvent.StartAt,
+            EndAt = updatedEventDto.EndAt ?? existingEvent.EndAt
+        };
+        _eventRepository.Update(id, EventMapper.ToEvent(updateEventDto));
     }
 }

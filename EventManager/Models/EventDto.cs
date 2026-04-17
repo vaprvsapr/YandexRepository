@@ -17,7 +17,8 @@ public class EventDto
     /// Название события, обязательное для заполнения, не должно быть пустой строкой
     /// </summary>
     [Required(ErrorMessage = "title обязателен для заполнения.")]
-    public required string Title { get; set; }
+    [MinLength(1, ErrorMessage = "title не может быть пустой строкой.")]
+    public required string Title { get; set; } // Вопрос с required и [Required] - нужно ли их использовать вместе
 
     /// <summary>
     /// Описание события, необязательное поле, может быть пустой строкой
