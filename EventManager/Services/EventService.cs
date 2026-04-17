@@ -70,14 +70,15 @@ public class EventService(IEventRepository eventRepository) : IEventService
         var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
         if (existingEvent != null)
         {
-            Event updatedEvent = new()
-            { Id = id,
+            EventDto updatedEvent = new()
+            { 
+                Id = id,
                 Title = updatedEventDto.Title ?? existingEvent.Title,
                 Description = updatedEventDto.Description ?? existingEvent.Description,
                 StartAt = updatedEventDto.StartAt ?? existingEvent.StartAt,
                 EndAt = updatedEventDto.EndAt ?? existingEvent.EndAt
             };
-            _eventRepository.Update(id, updatedEvent);
+            _eventRepository.Update(id, EventMapper.ToEvent(updatedEvent));
         }
         else
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
