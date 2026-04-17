@@ -33,7 +33,7 @@ public interface IEventService
     /// <param name="id">Идентификатор события.</param>
     /// <param name="updatedEvent">Новые данные события.</param>
     /// <returns><see langword="true"/>, если событие успешно обновлено; в противном случае — <see langword="false"/>.</returns>
-    public bool UpdateEvent(int id, EventDto updatedEvent);
+    public bool UpdateEvent(int id, EventPutDto updatedEvent);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором.

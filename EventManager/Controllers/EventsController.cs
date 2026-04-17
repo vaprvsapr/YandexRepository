@@ -80,7 +80,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:int}")]
-    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventDto updatedEvent)
+    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventPutDto updatedEvent)
     {
         var isUpdated = _eventService.UpdateEvent(id, updatedEvent);
         return isUpdated ? Ok() : NotFound();

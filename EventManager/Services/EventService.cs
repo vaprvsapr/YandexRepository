@@ -66,12 +66,19 @@ public class EventService(IEventRepository eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public bool UpdateEvent(int id, EventDto updatedEventDto)
+    public bool UpdateEvent(int id, EventPutDto updatedEventDto)
     {
         var existingEvent = _eventRepository.GetAll().FirstOrDefault(e => e.Id == id);
         if (existingEvent != null)
         {
-            _eventRepository.Update(id, EventMapper.ToEvent(updatedEventDto));
+            Event updatedEvent = new()
+            { Id = id,
+                Title = updatedEventDto.Title ?? existingEvent.Title,
+                Description = updatedEventDto.Description ?? existingEvent.Description,
+                StartAt = updatedEventDto.StartAt ?? existingEvent.StartAt,
+                EndAt = updatedEventDto.EndAt ?? existingEvent.EndAt
+            };
+            _eventRepository.Update(id, updatedEvent);
             return true;
         }
         return false;

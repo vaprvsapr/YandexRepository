@@ -5,35 +5,27 @@ namespace EventManager.Models;
 /// <summary>
 /// DTO модель данных события
 /// </summary>
-public class EventDto
+public class EventPutDto
 {
-    /// <summary>
-    /// ID события, обязательное для заполнения при обновлении и удалении, не должно быть изменяемым при создании
-    /// </summary>
-    [Required(ErrorMessage = "id обязателен для заполнения.")]
-    public required int Id { get; init; }
-
     /// <summary>
     /// Название события, обязательное для заполнения, не должно быть пустой строкой
     /// </summary>
-    [Required(ErrorMessage = "title обязателен для заполнения.")]
-    public required string Title { get; set; }
+    public string? Title { get; set; } = null;
 
     /// <summary>
     /// Описание события, необязательное поле, может быть пустой строкой
     /// </summary>
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; } = null;
 
-    private DateTime? _startAt;
-
+    private DateTime? _startAt = null;
     /// <summary>
     /// Время начала события, обязательное для заполнения, должно быть меньше времени окончания события
     /// </summary>
-    [Required(ErrorMessage = "startAt обязателен для заполнения.")]
-    public DateTime? StartAt 
-    { 
+
+    public DateTime? StartAt
+    {
         get { return _startAt; }
-        set 
+        set
         {
             if (_endAt == null || value < _endAt)
                 _startAt = value;
@@ -42,16 +34,14 @@ public class EventDto
         }
     }
 
-    private DateTime? _endAt;
-
+    private DateTime? _endAt = null;
     /// <summary>
     /// Время окончания события, обязательное для заполнения, должно быть больше времени начала события
     /// </summary>
-    [Required(ErrorMessage = "endAt обязателен для заполнения.")]
-    public DateTime? EndAt 
-    { 
+    public DateTime? EndAt
+    {
         get { return _endAt; }
-        set 
+        set
         {
             if (_startAt == null || _startAt < value)
                 _endAt = value;

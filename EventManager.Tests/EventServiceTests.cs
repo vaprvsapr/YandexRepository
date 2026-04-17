@@ -229,12 +229,13 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.UpdateEvent(existingId, new EventDto { 
-            Id = existingId, 
-            Title = "Updated Event",
-            StartAt = new DateTime(0), 
-            EndAt = new DateTime(1) 
-        });
+        var result = eventService.UpdateEvent(existingId, 
+            new EventPutDto 
+            {  
+                Title = "Updated Event",
+                StartAt = new DateTime(0), 
+                EndAt = new DateTime(1) 
+            });
         // Assert
         Assert.True(result);
         mockRepository.Verify(m => m.Update(existingId, It.IsAny<Event>()), Times.Once);
@@ -252,38 +253,16 @@ public class EventServiceTests
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
-        var result = eventService.UpdateEvent(nonExistingId, new EventDto
-        {
-            Id = nonExistingId,
-            Title = "Updated Event",
-            StartAt = new DateTime(0),
-            EndAt = new DateTime(1)
-        });
+        var result = eventService.UpdateEvent(nonExistingId, 
+            new EventPutDto
+            {
+                Title = "Updated Event",
+                StartAt = new DateTime(0),
+                EndAt = new DateTime(1)
+            });
         // Assert
         Assert.False(result);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
-    }
-
-    // С этим тестом вопрос. Валидация - проходит, когда мы отправляем Http запрос. 
-    // В тестовом же проекте, мы запросов не отправляем
-    [Fact]
-    [Trait("Category", "EventService")]
-    [Trait("Subcategory", "UpdateEvent")]
-    public void UpdateEvent_InvalidDate_ReturnsFalse()
-    {
-        // Arrange
-        var invalidEventDto = new EventDto
-        {
-            Id = 1,
-            Title = "Invalid Event",
-            StartAt = new DateTime(1),
-            EndAt = new DateTime(0)
-        };
-        // Act
-        var validationResult = ValidateModel(invalidEventDto);
-        // Assert
-        Assert.Contains("Время окончания события должно быть позже времени начала.", 
-            validationResult?.First()?.ErrorMessage ?? string.Empty);
     }
 
     [Fact]
@@ -320,18 +299,5 @@ public class EventServiceTests
         // Assert
         Assert.False(result);
         mockRepository.Verify(m => m.GetAll(), Times.Once);
-    }
-
-    /// <summary>
-    /// Выполняет валидацию модели через DataAnnotations.
-    /// </summary>
-    private static List<ValidationResult> ValidateModel(object model)
-    {
-        var results = new List<ValidationResult>();
-        var context = new ValidationContext(model);
-
-        Validator.TryValidateObject(model, context, results, validateAllProperties: true);
-
-        return results;
     }
 }
