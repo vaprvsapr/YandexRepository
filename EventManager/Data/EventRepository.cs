@@ -30,9 +30,8 @@ public class EventRepository : IEventRepository
     /// <inheritdoc />
     public void Update(int id, Event updatedEvent)
     {
-        _events[id].Title = updatedEvent.Title;
-        _events[id].Description = updatedEvent.Description;
-        _events[id].StartAt = updatedEvent.StartAt;
-        _events[id].EndAt = updatedEvent.EndAt;
+        Event eventToBeUpdated = _events.FirstOrDefault(e => e.Id == id) ?? 
+            throw new InvalidOperationException($"Event with id {id} not found.");
+        eventToBeUpdated = updatedEvent;
     }
 }

@@ -54,7 +54,7 @@ public class EventServiceTests
     {
         // Arrange
         var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
 
         // Act
@@ -69,7 +69,7 @@ public class EventServiceTests
                 StartAt = new DateTime(),
                 EndAt = new DateTime().AddHours(1),
             }));
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 
     [Fact]
@@ -189,14 +189,14 @@ public class EventServiceTests
         // Arrange
         int existingId = 1;
         var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var eventService = new EventService(mockRepository.Object);
         // Act
         var result = eventService.GetEvent(existingId);
         // Assert
         Assert.NotNull(result);
         Assert.Equal(existingId, result.Id);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 
     [Fact]
@@ -207,25 +207,25 @@ public class EventServiceTests
         // Arrange
         int nonExistingId = 999;
         var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
         
         // Assert
         Assert.Throws<KeyNotFoundException>(() => eventService.GetEvent(nonExistingId));
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
     [Trait("Subcategory", "UpdateEvent")]
-    public void UpdateEvent_ExistingId_ReturnsTrue()
+    public void UpdateEvent_ExistingId_UpdatesEvent()
     {
         // Arrange
         int existingId = 1;
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.Update(existingId, It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var eventService = new EventService(mockRepository.Object);
         // Act
         eventService.UpdateEvent(existingId, 
@@ -237,7 +237,7 @@ public class EventServiceTests
             });
         // Assert
         mockRepository.Verify(m => m.Update(existingId, It.IsAny<Event>()), Times.Once);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public class EventServiceTests
         // Arrange
         int nonExistingId = 999;
         var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
 
@@ -260,7 +260,7 @@ public class EventServiceTests
                 StartAt = new DateTime(0),
                 EndAt = new DateTime(1)
             }));
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 
     [Fact]
@@ -272,13 +272,13 @@ public class EventServiceTests
         int existingId = 1;
         var mockRepository = new Mock<IEventRepository>();
         mockRepository.Setup(m => m.Delete(It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
         eventService.DeleteEvent(existingId);
         // Assert
         mockRepository.Verify(m => m.Delete(It.IsAny<Event>()), Times.Once);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 
     [Fact]
@@ -289,12 +289,12 @@ public class EventServiceTests
         // Arrange
         int nonExistingId = 999;
         var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
 
         // Assert
         Assert.Throws<KeyNotFoundException>(() => eventService.DeleteEvent(nonExistingId));
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
     }
 }
