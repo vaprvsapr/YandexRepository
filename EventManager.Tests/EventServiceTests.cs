@@ -3,7 +3,6 @@ using EventManager.Interfaces;
 using EventManager.Models;
 using EventManager.Services;
 using Moq;
-using System.ComponentModel.DataAnnotations;
 
 public class EventServiceTests
 {
