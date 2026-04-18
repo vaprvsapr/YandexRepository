@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ExceptionHandling\ProblemDetails.cs" />
     <Compile Remove="Models\ApiResult.cs" />
   </ItemGroup>
 
