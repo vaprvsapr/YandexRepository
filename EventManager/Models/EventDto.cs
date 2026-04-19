@@ -8,10 +8,10 @@ namespace EventManager.Models;
 public class EventDto : IValidatableObject
 {
     /// <summary>
-    /// ID события, обязательное для заполнения при обновлении и удалении, не должно быть изменяемым при создании
+    /// ID события, обязательное для заполнения при обновлении и удалении   
     /// </summary>
     [Required(ErrorMessage = "id обязателен для заполнения.")]
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
     /// <summary>
     /// Название события, обязательное для заполнения, не должно быть пустой строкой

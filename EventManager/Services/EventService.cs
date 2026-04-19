@@ -11,7 +11,7 @@ public class EventService(IEventRepository eventRepository) : IEventService
     /// <inheritdoc/>
     public void CreateEvent(EventDto newEventDto)
     {
-        var existingEvent = _eventRepository.GetById(newEventDto.Id);
+        var existingEvent = _eventRepository.GetById(newEventDto.Id ?? 0);
         if (existingEvent != null)
             throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
         _eventRepository.Add(EventMapper.ToEvent(newEventDto));

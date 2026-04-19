@@ -15,7 +15,7 @@ public class EventMapper
     {
         return new Event
         {
-            Id = eventDto.Id,
+            Id = eventDto.Id ?? 0,
             Title = eventDto.Title,
             Description = eventDto.Description,
             StartAt = eventDto.StartAt,
