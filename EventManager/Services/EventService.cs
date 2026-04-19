@@ -20,8 +20,7 @@ public class EventService(IEventRepository eventRepository) : IEventService
     /// <inheritdoc/>
     public void DeleteEvent(int id)
     {
-        var existingEvent = _eventRepository.GetById(id);
-        if (existingEvent == null)
+        var existingEvent = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
         _eventRepository.Delete(existingEvent);
     }
@@ -53,28 +52,17 @@ public class EventService(IEventRepository eventRepository) : IEventService
     /// <inheritdoc/>
     public EventDto GetEvent(int id)
     {
-        var eventById = _eventRepository.GetById(id);
-        if (eventById == null)
+        var eventById = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
         return EventMapper.ToEventDto(eventById);
     }
 
     /// <inheritdoc/>
-    public void UpdateEvent(int id, EventPutDto updatedEventDto)
+    public void UpdateEvent(int id, EventDto updatedEventDto)
     {
-        var existingEvent = _eventRepository.GetById(id);
-        if (existingEvent == null)
+        _ = _eventRepository.GetById(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
 
-        // Использую Dto, чтобы спровоцировать валидацию в свойствах. Это ок?
-        EventDto updateEventDto = new()
-        {
-            Id = id,
-            Title = updatedEventDto.Title ?? existingEvent.Title,
-            Description = updatedEventDto.Description ?? existingEvent.Description,
-            StartAt = updatedEventDto.StartAt ?? existingEvent.StartAt,
-            EndAt = updatedEventDto.EndAt ?? existingEvent.EndAt
-        };
-        _eventRepository.Update(id, EventMapper.ToEvent(updateEventDto));
+        _eventRepository.Update(id, EventMapper.ToEvent(updatedEventDto));
     }
 }

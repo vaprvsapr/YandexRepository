@@ -11,7 +11,7 @@ public class EventDto
     /// ID события, обязательное для заполнения при обновлении и удалении, не должно быть изменяемым при создании
     /// </summary>
     [Required(ErrorMessage = "id обязателен для заполнения.")]
-    public required int Id { get; init; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// Название события, обязательное для заполнения, не должно быть пустой строкой

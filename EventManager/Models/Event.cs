@@ -11,7 +11,7 @@ public class Event
     /// <summary>
     /// Идентификатор события.
     /// </summary>
-    public required int Id { get; init; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// Название события.

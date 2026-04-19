@@ -74,7 +74,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// Обновляет существующее событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события, которое требуется обновить.</param>
-    /// <param name="updatedEvent">Новые данные события.</param>
+    /// <param name="updatedEventDto">Новые данные события.</param>
     /// <returns>Результат обновления события.</returns>
     /// <response code="200">Возвращается HTTP статус-код 200 OK, если событие успешно обновлено.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если не удалось обновить событие.</response>
@@ -84,9 +84,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:int}")]
-    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventPutDto updatedEvent)
+    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventDto updatedEventDto)
     {
-        _eventService.UpdateEvent(id, updatedEvent);
+        _eventService.UpdateEvent(id, updatedEventDto);
         return Ok();
     }
 

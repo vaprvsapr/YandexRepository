@@ -32,6 +32,12 @@ public class EventRepository : IEventRepository
     {
         Event eventToBeUpdated = _events.FirstOrDefault(e => e.Id == id) ?? 
             throw new InvalidOperationException($"Event with id {id} not found.");
-        eventToBeUpdated = updatedEvent;
+
+        // Полностью обновляем все поля, включая Id.
+        eventToBeUpdated.Id = updatedEvent.Id;
+        eventToBeUpdated.Title = updatedEvent.Title;
+        eventToBeUpdated.Description = updatedEvent.Description;
+        eventToBeUpdated.StartAt = updatedEvent.StartAt;
+        eventToBeUpdated.EndAt = updatedEvent.EndAt;
     }
 }

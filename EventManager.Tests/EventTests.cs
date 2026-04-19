@@ -17,13 +17,14 @@ public class EventTests
     public void UnableToCreateEventWithInvalidDates_ThrowsValidationException()
     {
         // Arrange & Act & Assert
-        Assert.Throws<ValidationException>(CreateInvalidEventPutDto);
+        Assert.Throws<ValidationException>(CreateInvalidEventDto);
     }
 
-    public static EventPutDto CreateInvalidEventPutDto()
+    public static EventDto CreateInvalidEventDto()
     {
-        return new EventPutDto
+        return new EventDto
         {
+            Id = 0,
             Title = "Invalid Event",
             StartAt = new DateTime(1),
             EndAt = new DateTime(0)
