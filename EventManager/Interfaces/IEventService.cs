@@ -18,27 +18,27 @@ public interface IEventService
     /// Возвращает коллекцию всех доступных событий.
     /// </summary>
     /// <returns>Коллекция объектов <see cref="EventDto"/>. Если события отсутствуют, возвращается пустая коллекция.</returns>
-    public IReadOnlyCollection<EventDto> GetAllEvents();
+    public PaginatedResultDto GetAllEvents(GetQuery query);
 
     /// <summary>
     /// Создает новое событие на основе предоставленных данных.
     /// </summary>
     /// <param name="newEvent">Данные нового события.</param>
     /// <returns><see langword="true"/>, если событие успешно создано; в противном случае — <see langword="false"/>.</returns>
-    public bool CreateEvent(EventDto newEvent);
+    public void CreateEvent(EventDto newEvent);
 
     /// <summary>
     /// Обновляет существующее событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
-    /// <param name="updatedEvent">Новые данные события.</param>
+    /// <param name="updatedEventDto">Новые данные события.</param>
     /// <returns><see langword="true"/>, если событие успешно обновлено; в противном случае — <see langword="false"/>.</returns>
-    public bool UpdateEvent(int id, EventDto updatedEvent);
+    public void UpdateEvent(int id, EventDto updatedEventDto);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns><see langword="true"/>, если событие успешно удалено; в противном случае — <see langword="false"/>.</returns>
-    public bool DeleteEvent(int id);
+    public void DeleteEvent(int id);
 }

@@ -9,33 +9,60 @@ public class EventService(IEventRepository eventRepository) : IEventService
     private readonly IEventRepository _eventRepository = eventRepository;
 
     /// <inheritdoc/>
-    public bool CreateEvent(EventDto newEventDto)
+    public void CreateEvent(EventDto newEventDto)
     {
-        return _eventRepository.Add(EventDto.ToEvent(newEventDto));
+        var existingEvent = _eventRepository.GetById(newEventDto.Id ?? 0);
+        if (existingEvent != null)
+            throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
+        _eventRepository.Add(EventMapper.ToEvent(newEventDto));
     }
 
     /// <inheritdoc/>
-    public bool DeleteEvent(int id)
+    public void DeleteEvent(int id)
     {
-        return _eventRepository.Delete(id);
+        var existingEvent = _eventRepository.GetById(id) ?? 
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+        _eventRepository.Delete(existingEvent);
     }
 
     /// <inheritdoc/>
-    public IReadOnlyCollection<EventDto> GetAllEvents()
+    public PaginatedResultDto GetAllEvents(GetQuery query)
     {
-        return _eventRepository.GetAll().Select(EventDto.ToEventDto).ToList().AsReadOnly();
+        IEnumerable<Event> events = _eventRepository.GetAll();
+
+        // Фильтрация
+        if (!string.IsNullOrEmpty(query.Title))
+            events = events.Where(e => e.Title.Contains(query.Title, StringComparison.OrdinalIgnoreCase));
+
+        if (query.From.HasValue)
+            events = events.Where(e => e.StartAt >= query.From.Value);
+
+        if (query.To.HasValue)
+            events = events.Where(e => e.EndAt <= query.To.Value);
+
+        return new PaginatedResultDto()
+        {
+            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventDto), // Пагинация
+            TotalCount = events.Count(),
+            PageSize = query.PageSize,
+            Page = query.Page
+        };
     }
 
     /// <inheritdoc/>
-    public EventDto? GetEvent(int id)
+    public EventDto GetEvent(int id)
     {
-        var eventById = _eventRepository.GetById(id);
-        return eventById == null ? null : EventDto.ToEventDto(eventById);
+        var eventById = _eventRepository.GetById(id) ?? 
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+        return EventMapper.ToEventDto(eventById);
     }
 
     /// <inheritdoc/>
-    public bool UpdateEvent(int id, EventDto updatedEventDto)
+    public void UpdateEvent(int id, EventDto updatedEventDto)
     {
-        return _eventRepository.Update(id, EventDto.ToEvent(updatedEventDto));
+        _ = _eventRepository.GetById(id) ??
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+
+        _eventRepository.Update(id, EventMapper.ToEvent(updatedEventDto));
     }
 }

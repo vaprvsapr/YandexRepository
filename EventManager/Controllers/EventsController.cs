@@ -23,12 +23,14 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// </summary>
     /// <returns>Коллекция событий.</returns>
     /// <response code="200">Возвращается успешный ответ с коллекцией событий и HTTP статус-кодом 200 OK.</response>
+    /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
     [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpGet]
-    public ActionResult<IReadOnlyCollection<EventDto>> GetAllEvents()
+    public ActionResult<IReadOnlyCollection<EventDto>> GetAllEvents([FromQuery] GetQuery query)
     {
-        var events = _eventService.GetAllEvents();
+        var events = _eventService.GetAllEvents(query);
         return Ok(events);
     }
 
@@ -55,22 +57,24 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <param name="newEvent">Данные нового события, которые необходимо создать.</param>
     /// <returns>Информация о созданном событии.</returns>
     /// <response code="201">Возвращается успешный ответ с данными созданного события и HTTP статус-кодом 201 Created.</response>
-    /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если не удалось создать событие или обнаружены ошибки валидации.</response>
+    /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
+    /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие.</response>
     [ProducesResponseType((int)HttpStatusCode.Created)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [HttpPost]
     public ActionResult<EventDto> PostEvent([FromBody] EventDto newEvent)
     {
-        var isPosted = _eventService.CreateEvent(newEvent);
-        return isPosted ? CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent) : BadRequest();
+        _eventService.CreateEvent(newEvent);
+        return CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent);
     }
 
     /// <summary>
     /// Обновляет существующее событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события, которое требуется обновить.</param>
-    /// <param name="updatedEvent">Новые данные события.</param>
+    /// <param name="updatedEventDto">Новые данные события.</param>
     /// <returns>Результат обновления события.</returns>
     /// <response code="200">Возвращается HTTP статус-код 200 OK, если событие успешно обновлено.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если не удалось обновить событие.</response>
@@ -80,10 +84,10 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:int}")]
-    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventDto updatedEvent)
+    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventDto updatedEventDto)
     {
-        var isUpdated = _eventService.UpdateEvent(id, updatedEvent);
-        return isUpdated ? Ok() : NotFound();
+        _eventService.UpdateEvent(id, updatedEventDto);
+        return Ok();
     }
 
     /// <summary>
@@ -99,7 +103,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult Delete([FromRoute] int id)
     {
-        var isDeleted = _eventService.DeleteEvent(id);
-        return isDeleted ? NoContent() : NotFound();
+        _eventService.DeleteEvent(id);
+        return NoContent();
     }
 }

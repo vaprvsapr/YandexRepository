@@ -9,28 +9,11 @@ public class EventRepository : IEventRepository
     private readonly List<Event> _events = [];
 
     /// <inheritdoc />
-    public bool Add(Event newEvent)
-    {
-        var existingEvent = _events.FirstOrDefault(e => e.Id == newEvent.Id);
-        if (existingEvent == null)
-        {
-            _events.Add(newEvent);
-            return true;
-        }
-        return false;
-    }
+    public void Add(Event eventToAdd) => _events.Add(eventToAdd);
 
     /// <inheritdoc />
-    public bool Delete(int id)
-    {
-        var existingEvent = _events.FirstOrDefault(e => e.Id == id);
-        if (existingEvent != null)
-        {
-            _events.Remove(existingEvent);
-            return true;
-        }
-        return false;
-    }
+    public void Delete(Event eventToDelete) => _events.Remove(eventToDelete);
+
 
     /// <inheritdoc />
     public IReadOnlyCollection<Event> GetAll()
@@ -45,17 +28,16 @@ public class EventRepository : IEventRepository
     }
 
     /// <inheritdoc />
-    public bool Update(int id, Event updatedEvent)
+    public void Update(int id, Event updatedEvent)
     {
-        var existingEvent = _events.FirstOrDefault(e => e.Id == id);
-        if (existingEvent != null)
-        {
-            existingEvent.Title = updatedEvent.Title;
-            existingEvent.Description = updatedEvent.Description;
-            existingEvent.StartAt = updatedEvent.StartAt;
-            existingEvent.EndAt = updatedEvent.EndAt;
-            return true;
-        }
-        return false;
+        Event eventToBeUpdated = _events.FirstOrDefault(e => e.Id == id) ?? 
+            throw new InvalidOperationException($"Event with id {id} not found.");
+
+        // Полностью обновляем все поля, включая Id.
+        eventToBeUpdated.Id = updatedEvent.Id;
+        eventToBeUpdated.Title = updatedEvent.Title;
+        eventToBeUpdated.Description = updatedEvent.Description;
+        eventToBeUpdated.StartAt = updatedEvent.StartAt;
+        eventToBeUpdated.EndAt = updatedEvent.EndAt;
     }
 }

@@ -1,4 +1,5 @@
 using EventManager.DependencyInjection;
+using EventManager.ExceptionHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Пайплайн обработки запросов, включая глобальный обработчик исключений
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
