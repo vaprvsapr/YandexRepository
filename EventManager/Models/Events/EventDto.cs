@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EventManager.Models;
+namespace EventManager.Models.Events;
 
 /// <summary>
 /// DTO модель данных события

@@ -1,4 +1,5 @@
-﻿using EventManager.Models;
+﻿using EventManager.Models.Events;
+using EventManager.Models.Queries;
 
 namespace EventManager.Interfaces;
 

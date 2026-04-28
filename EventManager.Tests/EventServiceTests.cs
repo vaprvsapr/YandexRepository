@@ -1,6 +1,8 @@
 ﻿namespace EventManager.Tests;
+
 using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Event;
+using EventManager.Models.Queries;
 using EventManager.Services;
 using Moq;
 

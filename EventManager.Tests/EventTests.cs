@@ -1,5 +1,5 @@
 ﻿using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Event;
 using EventManager.Services;
 using Moq;
 using System;

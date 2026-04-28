@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel.DataAnnotations;
-
-namespace EventManager.Models;
+﻿namespace EventManager.Models.Events;
 
 /// <summary>
 /// Модель данных события.

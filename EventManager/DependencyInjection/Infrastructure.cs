@@ -14,7 +14,7 @@ public static partial class DependencyInjectionExtensions
     /// </summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddSingleton<IEventRepository, EventRepository>();
+        services.AddSingleton<IRepository<Models.Events.Event>, EventRepository>();
         services.AddScoped<IEventService, EventService>();
 
         return services;

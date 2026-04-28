@@ -1,5 +1,5 @@
 ﻿using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Events;
 
 namespace EventManager.Data;
 

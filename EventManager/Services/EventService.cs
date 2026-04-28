@@ -1,12 +1,14 @@
 ﻿using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Events;
+using EventManager.Models.Queries;
+
 
 namespace EventManager.Services;
 
 /// <inheritdoc/>
-public class EventService(IEventRepository eventRepository) : IEventService
+public class EventService(IRepository<Event> eventRepository) : IEventService
 {
-    private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly IRepository<Event> _eventRepository = eventRepository;
 
     /// <inheritdoc/>
     public void CreateEvent(EventDto newEventDto)
