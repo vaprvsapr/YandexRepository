@@ -1,29 +1,30 @@
 ﻿using EventManager.Interfaces;
 using EventManager.Models.Bookings;
+using System.Collections.Concurrent;
 
 namespace EventManager.Data;
 
 public class BookingRepository : IRepository<Booking>
 {
-    private List<Booking> _bookings = [];
+    private ConcurrentDictionary<int, Booking> _bookingsDictionary = [];
     public void Add(Booking entityToAdd)
     {
-        _bookings.Add(entityToAdd);
+        _bookingsDictionary[entityToAdd.Id] = entityToAdd;
     }
 
     public void Delete(Booking entityToDelete)
     {
-        _bookings.Remove(entityToDelete);
+        _bookingsDictionary.TryRemove(entityToDelete.Id, out _);
     }
 
     public IReadOnlyCollection<Booking> GetAll()
     {
-        return _bookings.AsReadOnly();
+        return _bookingsDictionary.Values.ToList().AsReadOnly();
     }
 
     public Booking? GetById(int id)
     {
-        return _bookings.FirstOrDefault(b => b.Id == id);
+        return _bookingsDictionary.GetValueOrDefault(id);
     }
 
     public void Update(int id, Booking entityToUpdate)
@@ -31,8 +32,7 @@ public class BookingRepository : IRepository<Booking>
         var booking = GetById(id);
         if (booking != null)
         {
-            _bookings.Remove(booking);
-            _bookings.Add(entityToUpdate);
+            _bookingsDictionary[booking.Id] = entityToUpdate;
         }
     }
 }
