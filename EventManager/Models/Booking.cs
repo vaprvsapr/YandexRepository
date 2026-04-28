@@ -2,7 +2,7 @@
 
 public class Booking
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
     public required int EventId { get; init; }
     public required BookingStatus Status { get; set; }
     public required DateTime CreatedAt { get; init; }
