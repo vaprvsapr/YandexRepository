@@ -11,7 +11,7 @@ public class EventDto : IValidatableObject
     /// ID события, обязательное для заполнения при обновлении и удалении   
     /// </summary>
     [Required(ErrorMessage = "id обязателен для заполнения.")]
-    public int? Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Название события, обязательное для заполнения, не должно быть пустой строкой

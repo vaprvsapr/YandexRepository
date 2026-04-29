@@ -6,7 +6,7 @@ namespace EventManager.Data;
 
 public class BookingRepository : IRepository<Booking>
 {
-    private ConcurrentDictionary<int, Booking> _bookingsDictionary = [];
+    private ConcurrentDictionary<Guid, Booking> _bookingsDictionary = [];
     public void Add(Booking entityToAdd)
     {
         _bookingsDictionary[entityToAdd.Id] = entityToAdd;
@@ -22,12 +22,12 @@ public class BookingRepository : IRepository<Booking>
         return _bookingsDictionary.Values.ToList().AsReadOnly();
     }
 
-    public Booking? GetById(int id)
+    public Booking? GetById(Guid id)
     {
         return _bookingsDictionary.GetValueOrDefault(id);
     }
 
-    public void Update(int id, Booking entityToUpdate)
+    public void Update(Guid id, Booking entityToUpdate)
     {
         var booking = GetById(id);
         if (booking != null)

@@ -12,7 +12,7 @@ public interface IRepository<T>
     /// </summary>
     /// <param name="id">Идентификатор объекта.</param>
     /// <returns>Объект <typeparamref name="T"/>, если найден; иначе <see langword="null"/>.</returns>
-    T? GetById(int id);
+    T? GetById(Guid id);
 
     /// <summary>
     /// Возвращает неизменяемую коллекцию всех объектов.
@@ -31,7 +31,7 @@ public interface IRepository<T>
     /// </summary>
     /// <param name="id">Идентификатор объекта.</param>
     /// <param name="entityToUpdate">Новые данные объекта.</param>
-    void Update(int id, T entityToUpdate);
+    void Update(Guid id, T entityToUpdate);
 
     /// <summary>
     /// Удаляет объект из репозитория.

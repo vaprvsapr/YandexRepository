@@ -39,7 +39,7 @@ public class EventRepository : IRepository<Event>
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns>Объект <see cref="Event"/>, если событие найдено; в противном случае — <see langword="null"/>.</returns>
-    public Event? GetById(int id)
+    public Event? GetById(Guid id)
     {
         return _events.FirstOrDefault(e => e.Id == id);
     }
@@ -50,7 +50,7 @@ public class EventRepository : IRepository<Event>
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <param name="updatedEvent">Новые данные события.</param>
-    public void Update(int id, Event updatedEvent)
+    public void Update(Guid id, Event updatedEvent)
     {
         Event eventToBeUpdated = _events.FirstOrDefault(e => e.Id == id) ?? 
             throw new InvalidOperationException($"Event with id {id} not found.");

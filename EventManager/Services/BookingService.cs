@@ -12,7 +12,7 @@ public class BookingService(IRepository<Booking> bookingRepository) : IBookingSe
     {
         Booking newBooking = new Booking
         {
-            Id = 0, // This should be set by the database when the booking is created
+            Id = Guid.NewGuid(), // This should be set by the database when the booking is created
             EventId = bookingDto.EventId,
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.UtcNow
@@ -20,7 +20,7 @@ public class BookingService(IRepository<Booking> bookingRepository) : IBookingSe
         _bookingRepository.Add(newBooking);
     }
 
-    public Booking? GetBookingByIdAsync(int id)
+    public Booking? GetBookingByIdAsync(Guid id)
     {
         return _bookingRepository.GetById(id);
     }
