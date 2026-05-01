@@ -1,7 +1,15 @@
 ﻿namespace EventManager.Models.Bookings;
 
+/// <summary>
+/// Маппер для преобразования между моделями бронирования и их DTO.
+/// </summary>
 public class BookingMapper
 {
+    /// <summary>
+    /// Метод преобразования модели бронирования в DTO.
+    /// </summary>
+    /// <param name="booking"></param>
+    /// <returns></returns>
     public static BookingDto ToBookingDto(Booking booking)
     {
         return new BookingDto
@@ -14,6 +22,11 @@ public class BookingMapper
         };
     }
 
+    /// <summary>
+    /// Метод преобразования DTO бронирования обратно в модель.
+    /// </summary>
+    /// <param name="bookingDto"></param>
+    /// <returns></returns>
     public static Booking ToBooking(BookingDto bookingDto)
     {
         return new Booking
