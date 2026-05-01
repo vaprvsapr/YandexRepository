@@ -15,21 +15,29 @@ public class BookingsController
     [ProducesResponseType((int)HttpStatusCode.Accepted)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
-    [Route("~/events/book/{id}/book")] // "~/" - игнорирует маршрут контроллера.
+    [Route("~/events/{id}/book")] // "~/" - игнорирует маршрут контроллера.
     [HttpPost] // Почему же не bookings/...
     public ActionResult<BookingDto> Book([FromRoute] Guid id)
     {
-        BookingDto newBookingDto = new BookingDto() { EventId = id};
-        BookingDto createdBooking = _bookingService.CreateBookingAsync(newBookingDto);
+        BookingDto createdBooking = _bookingService.CreateBookingAsync(id);
         return Accepted($"/bookings/{createdBooking.Id}", createdBooking);
     }
 
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
-    [HttpGet("bookings/{id:guid}")]
-    public ActionResult<List<BookingDto>> GetBookingById([FromRoute] Guid id)
+    [HttpGet("{id:guid}")]
+    public ActionResult<BookingDto> GetBookingById([FromRoute] Guid id)
     {
         return Ok(_bookingService.GetBookingByIdAsync(id));
+    }
+
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [Produces("application/json")]
+    [HttpGet("~/events/{id:guid}/bookings")]
+    public ActionResult<List<BookingDto>> GetBookingsByEventId([FromRoute] Guid id)
+    {
+        return Ok(_bookingService.GetBookingsByEventIdAsync(id));
     }
 }

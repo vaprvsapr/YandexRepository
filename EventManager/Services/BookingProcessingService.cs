@@ -14,7 +14,10 @@ public class BookingProcessingService(IRepository<Booking> bookingRepository) : 
                 .GetAll()
                 .FirstOrDefault(b => b.Status is BookingStatus.Pending);
             if (pendingBooking is not null)
+            {
+                await Task.Delay(5000); // Симуляция обработки брони
                 pendingBooking.Status = BookingStatus.Confirmed;
+            }
             else
                 await Task.Delay(1000);
         }

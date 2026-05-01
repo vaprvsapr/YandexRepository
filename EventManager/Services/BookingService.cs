@@ -12,16 +12,16 @@ public class BookingService
     private readonly IRepository<Event> _eventRepository = eventRepository;
 
     // Пересмотреть урок, где было похожее. Нужно ли писать async, await?
-    public BookingDto CreateBookingAsync(BookingDto bookingDto)
+    public BookingDto CreateBookingAsync(Guid eventId)
     {
         // Проверка, что указанное событие существует.
-        if (_eventRepository.GetById(bookingDto.EventId) is null)
-            throw new KeyNotFoundException($"Событие с Id:{bookingDto.EventId} не найдено.");
+        if (_eventRepository.GetById(eventId) is null)
+            throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
 
         Booking newBooking = new Booking
         {
             Id = Guid.NewGuid(), // Создаем новое Id для брони.
-            EventId = bookingDto.EventId,
+            EventId = eventId,
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
@@ -29,7 +29,7 @@ public class BookingService
 
         return new BookingDto() 
         { 
-            EventId = bookingDto.EventId, 
+            EventId = eventId, 
             Id = newBooking.Id, 
             Status = newBooking.Status
         };
@@ -46,5 +46,20 @@ public class BookingService
             Id = existingBooking.Id, 
             Status = existingBooking.Status 
         };
+    }
+
+    public List<BookingDto> GetBookingsByEventIdAsync(Guid eventId)
+    {
+        if(_eventRepository.GetById(eventId) is null)
+            throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
+        return _bookingRepository
+            .GetAll()
+            .Where(b => b.EventId == eventId)
+            .Select(b => new BookingDto
+            {
+                EventId = b.EventId,
+                Id = b.Id,
+                Status = b.Status
+            }).ToList();
     }
 }

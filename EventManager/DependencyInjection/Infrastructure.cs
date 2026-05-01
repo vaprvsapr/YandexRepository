@@ -20,6 +20,8 @@ public static partial class DependencyInjectionExtensions
         services.AddSingleton<IRepository<Models.Bookings.Booking>, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
 
+        services.AddHostedService<BookingProcessingService>();
+
         return services;
     }
 }
