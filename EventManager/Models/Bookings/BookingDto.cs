@@ -6,5 +6,7 @@ namespace EventManager.Models.Bookings
     {
         [Required(ErrorMessage = "EventId обязателен для заполнения.")]
         public Guid EventId { get; init; }
+        public Guid Id { get; init; } = Guid.Empty;
+        public BookingStatus Status { get; init; } = BookingStatus.Pending;
     }
 }

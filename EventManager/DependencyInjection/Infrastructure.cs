@@ -17,6 +17,9 @@ public static partial class DependencyInjectionExtensions
         services.AddSingleton<IRepository<Models.Events.Event>, EventRepository>();
         services.AddScoped<IEventService, EventService>();
 
+        services.AddSingleton<IRepository<Models.Bookings.Booking>, BookingRepository>();
+        services.AddScoped<IBookingService, BookingService>();
+
         return services;
     }
 }

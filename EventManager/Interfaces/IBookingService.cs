@@ -4,6 +4,6 @@ namespace EventManager.Interfaces;
 
 public interface IBookingService
 {
-    public void CreateBookingAsync(BookingDto bookingDto);
-    public Booking? GetBookingByIdAsync(Guid id);
+    public BookingDto CreateBookingAsync(BookingDto bookingDto);
+    public BookingDto? GetBookingByIdAsync(Guid id);
 }
