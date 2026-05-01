@@ -8,5 +8,7 @@ namespace EventManager.Models.Bookings
         public Guid EventId { get; init; }
         public Guid Id { get; init; } = Guid.Empty;
         public BookingStatus Status { get; init; } = BookingStatus.Pending;
+        public DateTime CreatedAt { get; init; }
+        public DateTime ProcessedAt { get; set; }
     }
 }

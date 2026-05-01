@@ -23,16 +23,12 @@ public class BookingService
             Id = Guid.NewGuid(), // Создаем новое Id для брони.
             EventId = eventId,
             Status = BookingStatus.Pending,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now,
+            ProcessedAt = DateTime.Now
         };
         _bookingRepository.Add(newBooking);
 
-        return new BookingDto() 
-        { 
-            EventId = eventId, 
-            Id = newBooking.Id, 
-            Status = newBooking.Status
-        };
+        return BookingMapper.ToBookingDto(newBooking);
     }
 
     public BookingDto? GetBookingByIdAsync(Guid id)
@@ -40,12 +36,7 @@ public class BookingService
         var existingBooking = _bookingRepository.GetById(id);
         if (existingBooking is null)
             throw new KeyNotFoundException($"Бронь с Id:{id} не найдена.");
-        return new BookingDto() 
-        { 
-            EventId = existingBooking.EventId, 
-            Id = existingBooking.Id, 
-            Status = existingBooking.Status 
-        };
+        return BookingMapper.ToBookingDto(existingBooking);
     }
 
     public List<BookingDto> GetBookingsByEventIdAsync(Guid eventId)
@@ -55,11 +46,6 @@ public class BookingService
         return _bookingRepository
             .GetAll()
             .Where(b => b.EventId == eventId)
-            .Select(b => new BookingDto
-            {
-                EventId = b.EventId,
-                Id = b.Id,
-                Status = b.Status
-            }).ToList();
+            .Select(BookingMapper.ToBookingDto).ToList();
     }
 }
