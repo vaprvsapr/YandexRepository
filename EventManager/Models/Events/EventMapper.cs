@@ -19,7 +19,8 @@ public class EventMapper
             Title = eventDto.Title,
             Description = eventDto.Description,
             StartAt = eventDto.StartAt,
-            EndAt = eventDto.EndAt
+            EndAt = eventDto.EndAt,
+            NumberOfSeats = eventDto.NumberOfSeats,
         };
     }
 
@@ -36,7 +37,8 @@ public class EventMapper
             Title = eventModel.Title,
             Description = eventModel.Description,
             StartAt = eventModel.StartAt,
-            EndAt = eventModel.EndAt
+            EndAt = eventModel.EndAt,
+            NumberOfSeats = eventModel.NumberOfSeats,
         };
     }
 }

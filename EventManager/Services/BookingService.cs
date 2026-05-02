@@ -18,7 +18,7 @@ public class BookingService
 
     // Пересмотреть урок, где было похожее. Нужно ли писать async, await?
     /// <inheritdoc/>
-    public BookingDto CreateBookingAsync(Guid eventId)
+    public async Task<BookingDto>CreateBookingAsync(Guid eventId)
     {
         // Проверка, что указанное событие существует.
         if (_eventRepository.GetById(eventId) is null)
@@ -29,8 +29,7 @@ public class BookingService
             Id = Guid.NewGuid(), // Создаем новое Id для брони.
             EventId = eventId,
             Status = BookingStatus.Pending,
-            CreatedAt = DateTime.Now,
-            ProcessedAt = DateTime.Now
+            CreatedAt = DateTime.Now
         };
         _bookingRepository.Add(newBooking);
 
@@ -38,7 +37,7 @@ public class BookingService
     }
 
     /// <inheritdoc/>
-    public BookingDto? GetBookingByIdAsync(Guid id)
+    public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
     {
         var existingBooking = _bookingRepository.GetById(id);
         return existingBooking is null
@@ -47,14 +46,13 @@ public class BookingService
     }
 
     /// <inheritdoc/>
-    public List<BookingDto> GetBookingsByEventIdAsync(Guid eventId)
+    public async Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId)
     {
         if(_eventRepository.GetById(eventId) is null)
             throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-        return _bookingRepository
+        return [.. _bookingRepository
             .GetAll()
             .Where(b => b.EventId == eventId)
-            .Select(BookingMapper.ToBookingDto)
-            .ToList();
+            .Select(BookingMapper.ToBookingDto)];
     }
 }

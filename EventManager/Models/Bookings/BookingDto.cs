@@ -30,6 +30,6 @@ namespace EventManager.Models.Bookings
         /// <summary>
         /// Дата и время обработки бронирования.
         /// </summary>
-        public DateTime ProcessedAt { get; set; }
+        public DateTime? ProcessedAt { get; set; }
     }
 }

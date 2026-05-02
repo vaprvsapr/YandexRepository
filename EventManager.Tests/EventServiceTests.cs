@@ -180,7 +180,7 @@ public class EventServiceTests
     public void GetEvent_ExistingId_ReturnsEvent()
     {
         // Arrange
-        Guid existingId = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01");
+        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var eventService = new EventService(mockRepository.Object);
@@ -213,7 +213,7 @@ public class EventServiceTests
     public void UpdateEvent_ExistingId_UpdatesEvent()
     {
         // Arrange
-        Guid existingId = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01");
+        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Update(existingId, It.IsAny<Event>()));
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
@@ -260,7 +260,7 @@ public class EventServiceTests
     public void DeleteEvent_ExistingId_ReturnsTrue()
     {
         // Arrange
-        Guid existingId = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01");
+        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Delete(It.IsAny<Event>()));
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));

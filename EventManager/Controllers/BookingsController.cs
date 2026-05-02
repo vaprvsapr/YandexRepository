@@ -30,9 +30,9 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [Produces("application/json")]
     [Route("~/events/{id}/book")]
     [HttpPost]
-    public ActionResult<BookingDto> Book([FromRoute] Guid id)
+    public async Task<ActionResult<BookingDto>> Book([FromRoute] Guid id)
     {
-        BookingDto createdBooking = _bookingService.CreateBookingAsync(id);
+        BookingDto createdBooking = await _bookingService.CreateBookingAsync(id);
         return Accepted($"/bookings/{createdBooking.Id}", createdBooking);
     }
 
@@ -47,9 +47,9 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpGet("event/{id:guid}")]
-    public ActionResult<List<BookingDto>> GetBookingsByEventId([FromRoute] Guid id)
+    public async Task<ActionResult<List<BookingDto>>> GetBookingsByEventId([FromRoute] Guid id)
     {
-        return Ok(_bookingService.GetBookingsByEventIdAsync(id));
+        return Ok(await _bookingService.GetBookingsByEventIdAsync(id));
     }
 
     /// <summary>
@@ -63,8 +63,8 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpGet("{id:guid}")]
-    public ActionResult<BookingDto> GetBookingById([FromRoute] Guid id)
+    public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] Guid id)
     {
-        return Ok(_bookingService.GetBookingByIdAsync(id));
+        return Ok(await _bookingService.GetBookingByIdAsync(id));
     }
 }

@@ -12,19 +12,19 @@ public interface IBookingService
     /// </summary>
     /// <param name="eventId">Идентификатор события, для которого создаётся бронирование.</param>
     /// <returns>Данные созданного бронирования.</returns>
-    public BookingDto CreateBookingAsync(Guid eventId);
+    public Task<BookingDto> CreateBookingAsync(Guid eventId);
 
     /// <summary>
     /// Возвращает бронирование по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор бронирования.</param>
     /// <returns>Данные найденного бронирования или <see langword="null"/>, если не найдено.</returns>
-    public BookingDto? GetBookingByIdAsync(Guid id);
+    public Task<BookingDto?> GetBookingByIdAsync(Guid id);
 
     /// <summary>
     /// Возвращает список бронирований для указанного события.
     /// </summary>
     /// <param name="eventId">Идентификатор события.</param>
     /// <returns>Список бронирований для события.</returns>
-    public List<BookingDto> GetBookingsByEventIdAsync(Guid eventId);
+    public Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId);
 }

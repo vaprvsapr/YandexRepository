@@ -28,5 +28,5 @@ public class Booking
     /// <summary>
     /// Дата и время обработки бронирования.
     /// </summary>
-    public required DateTime ProcessedAt { get; set; }
+    public DateTime? ProcessedAt { get; set; }
 }

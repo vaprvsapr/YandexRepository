@@ -37,6 +37,13 @@ public class EventDto : IValidatableObject
     [Required(ErrorMessage = "endAt обязателен для заполнения.")]
     public DateTime? EndAt { get; set; }
 
+
+    /// <summary>
+    /// Количество мест на событие, необязательное поле, может быть null, если количество мест не ограничено
+    /// </summary>
+    [Range(1, 10000, ErrorMessage = "Количество мест должно быть неотрицательным числом и больше нуля или null.")]
+    public int? NumberOfSeats { get; set; } = null;
+
     /// <summary>
     /// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки.
     /// </summary>

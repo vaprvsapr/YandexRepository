@@ -29,4 +29,9 @@ public class Event
     /// Время окончания события.
     /// </summary>
     public required DateTime? EndAt { get; set; }
+
+    /// <summary>
+    /// Количество мест на событие, необязательное поле, может быть null, если количество мест не ограничено
+    /// </summary>
+    public int? NumberOfSeats { get; set; } = null;
 }
