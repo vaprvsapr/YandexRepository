@@ -29,6 +29,7 @@ public class BookingProcessingService(IRepository<Booking> bookingRepository) : 
             {
                 await Task.Delay(5000, stoppingToken); // Симуляция обработки брони
                 pendingBooking.Status = BookingStatus.Confirmed;
+                pendingBooking.ProcessedAt = DateTime.Now;
             }
             else
                 await Task.Delay(1000, stoppingToken);
