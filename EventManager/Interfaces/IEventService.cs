@@ -1,4 +1,5 @@
-﻿using EventManager.Models;
+﻿using EventManager.Models.Events;
+using EventManager.Models.Queries;
 
 namespace EventManager.Interfaces;
 
@@ -12,7 +13,7 @@ public interface IEventService
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns>Объект <see cref="EventDto"/>, если событие найдено; в противном случае — <see langword="null"/>.</returns>
-    public EventDto? GetEvent(int id);
+    public EventDto? GetEvent(Guid id);
 
     /// <summary>
     /// Возвращает коллекцию всех доступных событий.
@@ -33,12 +34,12 @@ public interface IEventService
     /// <param name="id">Идентификатор события.</param>
     /// <param name="updatedEventDto">Новые данные события.</param>
     /// <returns><see langword="true"/>, если событие успешно обновлено; в противном случае — <see langword="false"/>.</returns>
-    public void UpdateEvent(int id, EventDto updatedEventDto);
+    public void UpdateEvent(Guid id, EventDto updatedEventDto);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns><see langword="true"/>, если событие успешно удалено; в противном случае — <see langword="false"/>.</returns>
-    public void DeleteEvent(int id);
+    public void DeleteEvent(Guid id);
 }

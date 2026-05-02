@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel.DataAnnotations;
-
-namespace EventManager.Models;
+﻿namespace EventManager.Models.Events;
 
 /// <summary>
 /// Модель данных события.
@@ -11,7 +8,7 @@ public class Event
     /// <summary>
     /// Идентификатор события.
     /// </summary>
-    public required int Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// Название события.
@@ -32,4 +29,9 @@ public class Event
     /// Время окончания события.
     /// </summary>
     public required DateTime? EndAt { get; set; }
+
+    /// <summary>
+    /// Количество мест на событие, необязательное поле, может быть null, если количество мест не ограничено
+    /// </summary>
+    public int? NumberOfSeats { get; set; } = null;
 }

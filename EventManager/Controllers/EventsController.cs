@@ -1,5 +1,6 @@
 ﻿using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Events;
+using EventManager.Models.Queries;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -44,8 +45,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
-    [HttpGet("{id:int}")]
-    public ActionResult<EventDto> GetEventById([FromRoute] int id)
+    [HttpGet("{id:guid}")]
+    public ActionResult<EventDto> GetEventById([FromRoute] Guid id)
     {
         var eventById = _eventService.GetEvent(id);
         return eventById is not null ? Ok(eventById) : NotFound();
@@ -83,8 +84,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
-    [HttpPut("{id:int}")]
-    public ActionResult PutEvent([FromRoute] int id, [FromBody] EventDto updatedEventDto)
+    [HttpPut("{id:guid}")]
+    public ActionResult PutEvent([FromRoute] Guid id, [FromBody] EventDto updatedEventDto)
     {
         _eventService.UpdateEvent(id, updatedEventDto);
         return Ok();
@@ -100,8 +101,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
-    [HttpDelete("{id:int}")]
-    public ActionResult Delete([FromRoute] int id)
+    [HttpDelete("{id:guid}")]
+    public ActionResult Delete([FromRoute] Guid id)
     {
         _eventService.DeleteEvent(id);
         return NoContent();
