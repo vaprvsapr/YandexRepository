@@ -11,7 +11,7 @@ public class EventService(IRepository<Event> eventRepository) : IEventService
     private readonly IRepository<Event> _eventRepository = eventRepository;
 
     /// <inheritdoc/>
-    public void CreateEvent(EventDto newEventDto)
+    public void CreateEvent(EventCreateDto newEventDto)
     {
         var existingEvent = _eventRepository.GetById(newEventDto.Id);
         if (existingEvent != null)
@@ -44,7 +44,7 @@ public class EventService(IRepository<Event> eventRepository) : IEventService
 
         return new PaginatedResultDto()
         {
-            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventDto), // Пагинация
+            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventInfoDto), // Пагинация
             TotalCount = events.Count(),
             PageSize = query.PageSize,
             Page = query.Page
@@ -52,15 +52,15 @@ public class EventService(IRepository<Event> eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public EventDto GetEvent(Guid id)
+    public EventInfoDto GetEvent(Guid id)
     {
         var eventById = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-        return EventMapper.ToEventDto(eventById);
+        return EventMapper.ToEventInfoDto(eventById);
     }
 
     /// <inheritdoc/>
-    public void UpdateEvent(Guid id, EventDto updatedEventDto)
+    public void UpdateEvent(Guid id, EventCreateDto updatedEventDto)
     {
         _ = _eventRepository.GetById(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");

@@ -35,7 +35,7 @@ public class EventServiceTests
 
         // Act
         eventService.CreateEvent(
-            new EventDto
+            new EventCreateDto
             {
                 Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af12"),
                 Title = "Test title",
@@ -61,7 +61,7 @@ public class EventServiceTests
 
         // Assert
         Assert.Throws<InvalidOperationException>(() => eventService.CreateEvent(
-            new EventDto
+            new EventCreateDto
             {
                 Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"),
                 Title = "Test title",
@@ -220,7 +220,7 @@ public class EventServiceTests
         var eventService = new EventService(mockRepository.Object);
         // Act
         eventService.UpdateEvent(existingId, 
-            new EventDto 
+            new EventCreateDto 
             {  
                 Id = existingId,
                 Title = "Updated Event",
@@ -245,7 +245,7 @@ public class EventServiceTests
 
         // Assert
         Assert.Throws<KeyNotFoundException>(() => eventService.UpdateEvent(nonExistingId,
-            new EventDto
+            new EventCreateDto
             {
                 Id = nonExistingId,
                 Title = "Updated Event",

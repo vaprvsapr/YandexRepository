@@ -9,7 +9,7 @@ public class EventTests
     [Trait("Category", "Event")]
     public void UnableToCreateEventWithInvalidDates_ThrowsValidationException()
     {
-        var eventDto = new EventDto
+        var eventDto = new EventCreateDto
         {
             Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"),
             Title = "Некорректное событие",
@@ -20,7 +20,7 @@ public class EventTests
         // Act
         var results = ValidateModel(eventDto);
         // Assert
-        Assert.Contains(results.SelectMany(r => r.MemberNames), name => name == nameof(EventDto.EndAt));
+        Assert.Contains(results.SelectMany(r => r.MemberNames), name => name == nameof(EventCreateDto.EndAt));
     }
 
 

@@ -5,7 +5,7 @@ namespace EventManager.Models.Events;
 /// <summary>
 /// DTO модель данных события
 /// </summary>
-public class EventDto : IValidatableObject
+public class EventInfoDto : IValidatableObject
 {
     /// <summary>
     /// ID события, обязательное для заполнения при обновлении и удалении   
@@ -18,7 +18,7 @@ public class EventDto : IValidatableObject
     /// </summary>
     [Required(ErrorMessage = "title обязателен для заполнения.")]
     [MinLength(1, ErrorMessage = "title не может быть пустой строкой.")]
-    public string Title { get; set; } = string.Empty; 
+    public string Title { get; set; } = string.Empty;
 
     /// <summary>
     /// Описание события, необязательное поле, может быть пустой строкой
@@ -37,15 +37,21 @@ public class EventDto : IValidatableObject
     [Required(ErrorMessage = "endAt обязателен для заполнения.")]
     public DateTime? EndAt { get; set; }
 
-
     /// <summary>
-    /// Количество мест на событие, необязательное поле, может быть null, если количество мест не ограничено
+    /// Количество мест на событие, обязательное поле
     /// </summary>
-    [Range(1, 10000, ErrorMessage = "Количество мест должно быть неотрицательным числом и больше нуля или null.")]
-    public int? NumberOfSeats { get; set; } = null;
+    [Required(ErrorMessage = "TotalSeats обязательно для заполнения.")]
+    [Range(1, 10000, ErrorMessage = "Количество мест должно быть больше нуля.")]
+    public int TotalSeats { get; set; }
 
     /// <summary>
-    /// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки.
+    /// Количество свободных мест на событие.
+    /// </summary>
+    [Range(0, 10000, ErrorMessage = "Количество свободных мест не может быть отрицательным.")]
+    public int AvailableSeats { get; set; }
+
+    /// <summary>
+    /// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки
     /// </summary>
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

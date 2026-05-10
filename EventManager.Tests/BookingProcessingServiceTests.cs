@@ -26,7 +26,7 @@ public class BookingProcessingServiceTests
             Description = "Test Description",
             StartAt = DateTime.Now,
             EndAt = DateTime.Now.AddHours(1),
-            NumberOfSeats = 2
+            TotalSeats = 2
         };
 
         List<Booking> bookings =

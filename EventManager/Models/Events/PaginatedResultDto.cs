@@ -8,7 +8,7 @@ public class PaginatedResultDto
     /// <summary>
     /// События на странице.
     /// </summary>
-    public required IEnumerable<EventDto>? Events { get; init; }
+    public required IEnumerable<EventInfoDto>? Events { get; init; }
 
     /// <summary>
     /// Общее число событий, удовлетворяющих условиям фильтрации.

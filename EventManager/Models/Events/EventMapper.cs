@@ -11,7 +11,7 @@ public class EventMapper
     /// </summary>
     /// <param name="eventDto"></param>
     /// <returns></returns>
-    public static Event ToEvent(EventDto eventDto)
+    public static Event ToEvent(EventCreateDto eventDto)
     {
         return new Event
         {
@@ -20,7 +20,7 @@ public class EventMapper
             Description = eventDto.Description,
             StartAt = eventDto.StartAt,
             EndAt = eventDto.EndAt,
-            NumberOfSeats = eventDto.NumberOfSeats,
+            TotalSeats = eventDto.TotalSeats
         };
     }
 
@@ -29,16 +29,17 @@ public class EventMapper
     /// </summary>
     /// <param name="eventModel"></param>
     /// <returns></returns>
-    public static EventDto ToEventDto(Event eventModel)
+    public static EventInfoDto ToEventInfoDto(Event eventModel)
     {
-        return new EventDto
+        return new EventInfoDto
         {
             Id = eventModel.Id,
             Title = eventModel.Title,
             Description = eventModel.Description,
             StartAt = eventModel.StartAt,
             EndAt = eventModel.EndAt,
-            NumberOfSeats = eventModel.NumberOfSeats,
+            TotalSeats = eventModel.TotalSeats,
+            AvailableSeats = eventModel.AvailableSeats,
         };
     }
 }

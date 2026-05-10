@@ -29,7 +29,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpGet]
-    public ActionResult<IReadOnlyCollection<EventDto>> GetAllEvents([FromQuery] GetQuery query)
+    public ActionResult<IReadOnlyCollection<EventInfoDto>> GetAllEvents([FromQuery] GetQuery query)
     {
         var events = _eventService.GetAllEvents(query);
         return Ok(events);
@@ -46,7 +46,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpGet("{id:guid}")]
-    public ActionResult<EventDto> GetEventById([FromRoute] Guid id)
+    public ActionResult<EventInfoDto> GetEventById([FromRoute] Guid id)
     {
         var eventById = _eventService.GetEvent(id);
         return Ok(eventById);
@@ -65,7 +65,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [HttpPost]
-    public ActionResult<EventDto> PostEvent([FromBody] EventDto newEvent)
+    public ActionResult<EventCreateDto> PostEvent([FromBody] EventCreateDto newEvent)
     {
         _eventService.CreateEvent(newEvent);
         return CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent);
@@ -85,7 +85,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:guid}")]
-    public ActionResult PutEvent([FromRoute] Guid id, [FromBody] EventDto updatedEventDto)
+    public ActionResult PutEvent([FromRoute] Guid id, [FromBody] EventCreateDto updatedEventDto)
     {
         _eventService.UpdateEvent(id, updatedEventDto);
         return Ok();

@@ -66,7 +66,7 @@ public class BookingProcessingService(
     public async Task ProcessBooking(Booking bookingToProcess, int delay = 5000, CancellationToken ct = default)
     {
         await Task.Delay(delay, ct); // Симуляция обработки
-        int? numberOfSeats = _eventRepository.GetById(bookingToProcess.EventId)?.NumberOfSeats;
+        int? numberOfSeats = _eventRepository.GetById(bookingToProcess.EventId)?.TotalSeats;
         int numberOfBookings = _bookingRepository
             .GetAll()
             .Count(
