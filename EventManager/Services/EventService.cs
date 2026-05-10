@@ -1,24 +1,26 @@
 ﻿using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Events;
+using EventManager.Models.Queries;
+
 
 namespace EventManager.Services;
 
 /// <inheritdoc/>
-public class EventService(IEventRepository eventRepository) : IEventService
+public class EventService(IRepository<Event> eventRepository) : IEventService
 {
-    private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly IRepository<Event> _eventRepository = eventRepository;
 
     /// <inheritdoc/>
     public void CreateEvent(EventDto newEventDto)
     {
-        var existingEvent = _eventRepository.GetById(newEventDto.Id ?? 0);
+        var existingEvent = _eventRepository.GetById(newEventDto.Id);
         if (existingEvent != null)
             throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
         _eventRepository.Add(EventMapper.ToEvent(newEventDto));
     }
 
     /// <inheritdoc/>
-    public void DeleteEvent(int id)
+    public void DeleteEvent(Guid id)
     {
         var existingEvent = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
@@ -50,7 +52,7 @@ public class EventService(IEventRepository eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public EventDto GetEvent(int id)
+    public EventDto GetEvent(Guid id)
     {
         var eventById = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
@@ -58,7 +60,7 @@ public class EventService(IEventRepository eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public void UpdateEvent(int id, EventDto updatedEventDto)
+    public void UpdateEvent(Guid id, EventDto updatedEventDto)
     {
         _ = _eventRepository.GetById(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");

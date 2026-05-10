@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EventManager.Models;
+namespace EventManager.Models.Events;
 
 /// <summary>
 /// DTO модель данных события
@@ -11,7 +11,7 @@ public class EventDto : IValidatableObject
     /// ID события, обязательное для заполнения при обновлении и удалении   
     /// </summary>
     [Required(ErrorMessage = "id обязателен для заполнения.")]
-    public int? Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Название события, обязательное для заполнения, не должно быть пустой строкой
@@ -36,6 +36,13 @@ public class EventDto : IValidatableObject
     /// </summary>
     [Required(ErrorMessage = "endAt обязателен для заполнения.")]
     public DateTime? EndAt { get; set; }
+
+
+    /// <summary>
+    /// Количество мест на событие, необязательное поле, может быть null, если количество мест не ограничено
+    /// </summary>
+    [Range(1, 10000, ErrorMessage = "Количество мест должно быть неотрицательным числом и больше нуля или null.")]
+    public int? NumberOfSeats { get; set; } = null;
 
     /// <summary>
     /// Выполняет проверку объекта на соответствие бизнес-правилам и возвращает результаты проверки.

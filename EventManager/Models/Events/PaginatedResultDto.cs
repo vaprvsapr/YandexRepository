@@ -1,5 +1,4 @@
-﻿namespace EventManager.Models;
-using EventManager.Models;
+﻿namespace EventManager.Models.Events;
 
 /// <summary>
 /// Модель данных для представления результатов пагинации при получении списка событий.

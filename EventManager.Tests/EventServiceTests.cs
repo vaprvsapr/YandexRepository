@@ -1,6 +1,8 @@
 ﻿namespace EventManager.Tests;
+
 using EventManager.Interfaces;
-using EventManager.Models;
+using EventManager.Models.Events;
+using EventManager.Models.Queries;
 using EventManager.Services;
 using Moq;
 
@@ -8,26 +10,25 @@ public class EventServiceTests
 {
     private readonly List<Event> _events =
     [
-        new Event { Id = 1, Title = "First", StartAt = new DateTime(0), EndAt = new DateTime(1) },
-        new Event { Id = 2, Title = "Second", StartAt = new DateTime(1), EndAt = new DateTime(2) },
-        new Event { Id = 3, Title = "Third", StartAt = new DateTime(2), EndAt = new DateTime(3) },
-        new Event { Id = 4, Title = "Fourth", StartAt = new DateTime(3), EndAt = new DateTime(4) },
-        new Event { Id = 5, Title = "Fifth", StartAt = new DateTime(4), EndAt = new DateTime(5) },
-        new Event { Id = 6, Title = "Sixth", StartAt = new DateTime(5), EndAt = new DateTime(6) },
-        new Event { Id = 7, Title = "Seventh", StartAt = new DateTime(6), EndAt = new DateTime(7)},
-        new Event { Id = 8, Title = "Eighth", StartAt = new DateTime(7), EndAt = new DateTime(8) },
-        new Event { Id = 9, Title = "Ninth", StartAt = new DateTime(8), EndAt = new DateTime(9) },
-        new Event { Id = 10, Title = "Tenth", StartAt = new DateTime(9), EndAt = new DateTime(10) },
-        new Event { Id = 11, Title = "Eleventh", StartAt = new DateTime(10), EndAt = new DateTime(11) }
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"), Title = "First", StartAt = new DateTime(0), EndAt = new DateTime(1) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af02"), Title = "Second", StartAt = new DateTime(1), EndAt = new DateTime(2) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af03"), Title = "Third", StartAt = new DateTime(2), EndAt = new DateTime(3) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af04"), Title = "Fourth", StartAt = new DateTime(3), EndAt = new DateTime(4) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af05"), Title = "Fifth", StartAt = new DateTime(4), EndAt = new DateTime(5) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af06"), Title = "Sixth", StartAt = new DateTime(5), EndAt = new DateTime(6) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af07"), Title = "Seventh", StartAt = new DateTime(6), EndAt = new DateTime(7)},
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af08"), Title = "Eighth", StartAt = new DateTime(7), EndAt = new DateTime(8) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af09"), Title = "Ninth", StartAt = new DateTime(8), EndAt = new DateTime(9) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af10"), Title = "Tenth", StartAt = new DateTime(9), EndAt = new DateTime(10) },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af11"), Title = "Eleventh", StartAt = new DateTime(10), EndAt = new DateTime(11) }
     ];
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "CreateEvent")]
     public void CreateEvent_CreatingValidEvent_ReturnsTrue()
     {
         // Arrange
-        var mockRepository = new Mock<IEventRepository>();
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Add(It.IsAny<Event>()));
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
@@ -36,7 +37,7 @@ public class EventServiceTests
         eventService.CreateEvent(
             new EventDto
             {
-                Id = 12,
+                Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af12"),
                 Title = "Test title",
                 StartAt = new DateTime(),
                 EndAt = new DateTime().AddHours(1),
@@ -48,12 +49,11 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "CreateEvent")]
     public void CreateEvent_CreatingInvalidEvent_ThrowsException()
     {
         // Arrange
-        var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
+        var mockRepository = new Mock<IRepository<Event>>();
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
 
         // Act
@@ -63,24 +63,23 @@ public class EventServiceTests
         Assert.Throws<InvalidOperationException>(() => eventService.CreateEvent(
             new EventDto
             {
-                Id = 1,
+                Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"),
                 Title = "Test title",
                 StartAt = new DateTime(),
                 EndAt = new DateTime().AddHours(1),
             }));
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetAllEvents")]
     public void GetAllEvents_WithoutFiltration_ReturnsEvents()
     {
         // Arrange
 
         GetQuery query = new();
 
-        var mockRepository = new Mock<IEventRepository>();
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
 
@@ -94,13 +93,12 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetAllEvents")]
     public void GetAllEvents_WithTitleFiltration_ReturnsEvents()
     {
         // Arrange
         GetQuery query = new() { Title = "th" };
 
-        var mockRepository = new Mock<IEventRepository>();
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
 
@@ -114,7 +112,6 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetAllEvents")]
     public void GetAllEvents_WithDateFiltration_ReturnsEvents()
     {
         // Arrange
@@ -122,7 +119,7 @@ public class EventServiceTests
         GetQuery toQuery = new() { To = new DateTime(5) };
         GetQuery fromToQuery = new() { From = new DateTime(4), To = new DateTime(6) };
 
-        var mockRepository = new Mock<IEventRepository>();
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
 
@@ -140,13 +137,12 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetAllEvents")]
     public void GetAllEvents_WithCombinedFiltration_ReturnsEvents()
     {
         // Arrange
         GetQuery query = new() { Title = "I", From = new DateTime(4), To = new DateTime(8) };
 
-        var mockRepository = new Mock<IEventRepository>();
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
 
@@ -160,12 +156,11 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetAllEvents")]
     public void GetAllEvents_Pagination_ReturnsEvents()
     {
         // Arrange
         GetQuery query = new() { Page = 4, PageSize = 3 };
-        var mockRepository = new Mock<IEventRepository>();
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var eventService = new EventService(mockRepository.Object);
         // Act
@@ -182,49 +177,46 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetEvent")]
     public void GetEvent_ExistingId_ReturnsEvent()
     {
         // Arrange
-        int existingId = 1;
-        var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
+        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
+        var mockRepository = new Mock<IRepository<Event>>();
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var eventService = new EventService(mockRepository.Object);
         // Act
         var result = eventService.GetEvent(existingId);
         // Assert
         Assert.NotNull(result);
         Assert.Equal(existingId, result.Id);
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "GetEvent")]
     public void GetEvent_NonExistingId_ReturnsNull()
     {
         // Arrange
-        int nonExistingId = 999;
-        var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
+        Guid nonExistingId = Guid.NewGuid();
+        var mockRepository = new Mock<IRepository<Event>>();
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
         
         // Assert
         Assert.Throws<KeyNotFoundException>(() => eventService.GetEvent(nonExistingId));
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "UpdateEvent")]
     public void UpdateEvent_ExistingId_UpdatesEvent()
     {
         // Arrange
-        int existingId = 1;
-        var mockRepository = new Mock<IEventRepository>();
+        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Update(existingId, It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var eventService = new EventService(mockRepository.Object);
         // Act
         eventService.UpdateEvent(existingId, 
@@ -237,18 +229,17 @@ public class EventServiceTests
             });
         // Assert
         mockRepository.Verify(m => m.Update(existingId, It.IsAny<Event>()), Times.Once);
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "UpdateEvent")]
     public void UpdateEvent_NonExistingId_ThrowsException()
     {
         // Arrange
-        int nonExistingId = 999;
-        var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
+        Guid nonExistingId = Guid.NewGuid();
+        var mockRepository = new Mock<IRepository<Event>>();
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
 
@@ -261,41 +252,39 @@ public class EventServiceTests
                 StartAt = new DateTime(0),
                 EndAt = new DateTime(1)
             }));
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "DeleteEvent")]
     public void DeleteEvent_ExistingId_ReturnsTrue()
     {
         // Arrange
-        int existingId = 1;
-        var mockRepository = new Mock<IEventRepository>();
+        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
+        var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Delete(It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
         eventService.DeleteEvent(existingId);
         // Assert
         mockRepository.Verify(m => m.Delete(It.IsAny<Event>()), Times.Once);
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    [Trait("Subcategory", "DeleteEvent")]
     public void DeleteEvent_NonExistingId_ThrowsException()
     {
         // Arrange
-        int nonExistingId = 999;
-        var mockRepository = new Mock<IEventRepository>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<int>())).Returns((int id) => _events.FirstOrDefault(e => e.Id == id));
+        Guid nonExistingId = Guid.NewGuid();
+        var mockRepository = new Mock<IRepository<Event>>();
+        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var eventService = new EventService(mockRepository.Object);
         // Act
 
         // Assert
         Assert.Throws<KeyNotFoundException>(() => eventService.DeleteEvent(nonExistingId));
-        mockRepository.Verify(m => m.GetById(It.IsAny<int>()), Times.Once);
+        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 }
