@@ -2,6 +2,7 @@
 using EventManager.Interfaces;
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
+using EventManager.ExceptionHandling;
 
 namespace EventManager.Services;
 
@@ -15,25 +16,32 @@ public class BookingService
 {
     private readonly IRepository<Booking> _bookingRepository = bookingRepository;
     private readonly IRepository<Event> _eventRepository = eventRepository;
+    private readonly object _bookingLock = new();
 
     // Пересмотреть урок, где было похожее. Нужно ли писать async, await?
     /// <inheritdoc/>
     public async Task<BookingDto>CreateBookingAsync(Guid eventId)
     {
-        // Проверка, что указанное событие существует.
-        if (_eventRepository.GetById(eventId) is null)
-            throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-
-        Booking newBooking = new()
+        lock (_bookingLock)
         {
-            Id = Guid.NewGuid(), // Создаем новое Id для брони.
-            EventId = eventId,
-            Status = BookingStatus.Pending,
-            CreatedAt = DateTime.Now
-        };
-        _bookingRepository.Add(newBooking);
+            // Проверка, что указанное событие существует.
+            Event? existingEvent = _eventRepository.GetById(eventId) ?? 
+                throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
 
-        return BookingMapper.ToBookingDto(newBooking);
+            if (!existingEvent.TryReserveSeats())
+                throw new NoAvailableSeatsException();
+
+            Booking newBooking = new()
+            {
+                Id = Guid.NewGuid(), // Создаем новое Id для брони.
+                EventId = eventId,
+                Status = BookingStatus.Pending,
+                CreatedAt = DateTime.Now
+            };
+
+            _bookingRepository.Add(newBooking);
+            return BookingMapper.ToBookingDto(newBooking);
+        }
     }
 
     /// <inheritdoc/>
