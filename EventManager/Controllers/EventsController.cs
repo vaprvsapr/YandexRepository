@@ -49,7 +49,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     public ActionResult<EventDto> GetEventById([FromRoute] Guid id)
     {
         var eventById = _eventService.GetEvent(id);
-        return eventById is not null ? Ok(eventById) : NotFound();
+        return Ok(eventById);
     }
 
     /// <summary>
