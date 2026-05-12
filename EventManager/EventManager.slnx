@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Элементы решения/">
+    <File Path="../README.md" />
+  </Folder>
   <Project Path="../EventManager.Tests/EventManager.Tests.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
   <Project Path="EventManager.csproj" />
 </Solution>
