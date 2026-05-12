@@ -231,9 +231,8 @@ public class EventServiceTests
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
         eventService.UpdateEvent(existingId, 
-            new EventCreateDto 
+            new EventUpdateDto 
             {  
-                Id = existingId,
                 Title = "Updated Event",
                 StartAt = new DateTime(0), 
                 EndAt = new DateTime(1) 
@@ -257,9 +256,8 @@ public class EventServiceTests
 
         // Assert
         Assert.Throws<KeyNotFoundException>(() => eventService.UpdateEvent(nonExistingId,
-            new EventCreateDto
+            new EventUpdateDto
             {
-                Id = nonExistingId,
                 Title = "Updated Event",
                 StartAt = new DateTime(0),
                 EndAt = new DateTime(1)

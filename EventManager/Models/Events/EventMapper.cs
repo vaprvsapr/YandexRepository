@@ -15,7 +15,25 @@ public class EventMapper
     {
         return new Event
         {
-            Id = eventDto.Id, // problem with ??
+            Id = eventDto.Id,
+            Title = eventDto.Title,
+            Description = eventDto.Description,
+            StartAt = eventDto.StartAt,
+            EndAt = eventDto.EndAt,
+            TotalSeats = eventDto.TotalSeats
+        };
+    }
+
+    /// <summary>
+    /// Метод преобразования DTO модели данных события в модель данных события, используемую в бизнес-логике приложения
+    /// </summary>
+    /// <param name="eventDto"></param>
+    /// <param name="id"></param>
+    public static Event ToEvent(EventUpdateDto eventDto, Guid id)
+    {
+        return new Event
+        {
+            Id = id,
             Title = eventDto.Title,
             Description = eventDto.Description,
             StartAt = eventDto.StartAt,

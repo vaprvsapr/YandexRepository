@@ -29,7 +29,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpGet]
-    public ActionResult<IReadOnlyCollection<EventInfoDto>> GetAllEvents([FromQuery] GetQuery query)
+    public ActionResult<PaginatedResultDto> GetAllEvents([FromQuery] GetQuery query)
     {
         var events = _eventService.GetAllEvents(query);
         return Ok(events);
@@ -85,7 +85,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:guid}")]
-    public ActionResult PutEvent([FromRoute] Guid id, [FromBody] EventCreateDto updatedEventDto)
+    public ActionResult PutEvent([FromRoute] Guid id, [FromBody] EventUpdateDto updatedEventDto)
     {
         _eventService.UpdateEvent(id, updatedEventDto);
         return Ok();

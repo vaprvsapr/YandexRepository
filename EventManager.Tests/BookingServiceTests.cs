@@ -362,11 +362,11 @@ public class BookingServiceTests
         eventRepository.Add(newEvent);
         BookingRepository bookingRepository = new();
         var mockLogger = new Mock<ILogger<BookingService>>();
-        var BookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
 
         var tasks = Enumerable.Range(0, 20)
-            .Select(_ => BookingService.CreateBookingAsync(eventId))
+            .Select(_ => bookingService.CreateBookingAsync(eventId))
             .ToArray();
 
         await Task.WhenAll(tasks.Select(t => t.ContinueWith(_ => { })));
