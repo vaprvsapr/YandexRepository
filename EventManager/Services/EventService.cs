@@ -12,14 +12,16 @@ public class EventService(IRepository<Event> eventRepository, ILogger<EventServi
     private readonly ILogger<EventService> _logger = logger;
 
     /// <inheritdoc/>
-    public void CreateEvent(EventCreateDto newEventDto)
+    public EventInfoDto CreateEvent(EventCreateDto newEventDto)
     {
         var existingEvent = _eventRepository.GetById(newEventDto.Id);
         if (existingEvent != null)
             throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
-        _eventRepository.Add(EventMapper.ToEvent(newEventDto));
+        Event newEvent = EventMapper.ToEvent(newEventDto);
+        _eventRepository.Add(newEvent);
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event created: {title} with id: {id}", newEventDto.Title, newEventDto.Id);
+        return EventMapper.ToEventInfoDto(newEvent);
     }
 
     /// <inheritdoc/>

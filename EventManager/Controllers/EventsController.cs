@@ -65,10 +65,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [HttpPost]
-    public ActionResult<EventCreateDto> PostEvent([FromBody] EventCreateDto newEvent)
+    public ActionResult<EventInfoDto> PostEvent([FromBody] EventCreateDto newEvent)
     {
-        _eventService.CreateEvent(newEvent);
-        return CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent);
+        return CreatedAtAction(nameof(IEventService.CreateEvent), _eventService.CreateEvent(newEvent));
     }
 
     /// <summary>

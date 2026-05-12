@@ -25,8 +25,8 @@ public interface IEventService
     /// Создает новое событие на основе предоставленных данных.
     /// </summary>
     /// <param name="newEvent">Данные нового события.</param>
-    /// <returns><see langword="true"/>, если событие успешно создано; в противном случае — <see langword="false"/>.</returns>
-    public void CreateEvent(EventCreateDto newEvent);
+    /// <returns>Объект <see cref="EventInfoDto"/>, если событие успешно создано.</returns>
+    public EventInfoDto CreateEvent(EventCreateDto newEvent);
 
     /// <summary>
     /// Обновляет существующее событие с указанным идентификатором.
