@@ -73,7 +73,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <summary>
     /// Возвращает список всех бронирований.
     /// </summary>
-    /// <response code="200">Список успешно возвра</response>
+    /// <response code="200">Список успешно возвращён.</response>
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [HttpGet]
     public async Task<ActionResult<List<BookingDto>>> GetAllBookings()

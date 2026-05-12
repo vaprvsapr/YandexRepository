@@ -63,7 +63,7 @@ public class BookingProcessingService(
     /// <summary>
     /// Метод обработки бронирования.
     /// </summary>
-    /// <param name="bookingToProcess">Бронировани, которое нужно обработать.</param>
+    /// <param name="bookingToProcess">Бронирование, которое нужно обработать.</param>
     /// <param name="ct">Токен отмены.</param>
     /// <param name="delay">Задержка перед обработкой.</param>
     public async Task ProcessBookingAsync(Booking bookingToProcess, int delay, CancellationToken ct)
