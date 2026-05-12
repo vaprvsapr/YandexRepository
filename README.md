@@ -40,7 +40,7 @@ RESTful API для управления событиями, написанное
 | `POST`   | `/events`                    | Создать новое событие                                     | `201 Created`    | `400 Bad Request`, `409 Conflict`  |
 | `PUT`    | `/events/{id}`               | Обновить существующее событие по его `id`                 | `200 OK`         | `400 Bad Request`, `404 Not Found` |
 | `DELETE` | `/events/{id}`               | Удалить событие по его `id`                               | `204 No Content` | `404 Not Found`                    |
-| `POST`   | `/events/{id}/book`          | Создать бронирование для события с указанным `id`         | `202 Accepted`   | `404 Not Found`  , `409 Conflict`  |
+| `POST`   | `/events/{id}/book`          | Создать бронирование для события с указанным `id`         | `202 Accepted`   | `404 Not Found`, `409 Conflict`    |
 | `GET`    | `/bookings/{id}`             | Получить бронирование по его уникальному `id`             | `200 OK`         | `404 Not Found`                    |
 | `GET`    | `/bookings/event/{id}`       | Получить список бронирований для события с указанным `id` | `200 OK`         | `404 Not Found`                    |
 | `GET`    | `/bookings`                  | Получить список всех бронирований                         | `200 OK`         |                                    |
