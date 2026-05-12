@@ -32,7 +32,7 @@ public class EventServiceTests
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Add(It.IsAny<Event>()));
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
 
         // Act
@@ -56,7 +56,7 @@ public class EventServiceTests
         // Arrange
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
 
         // Act
@@ -84,7 +84,7 @@ public class EventServiceTests
 
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
 
         // Act
@@ -104,7 +104,7 @@ public class EventServiceTests
 
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
 
         // Act
@@ -126,7 +126,7 @@ public class EventServiceTests
 
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
 
         // Act
@@ -150,7 +150,7 @@ public class EventServiceTests
 
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
 
         // Act
@@ -169,7 +169,7 @@ public class EventServiceTests
         GetQuery query = new() { Page = 4, PageSize = 3 };
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetAll()).Returns(_events);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
         var result = eventService.GetAllEvents(query);
@@ -191,7 +191,7 @@ public class EventServiceTests
         Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
         var result = eventService.GetEvent(existingId);
@@ -209,7 +209,7 @@ public class EventServiceTests
         Guid nonExistingId = Guid.NewGuid();
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
         
@@ -227,7 +227,7 @@ public class EventServiceTests
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Update(existingId, It.IsAny<Event>()));
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
         eventService.UpdateEvent(existingId, 
@@ -251,7 +251,7 @@ public class EventServiceTests
         Guid nonExistingId = Guid.NewGuid();
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
 
@@ -276,7 +276,7 @@ public class EventServiceTests
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.Delete(It.IsAny<Event>()));
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
         eventService.DeleteEvent(existingId);
@@ -293,7 +293,7 @@ public class EventServiceTests
         Guid nonExistingId = Guid.NewGuid();
         var mockRepository = new Mock<IRepository<Event>>();
         mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(mockRepository.Object, mockLogger.Object);
         // Act
 

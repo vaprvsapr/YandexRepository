@@ -28,7 +28,7 @@ public class BookingServiceTests
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act
         var result = await bookingService.CreateBookingAsync(eventId);
@@ -57,7 +57,7 @@ public class BookingServiceTests
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act
         var result1 = await bookingService.CreateBookingAsync(eventId);
@@ -91,7 +91,7 @@ public class BookingServiceTests
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(It.IsAny<Guid>())).Returns((Guid id) => null);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
 
         // Act, Assert
@@ -118,7 +118,7 @@ public class BookingServiceTests
         var mockEventRepository = new Mock<IRepository<Event>>();
         var mockBookingRepository = new Mock<IRepository<Booking>>();
         mockBookingRepository.Setup(repo => repo.GetById(bookingId)).Returns(existingBooking);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act
         var result = await bookingService.GetBookingByIdAsync(bookingId);
@@ -139,7 +139,7 @@ public class BookingServiceTests
         var mockEventRepository = new Mock<IRepository<Event>>();
         var mockBookingRepository = new Mock<IRepository<Booking>>();
         mockBookingRepository.Setup(repo => repo.GetById(It.IsAny<Guid>())).Returns((Guid id) => null);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act, Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.GetBookingByIdAsync(bookingId));
@@ -164,7 +164,7 @@ public class BookingServiceTests
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
         mockBookingRepository.Setup(repo => repo.GetAll()).Returns([]);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act
         var result = await bookingService.GetBookingsByEventIdAsync(eventId);
@@ -199,7 +199,7 @@ public class BookingServiceTests
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
         mockBookingRepository.Setup(repo => repo.GetAll()).Returns(bookings);
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act
         var result = await bookingService.GetBookingsByEventIdAsync(eventId);
@@ -220,7 +220,7 @@ public class BookingServiceTests
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns((Event)null!);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(mockBookingRepository.Object, mockEventRepository.Object, mockLogger.Object);
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.GetBookingsByEventIdAsync(eventId));
@@ -246,7 +246,7 @@ public class BookingServiceTests
         eventRepository.Add(newEvent);
         eventRepository.Delete(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(mockBookingRepository.Object, eventRepository, mockLogger.Object);
 
         // Act & Assert
@@ -271,7 +271,7 @@ public class BookingServiceTests
         EventRepository eventRepository = new();
         eventRepository.Add(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(mockBookingRepository.Object, eventRepository, mockLogger.Object);
 
         // Act
@@ -297,7 +297,7 @@ public class BookingServiceTests
         EventRepository eventRepository = new();
         eventRepository.Add(newEvent);
         BookingRepository bookingRepository = new();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act 1
         await BookingService.CreateBookingAsync(eventId);
@@ -334,7 +334,7 @@ public class BookingServiceTests
         EventRepository eventRepository = new();
         eventRepository.Add(newEvent);
         BookingRepository bookingRepository = new();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         var tasks = Enumerable.Range(0, numberOfSeats).Select(async i => await BookingService.CreateBookingAsync(eventId));
@@ -361,7 +361,7 @@ public class BookingServiceTests
         EventRepository eventRepository = new();
         eventRepository.Add(newEvent);
         BookingRepository bookingRepository = new();
-        var mockLogger = new Mock<ILogger>();
+        var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
 
