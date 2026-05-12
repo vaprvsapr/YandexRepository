@@ -33,8 +33,8 @@ public interface IEventService
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <param name="updatedEventDto">Новые данные события.</param>
-    /// <returns><see langword="true"/>, если событие успешно обновлено; в противном случае — <see langword="false"/>.</returns>
-    public void UpdateEvent(Guid id, EventUpdateDto updatedEventDto);
+    /// <returns>Объект <see cref="EventInfoDto"/>, если событие успешно обновлено.</returns>
+    public EventInfoDto UpdateEvent(Guid id, EventUpdateDto updatedEventDto);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором.

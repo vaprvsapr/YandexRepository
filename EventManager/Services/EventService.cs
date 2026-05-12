@@ -67,13 +67,15 @@ public class EventService(IRepository<Event> eventRepository, ILogger<EventServi
     }
 
     /// <inheritdoc/>
-    public void UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
+    public EventInfoDto UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
     {
         _ = _eventRepository.GetById(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
 
-        _eventRepository.Update(id, EventMapper.ToEvent(updatedEventDto, id));
+        Event updatedEvent = EventMapper.ToEvent(updatedEventDto, id);
+        _eventRepository.Update(id, updatedEvent);
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event updated: {title} with id: {id}", updatedEventDto.Title, id);
+        return EventMapper.ToEventInfoDto(updatedEvent);
     }
 }

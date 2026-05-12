@@ -1,6 +1,7 @@
 ﻿using EventManager.Interfaces;
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
+using EventManager.DependencyInjection;
 
 namespace EventManager.Services;
 
@@ -14,17 +15,19 @@ namespace EventManager.Services;
 /// <param name="eventRepository">Репозиторий для работы с событиями.</param>
 /// <param name="logger">Логгер для записи информации о процессе обработки бронирований.</param>
 /// <param name="delay">Задержка между проверками бронирований.</param>
+/// <param name="maxConcurrentBookings">Максимальное количество бронирований, обрабатываемых одновременно.</param>
 public class BookingProcessingService(
     IRepository<Booking> bookingRepository,
     IRepository<Event> eventRepository,
     ILogger<BookingProcessingService> logger,
-    int delay = 5000) : BackgroundService
+    int delay = Constants.BookingProcessingService.DefaultDelay,
+    int maxConcurrentBookings = Constants.BookingProcessingService.DefaultMaxConcurrentBookings) : BackgroundService
 {
     private readonly IRepository<Booking> _bookingRepository = bookingRepository;
     private readonly IRepository<Event> _eventRepository = eventRepository;
     private readonly ILogger<BookingProcessingService> _logger = logger;
-    private readonly int _delay = delay;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
+
 
     /// <summary>
     /// Запускает фоновую задачу обработки бронирований.
@@ -41,7 +44,7 @@ public class BookingProcessingService(
             List<Booking> pendingBookings = [.. _bookingRepository
                 .GetAll()
                 .Where(b => b.Status is BookingStatus.Pending)
-                .Take(4)];
+                .Take(maxConcurrentBookings)];
 
             if (pendingBookings.Count > 0)
             {
@@ -49,11 +52,11 @@ public class BookingProcessingService(
                     _logger.LogInformation("Processing {n} pending bookings at: {time}", 
                         pendingBookings.Count, DateTime.Now);
 
-                var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking, _delay, stoppingToken));
+                var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking, delay, stoppingToken));
                 await Task.WhenAll(tasks);
             }
             else
-                await Task.Delay(_delay, stoppingToken);
+                await Task.Delay(delay, stoppingToken);
         }
 
         if (_logger.IsEnabled(LogLevel.Information))

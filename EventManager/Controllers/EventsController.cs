@@ -67,7 +67,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpPost]
     public ActionResult<EventInfoDto> PostEvent([FromBody] EventCreateDto newEvent)
     {
-        return CreatedAtAction(nameof(IEventService.CreateEvent), _eventService.CreateEvent(newEvent));
+        var createdEvent = _eventService.CreateEvent(newEvent);
+        return CreatedAtAction(nameof(GetEventById), new { id = createdEvent.Id }, createdEvent);
     }
 
     /// <summary>
@@ -84,10 +85,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:guid}")]
-    public ActionResult PutEvent([FromRoute] Guid id, [FromBody] EventUpdateDto updatedEventDto)
+    public ActionResult<EventInfoDto> PutEvent([FromRoute] Guid id, [FromBody] EventUpdateDto updatedEventDto)
     {
-        _eventService.UpdateEvent(id, updatedEventDto);
-        return Ok();
+        return Ok(_eventService.UpdateEvent(id, updatedEventDto));
     }
 
     /// <summary>
