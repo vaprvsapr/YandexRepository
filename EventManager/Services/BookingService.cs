@@ -16,9 +16,8 @@ public class BookingService
 {
     private readonly IRepository<Booking> _bookingRepository = bookingRepository;
     private readonly IRepository<Event> _eventRepository = eventRepository;
-    private readonly object _bookingLock = new();
+    private readonly Lock _bookingLock = new();
 
-    // Пересмотреть урок, где было похожее. Нужно ли писать async, await?
     /// <inheritdoc/>
     public async Task<BookingDto>CreateBookingAsync(Guid eventId)
     {
@@ -45,6 +44,12 @@ public class BookingService
     }
 
     /// <inheritdoc/>
+    public async Task<List<BookingDto>> GetAllBookingsAsync()
+    {
+        return [.. _bookingRepository.GetAll().Select(BookingMapper.ToBookingDto)];
+    }
+
+    /// <inheritdoc/>
     public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
     {
         var existingBooking = _bookingRepository.GetById(id);
@@ -63,4 +68,6 @@ public class BookingService
             .Where(b => b.EventId == eventId)
             .Select(BookingMapper.ToBookingDto)];
     }
+
+
 }

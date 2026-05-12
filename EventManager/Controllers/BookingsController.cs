@@ -69,4 +69,15 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         return Ok(await _bookingService.GetBookingByIdAsync(id));
     }
+
+    /// <summary>
+    /// Возвращает список всех бронирований.
+    /// </summary>
+    /// <response code="200">Список успешно возвра</response>
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [HttpGet]
+    public async Task<ActionResult<List<BookingDto>>> GetAllBookings()
+    {
+        return Ok(await _bookingService.GetAllBookingsAsync());
+    }
 }

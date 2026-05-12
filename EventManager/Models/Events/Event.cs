@@ -76,6 +76,6 @@ public class Event
     {
         if (AvailableSeats + count <= TotalSeats)
             AvailableSeats += count;
-        else throw new ArgumentException("Нельзя освободить больше мест, чем было изначально.");
+        else throw new InvalidOperationException("Нельзя освободить больше мест, чем было изначально.");
     }
 }

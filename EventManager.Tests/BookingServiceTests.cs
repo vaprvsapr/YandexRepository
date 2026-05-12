@@ -4,7 +4,7 @@ using EventManager.Models.Bookings;
 using EventManager.Models.Events;
 using EventManager.Services;
 using EventManager.Data;
-using Xunit.Internal;
+using EventManager.ExceptionHandling;
 
 namespace EventManager.Tests;
 
@@ -21,7 +21,8 @@ public class BookingServiceTests
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1)
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
         };
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
@@ -48,7 +49,8 @@ public class BookingServiceTests
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1)
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
         };
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
@@ -80,7 +82,8 @@ public class BookingServiceTests
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1)
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
         };
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(It.IsAny<Guid>())).Returns((Guid id) => null);
@@ -148,7 +151,8 @@ public class BookingServiceTests
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1)
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
         };
         var mockEventRepository = new Mock<IRepository<Event>>();
         mockEventRepository.Setup(repo => repo.GetById(eventId)).Returns(newEvent);
@@ -175,7 +179,8 @@ public class BookingServiceTests
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1)
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
         };
         var bookings = new List<Booking>
         {
@@ -225,15 +230,141 @@ public class BookingServiceTests
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1)
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
         };
-        new EventRepository().Add(newEvent);
-        new EventRepository().Delete(newEvent);
+        EventRepository eventRepository = new();
+        eventRepository.Add(newEvent);
+        eventRepository.Delete(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
-        var BookingService = new BookingService(mockBookingRepository.Object, new EventRepository());
+        var BookingService = new BookingService(mockBookingRepository.Object, eventRepository);
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => BookingService.CreateBookingAsync(eventId));
         mockBookingRepository.Verify(repo => repo.Add(It.IsAny<Booking>()), Times.Never);
+    }
+
+    [Fact]
+    [Trait("Category", "BookingService")]
+    public async Task CreateBookingAsync_WhenNotEnoughAvailableSeats_ThrowsException()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        Event newEvent = new()
+        {
+            Id = eventId,
+            Title = "Тестовое событие",
+            StartAt = DateTime.Now,
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 0
+        };
+        EventRepository eventRepository = new();
+        eventRepository.Add(newEvent);
+        var mockBookingRepository = new Mock<IRepository<Booking>>();
+        var BookingService = new BookingService(mockBookingRepository.Object, eventRepository);
+
+        // Act
+
+        // Assert
+        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => BookingService.CreateBookingAsync(eventId));
+    }
+
+    [Fact]
+    [Trait("Category", "BookingService")]
+    public async Task CreateBookingAsync_AddingValidBooking_DecreasesAvailableSeats()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        Event newEvent = new()
+        {
+            Id = eventId,
+            Title = "Тестовое событие",
+            StartAt = DateTime.Now,
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 3
+        };
+        EventRepository eventRepository = new();
+        eventRepository.Add(newEvent);
+        BookingRepository bookingRepository = new();
+        var BookingService = new BookingService(bookingRepository, eventRepository);
+        // Act 1
+        await BookingService.CreateBookingAsync(eventId);
+        // Assert 1
+        Assert.Equal(2, newEvent.AvailableSeats);
+        // Act 2
+        await BookingService.CreateBookingAsync(eventId);
+        // Assert 2
+        Assert.Equal(1, newEvent.AvailableSeats);
+        // Act 3
+        await BookingService.CreateBookingAsync(eventId);
+        // Assert 3
+        Assert.Equal(0, newEvent.AvailableSeats);
+        // Act 4 - trying to create booking when no seats are available
+        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => BookingService.CreateBookingAsync(eventId));
+        Assert.Equal(3, bookingRepository.GetAll().Select(b => b.Id).Distinct().Count());
+    }
+
+    [Fact]
+    [Trait("Category", "BookingService")]
+    public async Task CompetitionTest_CreateMultipleBookingsForSameEvent_EnsuresUniqueBookingIdsAndCorrectSeatCount()
+    {
+        // Arrange
+        int numberOfSeats = 10;
+        var eventId = Guid.NewGuid();
+        Event newEvent = new()
+        {
+            Id = eventId,
+            Title = "Тестовое событие",
+            StartAt = DateTime.Now,
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = numberOfSeats
+        };
+        EventRepository eventRepository = new();
+        eventRepository.Add(newEvent);
+        BookingRepository bookingRepository = new();
+        var BookingService = new BookingService(bookingRepository, eventRepository);
+        // Act
+        var tasks = Enumerable.Range(0, numberOfSeats).Select(async i => await BookingService.CreateBookingAsync(eventId));
+        await Task.WhenAll(tasks);
+        // Assert
+        Assert.Equal(0, newEvent.AvailableSeats);
+        Assert.Equal(numberOfSeats, bookingRepository.GetAll().Select(b => b.Id).Distinct().Count());
+    }
+
+    [Fact]
+    [Trait("Category", "BookingService")]
+    public async Task OverbookingTest_AttemptToOverbook_ThrowsNoAvailableSeatsException()
+    { 
+        // Arrange
+        var eventId = Guid.NewGuid();
+        Event newEvent = new()
+        {
+            Id = eventId,
+            Title = "Тестовое событие",
+            StartAt = DateTime.Now,
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 5
+        };
+        EventRepository eventRepository = new();
+        eventRepository.Add(newEvent);
+        BookingRepository bookingRepository = new();
+        var BookingService = new BookingService(bookingRepository, eventRepository);
+        // Act
+
+        var tasks = Enumerable.Range(0, 20)
+            .Select(_ => BookingService.CreateBookingAsync(eventId))
+            .ToArray();
+
+        await Task.WhenAll(tasks.Select(t => t.ContinueWith(_ => { })));
+
+        // Assert
+        var succeeded = tasks.Count(t => t.Status == TaskStatus.RanToCompletion);
+        var failed = tasks.Count(t =>
+            t.IsFaulted &&
+            (t.Exception?.InnerException is NoAvailableSeatsException ||
+             t.Exception?.Flatten().InnerExceptions.Any(e => e is NoAvailableSeatsException) == true));
+
+        Assert.Equal(5, succeeded);
+        Assert.Equal(15, failed);
     }
 }
