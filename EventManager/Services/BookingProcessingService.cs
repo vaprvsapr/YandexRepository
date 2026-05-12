@@ -1,9 +1,6 @@
 ﻿using EventManager.Interfaces;
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 
 namespace EventManager.Services;
 
@@ -56,11 +53,7 @@ public class BookingProcessingService(
                 await Task.WhenAll(tasks);
             }
             else
-            {
-                if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("No available pending bookings at: {time}", DateTime.Now);
                 await Task.Delay(_delay, stoppingToken);
-            }
         }
 
         if (_logger.IsEnabled(LogLevel.Information))

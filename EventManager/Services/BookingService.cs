@@ -11,11 +11,13 @@ namespace EventManager.Services;
 /// </summary>
 /// <param name="bookingRepository">Репозиторий для работы с бронированиями.</param>
 /// <param name="eventRepository">Репозиторий для работы с событиями.</param>
+/// <param name="logger">Логгер для записи информации о процессе управления бронированиями.</param>
 public class BookingService
-    (IRepository<Booking> bookingRepository, IRepository<Event> eventRepository) : IBookingService
+    (IRepository<Booking> bookingRepository, IRepository<Event> eventRepository, ILogger<BookingService> logger) : IBookingService
 {
     private readonly IRepository<Booking> _bookingRepository = bookingRepository;
     private readonly IRepository<Event> _eventRepository = eventRepository;
+    private readonly ILogger<BookingService> _logger = logger;
     private readonly Lock _bookingLock = new();
 
     /// <inheritdoc/>
@@ -28,7 +30,7 @@ public class BookingService
                 throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
 
             if (!existingEvent.TryReserveSeats())
-                throw new NoAvailableSeatsException();
+                throw new NoAvailableSeatsException($"Нет доступных мест для события с Id:{eventId}.");
 
             Booking newBooking = new()
             {
@@ -38,6 +40,8 @@ public class BookingService
                 CreatedAt = DateTime.Now
             };
 
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Created new booking with Id:{id} for EventId:{eventId}.", newBooking.Id, newBooking.EventId);
             _bookingRepository.Add(newBooking);
             return BookingMapper.ToBookingDto(newBooking);
         }
