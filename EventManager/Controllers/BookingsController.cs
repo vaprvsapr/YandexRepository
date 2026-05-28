@@ -25,8 +25,10 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <returns>Информация о созданном бронировании.</returns>
     /// <response code="202">Бронирование принято к обработке.</response>
     /// <response code="404">Событие не найдено.</response>
+    /// <response code="409">Нет доступных мест.</response>
     [ProducesResponseType((int)HttpStatusCode.Accepted)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [Route("~/events/{id}/book")]
     [HttpPost]
@@ -66,5 +68,16 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] Guid id)
     {
         return Ok(await _bookingService.GetBookingByIdAsync(id));
+    }
+
+    /// <summary>
+    /// Возвращает список всех бронирований.
+    /// </summary>
+    /// <response code="200">Список успешно возвращён.</response>
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [HttpGet]
+    public async Task<ActionResult<List<BookingDto>>> GetAllBookings()
+    {
+        return Ok(await _bookingService.GetAllBookingsAsync());
     }
 }

@@ -29,4 +29,22 @@ public class Booking
     /// Дата и время обработки бронирования.
     /// </summary>
     public DateTime? ProcessedAt { get; set; }
+
+    /// <summary>
+    /// Метод позволяет подтвердить бронирование, устанавливая статус в "Подтверждено" и фиксируя время обработки.
+    /// </summary>
+    public void Confirm()
+    {
+        Status = BookingStatus.Confirmed;
+        ProcessedAt = DateTime.Now;
+    }
+
+    /// <summary>
+    /// Метод позволяет отклонить бронирование, устанавливая статус в "Отклонено" и фиксируя время обработки.
+    /// </summary>
+    public void Reject()
+    {
+        Status = BookingStatus.Rejected;
+        ProcessedAt = DateTime.Now;
+    }
 }

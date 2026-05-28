@@ -30,8 +30,52 @@ public class Event
     /// </summary>
     public required DateTime? EndAt { get; set; }
 
+    private readonly int _totalSeats;
     /// <summary>
-    /// Количество мест на событие, необязательное поле, может быть null, если количество мест не ограничено
+    /// Количество мест на событие, обязательное поле.
     /// </summary>
-    public int? NumberOfSeats { get; set; } = null;
+    public required int TotalSeats 
+    {
+        get => _totalSeats;
+        init
+        {
+            _totalSeats = value;
+            AvailableSeats = value;
+        }
+    }
+
+    /// <summary>
+    /// Количество свободных мест на событие.
+    /// </summary>
+    public int AvailableSeats { get; set; }
+
+    /// <summary>
+    /// Метод для попытки зарезервировать указанное количество мест на событие. 
+    /// Если доступно достаточное количество мест, то они резервируются (уменьшается количество свободных мест)
+    /// и возвращается true. Если свободных мест недостаточно, метод возвращает false и не изменяет количество свободных мест.
+    /// </summary>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    public bool TryReserveSeats(int count = 1)
+    {
+        if (AvailableSeats >= count)
+        {
+            AvailableSeats -= count;
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Метод для освобождения указанного количества мест на событие. 
+    /// Увеличивает количество свободных мест на указанное значение,
+    /// </summary>
+    /// <param name="count"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void ReleaseSeats(int count = 1)
+    {
+        if (AvailableSeats + count <= TotalSeats)
+            AvailableSeats += count;
+        else throw new InvalidOperationException("Нельзя освободить больше мест, чем было изначально.");
+    }
 }

@@ -6,17 +6,22 @@ using EventManager.Models.Queries;
 namespace EventManager.Services;
 
 /// <inheritdoc/>
-public class EventService(IRepository<Event> eventRepository) : IEventService
+public class EventService(IRepository<Event> eventRepository, ILogger<EventService> logger) : IEventService
 {
     private readonly IRepository<Event> _eventRepository = eventRepository;
+    private readonly ILogger<EventService> _logger = logger;
 
     /// <inheritdoc/>
-    public void CreateEvent(EventDto newEventDto)
+    public EventInfoDto CreateEvent(EventCreateDto newEventDto)
     {
         var existingEvent = _eventRepository.GetById(newEventDto.Id);
         if (existingEvent != null)
             throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
-        _eventRepository.Add(EventMapper.ToEvent(newEventDto));
+        Event newEvent = EventMapper.ToEvent(newEventDto);
+        _eventRepository.Add(newEvent);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Event created: {title} with id: {id}", newEventDto.Title, newEventDto.Id);
+        return EventMapper.ToEventInfoDto(newEvent);
     }
 
     /// <inheritdoc/>
@@ -25,6 +30,8 @@ public class EventService(IRepository<Event> eventRepository) : IEventService
         var existingEvent = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
         _eventRepository.Delete(existingEvent);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Event deleted: {title} with id: {id}", existingEvent.Title, existingEvent.Id);
     }
 
     /// <inheritdoc/>
@@ -44,7 +51,7 @@ public class EventService(IRepository<Event> eventRepository) : IEventService
 
         return new PaginatedResultDto()
         {
-            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventDto), // Пагинация
+            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventInfoDto), // Пагинация
             TotalCount = events.Count(),
             PageSize = query.PageSize,
             Page = query.Page
@@ -52,19 +59,23 @@ public class EventService(IRepository<Event> eventRepository) : IEventService
     }
 
     /// <inheritdoc/>
-    public EventDto GetEvent(Guid id)
+    public EventInfoDto GetEvent(Guid id)
     {
         var eventById = _eventRepository.GetById(id) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-        return EventMapper.ToEventDto(eventById);
+        return EventMapper.ToEventInfoDto(eventById);
     }
 
     /// <inheritdoc/>
-    public void UpdateEvent(Guid id, EventDto updatedEventDto)
+    public EventInfoDto UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
     {
         _ = _eventRepository.GetById(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
 
-        _eventRepository.Update(id, EventMapper.ToEvent(updatedEventDto));
+        Event updatedEvent = EventMapper.ToEvent(updatedEventDto, id);
+        _eventRepository.Update(id, updatedEvent);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Event updated: {title} with id: {id}", updatedEventDto.Title, id);
+        return EventMapper.ToEventInfoDto(updatedEvent);
     }
 }

@@ -26,7 +26,7 @@ public class BookingProcessingServiceTests
             Description = "Test Description",
             StartAt = DateTime.Now,
             EndAt = DateTime.Now.AddHours(1),
-            NumberOfSeats = 2
+            TotalSeats = 2
         };
 
         List<Booking> bookings =
@@ -60,11 +60,9 @@ public class BookingProcessingServiceTests
         var service = new BookingProcessingService(bookingRepositoryMock.Object, eventRepositoryMock.Object, loggerMock.Object);
         var cancellationTokenSource = new CancellationTokenSource();
         // Act
-        await service.ProcessBooking(bookings[0], 10, TestContext.Current.CancellationToken);
-        await service.ProcessBooking(bookings[1], 10, TestContext.Current.CancellationToken);
-        await service.ProcessBooking(bookings[2], 10, TestContext.Current.CancellationToken);
+        var tasks = bookings.Select(b => service.ProcessBookingAsync(b, 10, TestContext.Current.CancellationToken));  
+        await Task.WhenAll(tasks);
         // Assert
-        Assert.Equal(2, bookings.Count(b => b.Status == BookingStatus.Confirmed));
-        Assert.Equal(1, bookings.Count(b => b.Status == BookingStatus.Rejected));
+        Assert.Equal(3, bookings.Count(b => b.Status == BookingStatus.Confirmed));
     }
 }

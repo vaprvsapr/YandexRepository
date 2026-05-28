@@ -55,7 +55,6 @@ public class EventRepository : IRepository<Event>
         Event eventToBeUpdated = _events.FirstOrDefault(e => e.Id == id) ?? 
             throw new InvalidOperationException($"Event with id {id} not found.");
 
-        // Полностью обновляем все поля, включая Id.
         eventToBeUpdated.Id = updatedEvent.Id;
         eventToBeUpdated.Title = updatedEvent.Title;
         eventToBeUpdated.Description = updatedEvent.Description;
