@@ -1,4 +1,6 @@
-﻿namespace EventManager.Models.Bookings;
+﻿using EventManager.Models.Events;
+
+namespace EventManager.Models.Bookings;
 
 /// <summary>
 /// Модель данных бронирования события.
@@ -46,5 +48,14 @@ public class Booking
     {
         Status = BookingStatus.Rejected;
         ProcessedAt = DateTime.Now;
+    }
+
+    /// <summary>
+    /// Объект события.
+    /// </summary>
+    public Event Event { get; set; } = null!;
+
+    private Booking()
+    {
     }
 }
