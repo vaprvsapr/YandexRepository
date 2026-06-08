@@ -4,8 +4,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventManager.DataAccess.Configurations;
 
+/// <summary>
+/// Класс конфигурации для сущности Event, определяющий структуру таблицы "events" и ее свойства,
+/// </summary>
 public class EventConfiguration : IEntityTypeConfiguration<Event>
 {
+    /// <summary>
+    /// Метод конфигурации, который задает правила для отображения сущности Event в базе данных, 
+    /// включая имена столбцов, типы данных, ограничения и связи с другими сущностями.
+    /// </summary>
+    /// <param name="builder"></param>
     public void Configure(EntityTypeBuilder<Event> builder)
     {
         builder.ToTable("events");

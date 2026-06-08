@@ -5,11 +5,21 @@ using EventManager.Models.Queries;
 
 namespace EventManager.Services;
 
+
+/// <summary>
+/// Сервис для управления событиями, реализующий бизнес-логику создания, получения, обновления и удаления событий,
+/// а также получения списка событий с поддержкой фильтрации и пагинации. 
+/// В качестве хранилища используется база данных через AppDbContext, 
+/// а для логирования используется ILogger.
+/// </summary>
+/// <param name="context"></param>
+/// <param name="logger"></param>
 public class EventService(AppDbContext context, ILogger<EventService> logger) : IEventService
 {
     private readonly AppDbContext _context = context;
     private readonly ILogger<EventService> _logger = logger;
 
+    /// <inheritdoc/>
     public async Task<EventInfoDto> CreateEvent(EventCreateDto eventCreateDto)
     {
         var existingEvent = await _context.Events.FindAsync(eventCreateDto.Id);
@@ -24,6 +34,7 @@ public class EventService(AppDbContext context, ILogger<EventService> logger) : 
         return EventMapper.ToEventInfoDto(newEvent);
     }
 
+    /// <inheritdoc/>
     public async Task DeleteEvent(Guid id)
     {
         var existingEvent = await _context.Events.FindAsync(id) ??
@@ -36,6 +47,7 @@ public class EventService(AppDbContext context, ILogger<EventService> logger) : 
         await _context.SaveChangesAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<PaginatedResultDto> GetAllEvents(GetQuery getQuery)
     {
         IEnumerable<Event> events = _context.Events.AsEnumerable();
@@ -62,6 +74,7 @@ public class EventService(AppDbContext context, ILogger<EventService> logger) : 
         };
     }
 
+    /// <inheritdoc/>
     public async Task<EventInfoDto?> GetEvent(Guid id)
     {
         var existingEvent = await _context.Events.FindAsync(id) ??
@@ -69,6 +82,7 @@ public class EventService(AppDbContext context, ILogger<EventService> logger) : 
         return EventMapper.ToEventInfoDto(existingEvent);
     }
 
+    /// <inheritdoc/>
     public async Task<EventInfoDto> UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
     {
         var existingEvent = await _context.Events.FindAsync(id) ??

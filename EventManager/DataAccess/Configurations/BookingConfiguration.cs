@@ -5,8 +5,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventManager.DataAccess.Configurations;
 
+/// <summary>
+/// Класс конфигурации для сущности Booking.
+/// </summary>
 public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 {
+    /// <summary>
+    /// Метод конфигурации сущности Booking, определяющий структуру таблицы "bookings" и ее свойства, 
+    /// а также устанавливающий связи с сущностью Event.
+    /// </summary>
+    /// <param name="builder"></param>
     public void Configure(EntityTypeBuilder<Booking> builder)
     {
         builder.ToTable("bookings");
