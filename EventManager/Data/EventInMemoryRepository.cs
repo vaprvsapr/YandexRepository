@@ -4,7 +4,7 @@ using EventManager.Models.Events;
 namespace EventManager.Data;
 
 /// <inheritdoc/>
-public class EventRepository : IRepository<Event>
+public class EventInMemoryRepository : IRepository<Event>
 {
     private readonly List<Event> _events = [];
 
@@ -13,14 +13,20 @@ public class EventRepository : IRepository<Event>
     /// Добавляет новое событие в репозиторий.
     /// </summary>
     /// <param name="eventToAdd">Событие, которое требуется добавить.</param>
-    public void Add(Event eventToAdd) => _events.Add(eventToAdd);
+    public void Add(Event eventToAdd)
+    {
+        _events.Add(eventToAdd);
+    }
 
 
     /// <summary>
     /// Удаляет событие из репозитория.
     /// </summary>
     /// <param name="eventToDelete">Событие, которое требуется удалить.</param>
-    public void Delete(Event eventToDelete) => _events.Remove(eventToDelete);
+    public void Delete(Event eventToDelete)
+    {
+        _events.Remove(eventToDelete);
+    }
 
 
 

@@ -32,17 +32,18 @@ public class Event
     /// </summary>
     public required DateTime? EndAt { get; set; }
 
-    private readonly int _totalSeats;
+    private int _totalSeats = 0;
     /// <summary>
     /// Количество мест на событие, обязательное поле.
     /// </summary>
     public required int TotalSeats 
     {
         get => _totalSeats;
-        init
+        set
         {
+            var occupiedSeats = _totalSeats - AvailableSeats;
             _totalSeats = value;
-            AvailableSeats = value;
+            AvailableSeats = _totalSeats - occupiedSeats;
         }
     }
 

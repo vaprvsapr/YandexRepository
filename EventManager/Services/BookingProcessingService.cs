@@ -2,6 +2,8 @@
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
 using EventManager.DependencyInjection;
+using EventManager.DataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Services;
 
@@ -11,22 +13,18 @@ namespace EventManager.Services;
 /// <remarks>
 /// Периодически проверяет наличие бронирований со статусом Pending и подтверждает их через заданный интервал времени.
 /// </remarks>
-/// <param name="bookingRepository">Репозиторий для работы с бронированиями.</param>
-/// <param name="eventRepository">Репозиторий для работы с событиями.</param>
+/// <param name="serviceScopeFactory">Фабрика для создания областей видимости сервисов.</param>
 /// <param name="logger">Логгер для записи информации о процессе обработки бронирований.</param>
 /// <param name="delay">Задержка между проверками бронирований.</param>
 /// <param name="maxConcurrentBookings">Максимальное количество бронирований, обрабатываемых одновременно.</param>
 public class BookingProcessingService(
-    IRepository<Booking> bookingRepository,
-    IRepository<Event> eventRepository,
+    IServiceScopeFactory serviceScopeFactory,
     ILogger<BookingProcessingService> logger,
     int delay = Constants.BookingProcessingService.DefaultDelay,
     int maxConcurrentBookings = Constants.BookingProcessingService.DefaultMaxConcurrentBookings) : BackgroundService
 {
-    private readonly IRepository<Booking> _bookingRepository = bookingRepository;
-    private readonly IRepository<Event> _eventRepository = eventRepository;
     private readonly ILogger<BookingProcessingService> _logger = logger;
-    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
 
     /// <summary>
@@ -41,18 +39,23 @@ public class BookingProcessingService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            List<Booking> pendingBookings = [.. _bookingRepository
-                .GetAll()
-                .Where(b => b.Status is BookingStatus.Pending)
-                .Take(maxConcurrentBookings)];
+            var scope = _serviceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            List<Booking> pendingBookings = await context
+                .Bookings
+                .Where(b => b.Status == BookingStatus.Pending)
+                .OrderBy(b => b.CreatedAt)
+                .Take(maxConcurrentBookings)
+                .ToListAsync();
 
             if (pendingBookings.Count > 0)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("Processing {n} pending bookings at: {time}", 
+                    _logger.LogInformation("Обработка {n} ожидающих бронирований в: {time}", 
                         pendingBookings.Count, DateTime.Now);
 
-                var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking, delay, stoppingToken));
+                var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking.Id, stoppingToken));
                 await Task.WhenAll(tasks);
             }
             else
@@ -60,53 +63,50 @@ public class BookingProcessingService(
         }
 
         if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("BookingProcessingService stopped at: {time}", DateTime.Now);
+            _logger.LogInformation("BookingProcessingService остановлен: {time}", DateTime.Now);
     }
 
     /// <summary>
     /// Метод обработки бронирования.
     /// </summary>
-    /// <param name="bookingToProcess">Бронирование, которое нужно обработать.</param>
+    /// <param name="bookingId">Id бронирования, которое нужно обработать.</param>
     /// <param name="ct">Токен отмены.</param>
-    /// <param name="delay">Задержка перед обработкой.</param>
-    public async Task ProcessBookingAsync(Booking bookingToProcess, int delay, CancellationToken ct)
+    public async Task ProcessBookingAsync(Guid bookingId, CancellationToken ct)
     {
-        await Task.Delay(delay, ct); // Симуляция обработки
-        Event? existingEvent = _eventRepository.GetById(bookingToProcess.EventId);
+        var scope = _serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        Booking? bookingToProcess = await context.Bookings.FindAsync(bookingId);
+        Event? existingEvent = await context.Events.FindAsync(bookingToProcess?.EventId);
         try
         {
-            await _semaphore.WaitAsync(ct);
             if (existingEvent is not null)
             {
-                bookingToProcess.Confirm();
+                bookingToProcess?.Confirm();
                 if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("Booking {id} for event {title} confirmed.", 
-                        bookingToProcess.Id, existingEvent.Title);
+                    _logger.LogInformation("Бронирование {id} для события {title} подтверждено.",
+                        bookingToProcess?.Id, existingEvent.Title);
             }
             else
             {
-                bookingToProcess.Reject();
-                _logger.LogWarning("Booking {id} rejected due to missing event with ID {eventId}.",
-                    bookingToProcess.Id, bookingToProcess.EventId);
+                bookingToProcess?.Reject();
+                _logger.LogWarning("Бронирование с ID {id} отклонено. Событие с ID {eventId} не найдено.",
+                    bookingToProcess?.Id, bookingToProcess?.EventId);
             }
         }
         catch
         {
-            bookingToProcess.Reject();
+            bookingToProcess?.Reject();
             existingEvent?.ReleaseSeats();
             if (existingEvent != null)
-                _logger.LogWarning("Booking {id} rejected due to an error during processing. Seats released for event {eventId}.", 
-                    bookingToProcess.Id, bookingToProcess.EventId);
+                _logger.LogWarning("Бронирование {id} отклонено из-за ошибки во время обработки. Места освобождены для события {eventId}.",
+                    bookingToProcess?.Id, bookingToProcess?.EventId);
             else
-                _logger.LogWarning("Booking {id} rejected due to an error during processing. Event with ID {eventId} not found.",
-                    bookingToProcess.Id, bookingToProcess.EventId);
+                _logger.LogWarning("Бронирование {id} отклонено из-за ошибки во время обработки. Событие с ID {eventId} не найдено.",
+                    bookingToProcess?.Id, bookingToProcess?.EventId);
         }
         finally
         {
-            _semaphore.Release();
+            await context.SaveChangesAsync(ct);
         }
     }
 }
-
-
-

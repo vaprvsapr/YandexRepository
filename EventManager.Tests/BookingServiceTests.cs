@@ -242,7 +242,7 @@ public class BookingServiceTests
             EndAt = DateTime.Now.AddHours(1),
             TotalSeats = 10
         };
-        EventRepository eventRepository = new();
+        EventInMemoryRepository eventRepository = new();
         eventRepository.Add(newEvent);
         eventRepository.Delete(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
@@ -268,7 +268,7 @@ public class BookingServiceTests
             EndAt = DateTime.Now.AddHours(1),
             TotalSeats = 0
         };
-        EventRepository eventRepository = new();
+        EventInMemoryRepository eventRepository = new();
         eventRepository.Add(newEvent);
         var mockBookingRepository = new Mock<IRepository<Booking>>();
         var mockLogger = new Mock<ILogger<BookingService>>();
@@ -294,9 +294,9 @@ public class BookingServiceTests
             EndAt = DateTime.Now.AddHours(1),
             TotalSeats = 3
         };
-        EventRepository eventRepository = new();
+        EventInMemoryRepository eventRepository = new();
         eventRepository.Add(newEvent);
-        BookingRepository bookingRepository = new();
+        BookingInMemoryRepository bookingRepository = new();
         var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act 1
@@ -331,9 +331,9 @@ public class BookingServiceTests
             EndAt = DateTime.Now.AddHours(1),
             TotalSeats = numberOfSeats
         };
-        EventRepository eventRepository = new();
+        EventInMemoryRepository eventRepository = new();
         eventRepository.Add(newEvent);
-        BookingRepository bookingRepository = new();
+        BookingInMemoryRepository bookingRepository = new();
         var mockLogger = new Mock<ILogger<BookingService>>();
         var BookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
@@ -358,9 +358,9 @@ public class BookingServiceTests
             EndAt = DateTime.Now.AddHours(1),
             TotalSeats = 5
         };
-        EventRepository eventRepository = new();
+        EventInMemoryRepository eventRepository = new();
         eventRepository.Add(newEvent);
-        BookingRepository bookingRepository = new();
+        BookingInMemoryRepository bookingRepository = new();
         var mockLogger = new Mock<ILogger<BookingService>>();
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act

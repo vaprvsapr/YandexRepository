@@ -7,7 +7,7 @@ namespace EventManager.Data;
 /// <summary>
 /// Репозиторий для управления данными бронирований, предоставляющий методы для получения, добавления, обновления и удаления бронирований.
 /// </summary>
-public class BookingRepository : IRepository<Booking>
+public class BookingInMemoryRepository : IRepository<Booking>
 {
     private readonly ConcurrentDictionary<Guid, Booking> _bookingsDictionary = [];
 
