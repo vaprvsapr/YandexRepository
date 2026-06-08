@@ -15,9 +15,9 @@ namespace EventManager.Controllers;
 /// <param name="eventService">Сервис, реализующий бизнес-логику для операций с событиями.</param>
 [ApiController]
 [Route("events")]
-public class EventsController(IEventServiceDb eventService) : ControllerBase
+public class EventsController(IEventService eventService) : ControllerBase
 {
-    private readonly IEventServiceDb _eventService = eventService;
+    private readonly IEventService _eventService = eventService;
 
     /// <summary>
     /// Возвращает коллекцию всех доступных событий.
