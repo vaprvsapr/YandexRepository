@@ -1,7 +1,10 @@
-﻿using EventManager.Interfaces;
+﻿using EventManager.DataAccess;
+using EventManager.Interfaces;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;
 using EventManager.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -26,153 +29,161 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void CreateEvent_CreatingValidEvent_ReturnsTrue()
+    public async Task CreateEvent_CreatingValidEvent_ReturnsTrue()
     {
         // Arrange
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.Add(It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+        var eventId = Guid.NewGuid();
+        EventCreateDto newEvent = new()
+        {
+            Id = eventId,
+            Title = "Тестовое событие",
+            StartAt = DateTime.Now,
+            EndAt = DateTime.Now.AddHours(1),
+            TotalSeats = 10
+        };
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        // Act
+        var createdEvent = await eventService.CreateEvent(newEvent);
 
         // Act
-        eventService.CreateEvent(
-            new EventCreateDto
-            {
-                Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af12"),
-                Title = "Test title",
-                StartAt = new DateTime(),
-                EndAt = new DateTime().AddHours(1),
-            });
 
         // Assert
-        mockRepository.Verify(m => m.Add(It.IsAny<Event>()), Times.Once);
+        Assert.Equal(1, context.Events.Count());
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void CreateEvent_CreatingInvalidEvent_ThrowsException()
-    {
-        // Arrange
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
-
-        // Act
-
-
-        // Assert
-        Assert.Throws<InvalidOperationException>(() => eventService.CreateEvent(
-            new EventCreateDto
-            {
-                Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"),
-                Title = "Test title",
-                StartAt = new DateTime(),
-                EndAt = new DateTime().AddHours(1),
-            }));
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
-    }
-
-    [Fact]
-    [Trait("Category", "EventService")]
-    public void GetAllEvents_WithoutFiltration_ReturnsEvents()
+    public async Task GetAllEvents_WithoutFiltration_ReturnsEvents()
     {
         // Arrange
 
         GetQuery query = new();
 
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
 
         // Act
-        var result = eventService.GetAllEvents(query);
+        var result = await eventService.GetAllEvents(query);
 
         // Assert
         Assert.Equal(_events.Count, result.TotalCount);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void GetAllEvents_WithTitleFiltration_ReturnsEvents()
+    public async Task GetAllEvents_WithTitleFiltration_ReturnsEvents()
     {
         // Arrange
         GetQuery query = new() { Title = "th" };
 
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
 
         // Act
-        var result = eventService.GetAllEvents(query);
+        var result = await eventService.GetAllEvents(query);
 
         // Assert
         Assert.Equal(9, result.TotalCount);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void GetAllEvents_WithDateFiltration_ReturnsEvents()
+    public async Task GetAllEvents_WithDateFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery fromQuery = new() { From = new DateTime(5)};
+        GetQuery fromQuery = new() { From = new DateTime(5) };
         GetQuery toQuery = new() { To = new DateTime(5) };
         GetQuery fromToQuery = new() { From = new DateTime(4), To = new DateTime(6) };
 
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
 
         // Act
-        var fromQueryResult = eventService.GetAllEvents(fromQuery);
-        var toQueryResult = eventService.GetAllEvents(toQuery);
-        var fromToQueryResult = eventService.GetAllEvents(fromToQuery);
+        var fromQueryResult = await eventService.GetAllEvents(fromQuery);
+        var toQueryResult = await eventService.GetAllEvents(toQuery);
+        var fromToQueryResult = await eventService.GetAllEvents(fromToQuery);
 
         // Assert
         Assert.Equal(6, fromQueryResult.TotalCount);
         Assert.Equal(5, toQueryResult.TotalCount);
         Assert.Equal(2, fromToQueryResult.TotalCount);
-        mockRepository.Verify(m => m.GetAll(), Times.Exactly(3));
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void GetAllEvents_WithCombinedFiltration_ReturnsEvents()
+    public async Task GetAllEvents_WithCombinedFiltration_ReturnsEvents()
     {
         // Arrange
         GetQuery query = new() { Title = "I", From = new DateTime(4), To = new DateTime(8) };
 
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
 
         // Act
-        var result = eventService.GetAllEvents(query);
+        var result = await eventService.GetAllEvents(query);
 
         // Assert
         Assert.Equal(3, result.TotalCount);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void GetAllEvents_Pagination_ReturnsEvents()
+    public async Task GetAllEvents_Pagination_ReturnsEvents()
     {
         // Arrange
         GetQuery query = new() { Page = 4, PageSize = 3 };
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetAll()).Returns(_events);
+
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
         // Act
-        var result = eventService.GetAllEvents(query);
+        var result = await eventService.GetAllEvents(query);
         // Assert
         Assert.Equal(11, result.TotalCount);
         Assert.Equal(3, result.PageSize);
@@ -180,123 +191,148 @@ public class EventServiceTests
         Assert.Equal(2, result.Events?.Count() ?? 0);
         Assert.Equal(_events[^2].Id, result.Events?.ToList()[0].Id);
         Assert.Equal(_events[^1].Id, result.Events?.ToList()[1].Id);
-        mockRepository.Verify(m => m.GetAll(), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void GetEvent_ExistingId_ReturnsEvent()
+    public async Task GetEvent_ExistingId_ReturnsEvent()
     {
         // Arrange
-        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
         // Act
-        var result = eventService.GetEvent(existingId);
+        var result = await eventService.GetEvent(_events[0].Id);
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(existingId, result.Id);
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
+        Assert.Equal(_events[0].Id, result.Id);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void GetEvent_NonExistingId_ReturnsNull()
+    public async Task GetEvent_NonExistingId_ReturnsNull()
     {
         // Arrange
-        Guid nonExistingId = Guid.NewGuid();
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options 
+            => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
         // Act
-        
+
         // Assert
-        Assert.Throws<KeyNotFoundException>(() => eventService.GetEvent(nonExistingId));
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await eventService.GetEvent(Guid.NewGuid()));
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void UpdateEvent_ExistingId_UpdatesEvent()
+    public async Task UpdateEvent_ExistingId_UpdatesEvent()
     {
         // Arrange
-        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.Update(existingId, It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns(_events.FirstOrDefault(e => e.Id == existingId));
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
         // Act
-        eventService.UpdateEvent(existingId, 
-            new EventUpdateDto 
-            {  
-                Title = "Updated Event",
-                StartAt = new DateTime(0), 
-                EndAt = new DateTime(1) 
-            });
-        // Assert
-        mockRepository.Verify(m => m.Update(existingId, It.IsAny<Event>()), Times.Once);
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
-    }
-
-    [Fact]
-    [Trait("Category", "EventService")]
-    public void UpdateEvent_NonExistingId_ThrowsException()
-    {
-        // Arrange
-        Guid nonExistingId = Guid.NewGuid();
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
-        var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
-        // Act
-
-        // Assert
-        Assert.Throws<KeyNotFoundException>(() => eventService.UpdateEvent(nonExistingId,
+        await eventService.UpdateEvent(_events[0].Id,
             new EventUpdateDto
             {
                 Title = "Updated Event",
                 StartAt = new DateTime(0),
                 EndAt = new DateTime(1)
+            });
+        // Assert
+        Assert.Equal("Updated Event", context.Events.First(e => e.Id == _events[0].Id).Title);
+        Assert.Equal(new DateTime(0), context.Events.First(e => e.Id == _events[0].Id).StartAt);
+        Assert.Equal(new DateTime(1), context.Events.First(e => e.Id == _events[0].Id).EndAt);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task UpdateEvent_NonExistingId_ThrowsException()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        // Act
+
+        // Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await eventService.UpdateEvent(Guid.NewGuid(),
+                new EventUpdateDto
+                {
+                    Title = "Updated Event",
+                    StartAt = new DateTime(0),
+                    EndAt = new DateTime(1)
             }));
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void DeleteEvent_ExistingId_ReturnsTrue()
+    public async Task DeleteEvent_ExistingId_ReturnsTrue()
     {
         // Arrange
-        Guid existingId = new("3fa85f64-5717-4562-b3fc-2c963f66af01");
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.Delete(It.IsAny<Event>()));
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
         // Act
-        eventService.DeleteEvent(existingId);
+        await eventService.DeleteEvent(_events[0].Id);
         // Assert
-        mockRepository.Verify(m => m.Delete(It.IsAny<Event>()), Times.Once);
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
+        Assert.Equal(_events.Count - 1, context.Events.Count());
     }
 
     [Fact]
     [Trait("Category", "EventService")]
-    public void DeleteEvent_NonExistingId_ThrowsException()
+    public async Task DeleteEvent_NonExistingId_ThrowsException()
     {
         // Arrange
-        Guid nonExistingId = Guid.NewGuid();
-        var mockRepository = new Mock<IRepository<Event>>();
-        mockRepository.Setup(m => m.GetById(It.IsAny<Guid>())).Returns((Guid id) => _events.FirstOrDefault(e => e.Id == id));
         var mockLogger = new Mock<ILogger<EventService>>();
-        var eventService = new EventService(mockRepository.Object, mockLogger.Object);
+        var dbName = Guid.NewGuid().ToString();
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var eventService = new EventService(context, mockLogger.Object);
+        context.Events.AddRange(_events);
+        context.SaveChanges();
         // Act
 
         // Assert
-        Assert.Throws<KeyNotFoundException>(() => eventService.DeleteEvent(nonExistingId));
-        mockRepository.Verify(m => m.GetById(It.IsAny<Guid>()), Times.Once);
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await eventService.DeleteEvent(Guid.NewGuid()));
     }
 }

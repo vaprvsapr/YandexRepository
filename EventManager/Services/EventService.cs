@@ -1,5 +1,4 @@
-﻿using EventManager.Data;
-using EventManager.DataAccess;
+﻿using EventManager.DataAccess;
 using EventManager.Interfaces;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;

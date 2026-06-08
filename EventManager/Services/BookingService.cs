@@ -12,10 +12,10 @@ namespace EventManager.Services
     /// </summary>
     /// <param name="context">Контекст базы данных.</param>
     /// <param name="logger">Логгер для записи информации о процессе управления бронированиями.</param>
-    public class BookingService(AppDbContext context, ILogger<EventService> logger) : IBookingService
+    public class BookingService(AppDbContext context, ILogger<BookingService> logger) : IBookingService
     {
         private readonly AppDbContext _context = context;
-        private readonly ILogger<EventService> _logger = logger;
+        private readonly ILogger<BookingService> _logger = logger;
         private readonly Lock _bookingLock = new();
 
         /// <inheritdoc/>
@@ -69,6 +69,8 @@ namespace EventManager.Services
         /// <inheritdoc/>
         public async Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId)
         {
+            var existingEvent = await _context.Events.FindAsync(eventId) ??
+                throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
             var bookings = await _context.Bookings.Where(b => b.EventId == eventId).ToListAsync();
             return [.. bookings.Select(BookingMapper.ToBookingDto)];
         }
