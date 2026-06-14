@@ -47,14 +47,17 @@ public class EventService(
         IQueryable<Event> events = _eventRepository.GetAll();
 
         // Фильтрация
-        if (!string.IsNullOrEmpty(getQuery.Title))
-            events = events.Where(e => e.Title.Contains(getQuery.Title, StringComparison.OrdinalIgnoreCase));
-
         if (getQuery.From.HasValue)
             events = events.Where(e => e.StartAt >= getQuery.From.Value);
 
         if (getQuery.To.HasValue)
             events = events.Where(e => e.EndAt <= getQuery.To.Value);
+
+        if (!string.IsNullOrEmpty(getQuery.Title))
+            events = events
+                .AsEnumerable()
+                .Where(e => e.Title.Contains(getQuery.Title, StringComparison.OrdinalIgnoreCase))
+                .AsQueryable();
 
         return new PaginatedResultDto()
         {

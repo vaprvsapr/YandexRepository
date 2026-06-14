@@ -1,6 +1,7 @@
 using EventManager.DataAccess;
 using EventManager.DependencyInjection;
 using EventManager.ExceptionHandling;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,11 +14,11 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//    db.Database.EnsureDeleted();
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Конфигурация middleware для визуализации и документации API только в режиме разработки
 if (app.Environment.IsDevelopment())
