@@ -1,4 +1,5 @@
 ﻿using EventManager.DataAccess;
+using EventManager.DataAccess.Repositories;
 using EventManager.Interfaces;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;
@@ -12,22 +13,19 @@ namespace EventManager.Services;
 /// В качестве хранилища используется база данных через AppDbContext, 
 /// а для логирования используется ILogger.
 /// </summary>
-/// <param name="context"></param>
+/// <param name="eventRepository"></param>
 /// <param name="logger"></param>
-public class EventService(AppDbContext context, ILogger<EventService> logger) : IEventService
+public class EventService(
+    IEventRepository eventRepository, 
+    ILogger<EventService> logger) : IEventService
 {
-    private readonly AppDbContext _context = context;
     private readonly ILogger<EventService> _logger = logger;
+    private readonly IEventRepository _eventRepository = eventRepository;
 
     /// <inheritdoc/>
     public async Task<EventInfoDto> CreateEvent(EventCreateDto eventCreateDto)
     {
-        var existingEvent = await _context.Events.FindAsync(eventCreateDto.Id);
-        if (existingEvent is not null)
-            throw new InvalidOperationException($"Событие с id {eventCreateDto.Id} уже существует.");
-        var newEvent = EventMapper.ToEvent(eventCreateDto);
-        _context.Events.Add(newEvent);
-        await _context.SaveChangesAsync();
+        var newEvent = await _eventRepository.CreateAsync(eventCreateDto);
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event created: {title} with id: {id}", newEvent.Title, newEvent.Id);
@@ -37,20 +35,16 @@ public class EventService(AppDbContext context, ILogger<EventService> logger) : 
     /// <inheritdoc/>
     public async Task DeleteEvent(Guid id)
     {
-        var existingEvent = await _context.Events.FindAsync(id) ??
-            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-        _context.Events.Remove(existingEvent);
+        await _eventRepository.DeleteByIdAsync(id);
 
         if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Event deleted: {title} with id: {id}", existingEvent.Title, existingEvent.Id);
-
-        await _context.SaveChangesAsync();
+            _logger.LogInformation("Event with {id} was deleted.", id);
     }
 
     /// <inheritdoc/>
     public async Task<PaginatedResultDto> GetAllEvents(GetQuery getQuery)
     {
-        IEnumerable<Event> events = _context.Events.AsEnumerable();
+        IQueryable<Event> events = _eventRepository.GetAll();
 
         // Фильтрация
         if (!string.IsNullOrEmpty(getQuery.Title))
@@ -77,22 +71,15 @@ public class EventService(AppDbContext context, ILogger<EventService> logger) : 
     /// <inheritdoc/>
     public async Task<EventInfoDto?> GetEvent(Guid id)
     {
-        var existingEvent = await _context.Events.FindAsync(id) ??
-            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+        var existingEvent = await _eventRepository.GetByIdAsync(id);
         return EventMapper.ToEventInfoDto(existingEvent);
     }
 
     /// <inheritdoc/>
     public async Task<EventInfoDto> UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
     {
-        var existingEvent = await _context.Events.FindAsync(id) ??
-            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-        existingEvent.Title = updatedEventDto.Title;
-        existingEvent.Description = updatedEventDto.Description;
-        existingEvent.StartAt = updatedEventDto.StartAt;
-        existingEvent.EndAt = updatedEventDto.EndAt;
-        existingEvent.TotalSeats = updatedEventDto.TotalSeats;
-        await _context.SaveChangesAsync();
-        return EventMapper.ToEventInfoDto(existingEvent);
+        Event @event = EventMapper.ToEvent(updatedEventDto, id);
+        var updatedEvent = await _eventRepository.UpdateAsync(@event);
+        return EventMapper.ToEventInfoDto(updatedEvent);
     }
 }

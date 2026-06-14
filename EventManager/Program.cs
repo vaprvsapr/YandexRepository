@@ -13,11 +13,11 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//    db.Database.EnsureDeleted();
+//}
 
 // Конфигурация middleware для визуализации и документации API только в режиме разработки
 if (app.Environment.IsDevelopment())

@@ -80,4 +80,13 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         return Ok(await _bookingService.GetAllBookingsAsync());
     }
+
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteBookingById([FromRoute] Guid id)
+    {
+        await _bookingService.DeleteBookingByIdAsync(id);
+        return NoContent();
+    }
 }

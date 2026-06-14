@@ -1,4 +1,5 @@
 ﻿using EventManager.DataAccess;
+using EventManager.DataAccess.Repositories;
 using EventManager.ExceptionHandling;
 using EventManager.Interfaces;
 using EventManager.Models.Bookings;
@@ -10,69 +11,56 @@ namespace EventManager.Services
     /// <summary>
     /// Сервис для управления бронированиями событий, реализующий бизнес-логику создания, получения и поиска бронирований.
     /// </summary>
-    /// <param name="context">Контекст базы данных.</param>
+    /// <param name="bookingRepository">Репозиторий для управления бронированиями.</param>
     /// <param name="logger">Логгер для записи информации о процессе управления бронированиями.</param>
-    public class BookingService(AppDbContext context, ILogger<BookingService> logger) : IBookingService
+    public class BookingService(
+        IBookingRepository bookingRepository,
+        ILogger<BookingService> logger) : IBookingService
     {
-        private readonly AppDbContext _context = context;
+        private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly ILogger<BookingService> _logger = logger;
-        private readonly Lock _bookingLock = new();
 
         /// <inheritdoc/>
         public async Task<BookingDto> CreateBookingAsync(Guid eventId)
         {
-            // Проверка, что указанное событие существует.
-            Event? existingEvent = await _context.Events.FindAsync(eventId) ??
-                throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-
-            // Блокируем доступ к бронированию мест для данного события, чтобы избежать гонок при одновременных запросах.
-            lock (_bookingLock)
-            {
-                if (!existingEvent.TryReserveSeats())
-                    throw new NoAvailableSeatsException
-                        ($"Нет доступных мест для события с Id:{eventId}.");
-            }
-
-            // Создаем новую бронь для указанного события.
-            Booking newBooking = new()
-            {
-                Id = Guid.NewGuid(), // Создаем новое Id для брони.
-                EventId = eventId,
-                Status = BookingStatus.Pending,
-                CreatedAt = DateTime.Now.ToUniversalTime()
-            };
+            Booking newBooking = await _bookingRepository.CreateAsync(eventId);
 
             if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("Created new booking with Id:{id} for EventId:{eventId}.", newBooking.Id, newBooking.EventId);
+                _logger.LogInformation("Created new booking with Id:{id} for EventId:{eventId}.", 
+                    newBooking.Id, newBooking.EventId);
 
-            // Сохраняем изменения в базе данных.
-            await _context.Bookings.AddAsync(newBooking);
-            await _context.SaveChangesAsync();
             return BookingMapper.ToBookingDto(newBooking);
         }
 
         /// <inheritdoc/>
         public async Task<List<BookingDto>> GetAllBookingsAsync()
         {
-            var bookings = await _context.Bookings.ToListAsync();
-            return [.. bookings.Select(BookingMapper.ToBookingDto)];
+            return [.. _bookingRepository
+                .GetAll()
+                .Select(BookingMapper.ToBookingDto)
+                ];
         }
 
         /// <inheritdoc/>   
         public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
-        { 
-            var existingBooking = await _context.Bookings.FindAsync(id) ?? 
-                throw new KeyNotFoundException("Бронь с Id:{id} не найдена.");
+        {
+            var existingBooking = await _bookingRepository.GetByIdAsync(id);
             return BookingMapper.ToBookingDto(existingBooking);
         }
 
         /// <inheritdoc/>
         public async Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId)
         {
-            var existingEvent = await _context.Events.FindAsync(eventId) ??
-                throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-            var bookings = await _context.Bookings.Where(b => b.EventId == eventId).ToListAsync();
+            var bookings = await _bookingRepository.GetBookingsByEventIdAsync(eventId);
             return [.. bookings.Select(BookingMapper.ToBookingDto)];
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteBookingByIdAsync(Guid id)
+        {
+            await _bookingRepository.DeleteByIdAsync(id);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Deleted booking with Id:{id}.", id);
         }
     }
 }
