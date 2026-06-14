@@ -1,6 +1,6 @@
-﻿using EventManager.Interfaces;
-using EventManager.Models.Events;
+﻿using EventManager.Models.Events;
 using EventManager.Models.Queries;
+using EventManager.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -29,9 +29,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpGet]
-    public ActionResult<PaginatedResultDto> GetAllEvents([FromQuery] GetQuery query)
+    public async Task<ActionResult<PaginatedResultDto>> GetAllEvents([FromQuery] GetQuery query)
     {
-        var events = _eventService.GetAllEvents(query);
+        var events = await _eventService.GetAllEvents(query);
         return Ok(events);
     }
 
@@ -46,9 +46,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpGet("{id:guid}")]
-    public ActionResult<EventInfoDto> GetEventById([FromRoute] Guid id)
+    public async Task<ActionResult<EventInfoDto>> GetEventById([FromRoute] Guid id)
     {
-        var eventById = _eventService.GetEvent(id);
+        var eventById = await _eventService.GetEvent(id);
         return Ok(eventById);
     }
 
@@ -65,9 +65,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
     [HttpPost]
-    public ActionResult<EventInfoDto> PostEvent([FromBody] EventCreateDto newEvent)
+    public async Task<ActionResult<EventInfoDto>> PostEvent([FromBody] EventCreateDto newEvent)
     {
-        var createdEvent = _eventService.CreateEvent(newEvent);
+        var createdEvent = await _eventService.CreateEvent(newEvent);
         return CreatedAtAction(nameof(GetEventById), new { id = createdEvent.Id }, createdEvent);
     }
 
@@ -85,9 +85,10 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:guid}")]
-    public ActionResult<EventInfoDto> PutEvent([FromRoute] Guid id, [FromBody] EventUpdateDto updatedEventDto)
+    public async Task<ActionResult<EventInfoDto>> PutEvent([FromRoute] Guid id, [FromBody] EventUpdateDto updatedEventDto)
     {
-        return Ok(_eventService.UpdateEvent(id, updatedEventDto));
+        var updatedEvent = await _eventService.UpdateEvent(id, updatedEventDto);
+        return Ok(updatedEvent);
     }
 
     /// <summary>
@@ -101,9 +102,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpDelete("{id:guid}")]
-    public ActionResult Delete([FromRoute] Guid id)
+    public async Task<ActionResult> Delete([FromRoute] Guid id)
     {
-        _eventService.DeleteEvent(id);
+        await _eventService.DeleteEvent(id);
         return NoContent();
     }
 }

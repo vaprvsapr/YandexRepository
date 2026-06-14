@@ -1,4 +1,6 @@
-﻿namespace EventManager.Models.Events;
+﻿using EventManager.Models.Bookings;
+
+namespace EventManager.Models.Events;
 
 /// <summary>
 /// Модель данных события.
@@ -13,7 +15,7 @@ public class Event
     /// <summary>
     /// Название события.
     /// </summary>
-    public required string Title { get; set; }
+    public required string Title { get; set; } = null!;
 
     /// <summary>
     /// Описание события.
@@ -30,17 +32,18 @@ public class Event
     /// </summary>
     public required DateTime? EndAt { get; set; }
 
-    private readonly int _totalSeats;
+    private int _totalSeats = 0;
     /// <summary>
     /// Количество мест на событие, обязательное поле.
     /// </summary>
     public required int TotalSeats 
     {
         get => _totalSeats;
-        init
+        set
         {
+            var occupiedSeats = _totalSeats - AvailableSeats;
             _totalSeats = value;
-            AvailableSeats = value;
+            AvailableSeats = _totalSeats - occupiedSeats;
         }
     }
 
@@ -78,4 +81,9 @@ public class Event
             AvailableSeats += count;
         else throw new InvalidOperationException("Нельзя освободить больше мест, чем было изначально.");
     }
+
+    /// <summary>
+    /// Список бронирований этого события.
+    /// </summary>
+    public List<Booking> Bookings { get; set; } = null!;
 }

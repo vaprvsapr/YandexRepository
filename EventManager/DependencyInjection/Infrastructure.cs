@@ -1,6 +1,7 @@
-﻿using EventManager.Data;
+﻿using EventManager.DataAccess;
 using EventManager.Interfaces;
 using EventManager.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.DependencyInjection;
 
@@ -12,12 +13,14 @@ public static partial class DependencyInjectionExtensions
     /// <summary>
     /// Добавляет инфраструктурные сервисы в коллекцию служб приложения.
     /// </summary>
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IRepository<Models.Events.Event>, EventRepository>();
         services.AddScoped<IEventService, EventService>();
+        services.AddDbContext<AppDbContext>(options =>
+        {
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+        });
 
-        services.AddSingleton<IRepository<Models.Bookings.Booking>, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
 
         services.AddHostedService<BookingProcessingService>();

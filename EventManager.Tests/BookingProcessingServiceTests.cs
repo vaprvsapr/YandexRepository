@@ -1,8 +1,10 @@
 ﻿using Moq;
-using EventManager.Interfaces;
+using EventManager.DataAccess;
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
 using EventManager.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace EventManager.Tests;
@@ -14,9 +16,11 @@ public class BookingProcessingServiceTests
     public async Task ExecuteAsync_ShouldProcessPendingBooking()
     {
         // Arrange
-        var bookingRepositoryMock = new Mock<IRepository<Booking>>();
-        var eventRepositoryMock = new Mock<IRepository<Event>>();
-        var loggerMock = new Mock<ILogger<BookingProcessingService>>();
+        var dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        await using var context = new AppDbContext(dbOptions);
 
         var eventId = Guid.NewGuid();
         Event eventWithSeats = new()
@@ -54,15 +58,29 @@ public class BookingProcessingServiceTests
             }
         ];
 
-        bookingRepositoryMock.Setup(repo => repo.GetAll()).Returns(bookings);
-        eventRepositoryMock.Setup(repo => repo.GetById(It.IsAny<Guid>())).Returns(eventWithSeats);
+        context.Events.Add(eventWithSeats);
+        context.Bookings.AddRange(bookings);
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var service = new BookingProcessingService(bookingRepositoryMock.Object, eventRepositoryMock.Object, loggerMock.Object);
-        var cancellationTokenSource = new CancellationTokenSource();
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(AppDbContext))).Returns(context);
+
+        var scopeMock = new Mock<IServiceScope>();
+        scopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);
+
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
+        scopeFactoryMock.Setup(f => f.CreateScope()).Returns(scopeMock.Object);
+
+        var loggerMock = new Mock<ILogger<BookingProcessingService>>();
+
+        var service = new BookingProcessingService(scopeFactoryMock.Object, loggerMock.Object);
+
         // Act
-        var tasks = bookings.Select(b => service.ProcessBookingAsync(b, 10, TestContext.Current.CancellationToken));  
+        var tasks = bookings.Select(b => service.ProcessBookingAsync(b.Id, TestContext.Current.CancellationToken));
         await Task.WhenAll(tasks);
+
         // Assert
-        Assert.Equal(3, bookings.Count(b => b.Status == BookingStatus.Confirmed));
+        var updatedBookings = await context.Bookings.ToListAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(3, updatedBookings.Count(b => b.Status == BookingStatus.Confirmed));
     }
 }

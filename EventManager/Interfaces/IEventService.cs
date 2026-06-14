@@ -13,33 +13,33 @@ public interface IEventService
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns>Объект <see cref="EventInfoDto"/>, если событие найдено; в противном случае — <see langword="null"/>.</returns>
-    public EventInfoDto? GetEvent(Guid id);
+    public Task<EventInfoDto?> GetEvent(Guid id);
 
     /// <summary>
     /// Возвращает коллекцию всех доступных событий.
     /// </summary>
     /// <returns>Коллекция объектов <see cref="EventInfoDto"/>. Если события отсутствуют, возвращается пустая коллекция.</returns>
-    public PaginatedResultDto GetAllEvents(GetQuery query);
+    public Task<PaginatedResultDto> GetAllEvents(GetQuery query);
 
     /// <summary>
     /// Создает новое событие на основе предоставленных данных.
     /// </summary>
-    /// <param name="newEvent">Данные нового события.</param>
+    /// <param name="eventCreateDto">Данные нового события.</param>
     /// <returns>Объект <see cref="EventInfoDto"/>, если событие успешно создано.</returns>
-    public EventInfoDto CreateEvent(EventCreateDto newEvent);
+    public Task<EventInfoDto> CreateEvent(EventCreateDto eventCreateDto);
 
     /// <summary>
     /// Обновляет существующее событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
-    /// <param name="updatedEventDto">Новые данные события.</param>
+    /// <param name="eventUpdateDto">Новые данные события.</param>
     /// <returns>Объект <see cref="EventInfoDto"/>, если событие успешно обновлено.</returns>
-    public EventInfoDto UpdateEvent(Guid id, EventUpdateDto updatedEventDto);
+    public Task<EventInfoDto> UpdateEvent(Guid id, EventUpdateDto eventUpdateDto);
 
     /// <summary>
     /// Удаляет событие с указанным идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns><see langword="true"/>, если событие успешно удалено; в противном случае — <see langword="false"/>.</returns>
-    public void DeleteEvent(Guid id);
+    public Task DeleteEvent(Guid id);
 }

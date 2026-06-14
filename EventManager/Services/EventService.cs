@@ -1,81 +1,98 @@
-﻿using EventManager.Interfaces;
+﻿using EventManager.DataAccess;
+using EventManager.Interfaces;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;
 
-
 namespace EventManager.Services;
 
-/// <inheritdoc/>
-public class EventService(IRepository<Event> eventRepository, ILogger<EventService> logger) : IEventService
+
+/// <summary>
+/// Сервис для управления событиями, реализующий бизнес-логику создания, получения, обновления и удаления событий,
+/// а также получения списка событий с поддержкой фильтрации и пагинации. 
+/// В качестве хранилища используется база данных через AppDbContext, 
+/// а для логирования используется ILogger.
+/// </summary>
+/// <param name="context"></param>
+/// <param name="logger"></param>
+public class EventService(AppDbContext context, ILogger<EventService> logger) : IEventService
 {
-    private readonly IRepository<Event> _eventRepository = eventRepository;
+    private readonly AppDbContext _context = context;
     private readonly ILogger<EventService> _logger = logger;
 
     /// <inheritdoc/>
-    public EventInfoDto CreateEvent(EventCreateDto newEventDto)
+    public async Task<EventInfoDto> CreateEvent(EventCreateDto eventCreateDto)
     {
-        var existingEvent = _eventRepository.GetById(newEventDto.Id);
-        if (existingEvent != null)
-            throw new InvalidOperationException($"Событие с id {newEventDto.Id} уже существует.");
-        Event newEvent = EventMapper.ToEvent(newEventDto);
-        _eventRepository.Add(newEvent);
+        var existingEvent = await _context.Events.FindAsync(eventCreateDto.Id);
+        if (existingEvent is not null)
+            throw new InvalidOperationException($"Событие с id {eventCreateDto.Id} уже существует.");
+        var newEvent = EventMapper.ToEvent(eventCreateDto);
+        _context.Events.Add(newEvent);
+        await _context.SaveChangesAsync();
+
         if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Event created: {title} with id: {id}", newEventDto.Title, newEventDto.Id);
+            _logger.LogInformation("Event created: {title} with id: {id}", newEvent.Title, newEvent.Id);
         return EventMapper.ToEventInfoDto(newEvent);
     }
 
     /// <inheritdoc/>
-    public void DeleteEvent(Guid id)
+    public async Task DeleteEvent(Guid id)
     {
-        var existingEvent = _eventRepository.GetById(id) ?? 
+        var existingEvent = await _context.Events.FindAsync(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-        _eventRepository.Delete(existingEvent);
+        _context.Events.Remove(existingEvent);
+
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event deleted: {title} with id: {id}", existingEvent.Title, existingEvent.Id);
+
+        await _context.SaveChangesAsync();
     }
 
     /// <inheritdoc/>
-    public PaginatedResultDto GetAllEvents(GetQuery query)
+    public async Task<PaginatedResultDto> GetAllEvents(GetQuery getQuery)
     {
-        IEnumerable<Event> events = _eventRepository.GetAll();
+        IEnumerable<Event> events = _context.Events.AsEnumerable();
 
         // Фильтрация
-        if (!string.IsNullOrEmpty(query.Title))
-            events = events.Where(e => e.Title.Contains(query.Title, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(getQuery.Title))
+            events = events.Where(e => e.Title.Contains(getQuery.Title, StringComparison.OrdinalIgnoreCase));
 
-        if (query.From.HasValue)
-            events = events.Where(e => e.StartAt >= query.From.Value);
+        if (getQuery.From.HasValue)
+            events = events.Where(e => e.StartAt >= getQuery.From.Value);
 
-        if (query.To.HasValue)
-            events = events.Where(e => e.EndAt <= query.To.Value);
+        if (getQuery.To.HasValue)
+            events = events.Where(e => e.EndAt <= getQuery.To.Value);
 
         return new PaginatedResultDto()
         {
-            Events = events.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).Select(EventMapper.ToEventInfoDto), // Пагинация
+            Events = events
+            .Skip((getQuery.Page - 1) * getQuery.PageSize)
+            .Take(getQuery.PageSize)
+            .Select(EventMapper.ToEventInfoDto), // Пагинация
             TotalCount = events.Count(),
-            PageSize = query.PageSize,
-            Page = query.Page
+            PageSize = getQuery.PageSize,
+            Page = getQuery.Page
         };
     }
 
     /// <inheritdoc/>
-    public EventInfoDto GetEvent(Guid id)
+    public async Task<EventInfoDto?> GetEvent(Guid id)
     {
-        var eventById = _eventRepository.GetById(id) ?? 
+        var existingEvent = await _context.Events.FindAsync(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-        return EventMapper.ToEventInfoDto(eventById);
+        return EventMapper.ToEventInfoDto(existingEvent);
     }
 
     /// <inheritdoc/>
-    public EventInfoDto UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
+    public async Task<EventInfoDto> UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
     {
-        _ = _eventRepository.GetById(id) ??
+        var existingEvent = await _context.Events.FindAsync(id) ??
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
-
-        Event updatedEvent = EventMapper.ToEvent(updatedEventDto, id);
-        _eventRepository.Update(id, updatedEvent);
-        if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Event updated: {title} with id: {id}", updatedEventDto.Title, id);
-        return EventMapper.ToEventInfoDto(updatedEvent);
+        existingEvent.Title = updatedEventDto.Title;
+        existingEvent.Description = updatedEventDto.Description;
+        existingEvent.StartAt = updatedEventDto.StartAt;
+        existingEvent.EndAt = updatedEventDto.EndAt;
+        existingEvent.TotalSeats = updatedEventDto.TotalSeats;
+        await _context.SaveChangesAsync();
+        return EventMapper.ToEventInfoDto(existingEvent);
     }
 }
