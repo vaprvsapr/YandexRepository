@@ -59,6 +59,7 @@ namespace EventManager.Services
         public async Task DeleteBookingByIdAsync(Guid id)
         {
             await _bookingRepository.DeleteByIdAsync(id);
+
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("Deleted booking with Id:{id}.", id);
         }

@@ -49,6 +49,10 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     {
         var existingBooking = _context.Bookings.Find(id) ??
             throw new KeyNotFoundException($"Бронь с Id:{id} не найдена.");
+        var existingEvent = await _context.Events.FindAsync(existingBooking.EventId) ?? 
+            throw new KeyNotFoundException($"Событие с Id:{existingBooking.EventId} не найдено.");
+    
+        existingEvent.ReleaseSeats();
         _context.Bookings.Remove(existingBooking);
         await _context.SaveChangesAsync();
     }
