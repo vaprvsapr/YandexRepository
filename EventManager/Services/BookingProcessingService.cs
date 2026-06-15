@@ -47,7 +47,7 @@ public class BookingProcessingService(
                 .Where(b => b.Status == BookingStatus.Pending)
                 .OrderBy(b => b.CreatedAt)
                 .Take(maxConcurrentBookings)
-                .ToListAsync();
+                .ToListAsync(stoppingToken);
 
             if (pendingBookings.Count > 0)
             {
@@ -75,8 +75,9 @@ public class BookingProcessingService(
     {
         var scope = _serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        Booking? bookingToProcess = await context.Bookings.FindAsync(bookingId);
-        Event? existingEvent = await context.Events.FindAsync(bookingToProcess?.EventId);
+        // CA2016 fix
+        Booking? bookingToProcess = await context.Bookings.FindAsync([bookingId], cancellationToken: ct);
+        Event? existingEvent = await context.Events.FindAsync([bookingToProcess?.EventId], cancellationToken: ct);
         try
         {
             if (existingEvent is not null)

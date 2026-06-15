@@ -56,7 +56,7 @@ public class EventRepositoryTests : IAsyncLifetime
             EndAt = DateTime.UtcNow.AddHours(1),
         };
 
-        IEventRepository eventRepository = new EventRepository(context);
+        var eventRepository = new EventRepository(context);
 
         // Act
         await eventRepository.CreateAsync(eventCreateDto);
@@ -86,7 +86,7 @@ public class EventRepositoryTests : IAsyncLifetime
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1),
         };
-        IEventRepository eventRepository = new EventRepository(context);
+        var eventRepository = new EventRepository(context);
         await eventRepository.CreateAsync(eventCreateDto);
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -112,7 +112,7 @@ public class EventRepositoryTests : IAsyncLifetime
         context.Events.Add(existingEvent);
         await context.SaveChangesAsync();
         await using var retrievingContext = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(retrievingContext);
+        var eventRepository = new EventRepository(retrievingContext);
         // Act
         var retrievedEvent = await eventRepository.GetByIdAsync(existingEvent.Id);
         // Assert
@@ -129,7 +129,7 @@ public class EventRepositoryTests : IAsyncLifetime
         // Arrange
         await ResetDatabaseAsync();
         await using var context = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(context);
+        var eventRepository = new EventRepository(context);
         var nonExistentEventId = Guid.NewGuid();
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
@@ -155,7 +155,7 @@ public class EventRepositoryTests : IAsyncLifetime
         context.Events.Add(eventToDelete);
         await context.SaveChangesAsync();
         await using var deletingContext = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(deletingContext);
+        var eventRepository = new EventRepository(deletingContext);
         // Act
         await eventRepository.DeleteByIdAsync(eventToDelete.Id);
         // Assert
@@ -171,7 +171,7 @@ public class EventRepositoryTests : IAsyncLifetime
         // Arrange
         await ResetDatabaseAsync();
         await using var context = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(context);
+        var eventRepository = new EventRepository(context);
         var nonExistentEventId = Guid.NewGuid();
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
@@ -197,7 +197,7 @@ public class EventRepositoryTests : IAsyncLifetime
         context.Events.Add(existingEvent);
         await context.SaveChangesAsync();
         await using var updatingContext = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(updatingContext);
+        var eventRepository = new EventRepository(updatingContext);
         var updatedEvent = new Event
         {
             Id = existingEvent.Id,
@@ -227,7 +227,7 @@ public class EventRepositoryTests : IAsyncLifetime
         // Arrange
         await ResetDatabaseAsync();
         await using var context = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(context);
+        var eventRepository = new EventRepository(context);
         var nonExistentEvent = new Event
         {
             Id = Guid.NewGuid(),
@@ -273,7 +273,7 @@ public class EventRepositoryTests : IAsyncLifetime
         context.Events.AddRange(events);
         await context.SaveChangesAsync();
         await using var retrievingContext = CreateDbContext();
-        IEventRepository eventRepository = new EventRepository(retrievingContext);
+        var eventRepository = new EventRepository(retrievingContext);
         // Act
         var retrievedEvents = await eventRepository.GetAll().ToListAsync();
         // Assert

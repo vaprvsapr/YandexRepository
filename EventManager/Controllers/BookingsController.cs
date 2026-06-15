@@ -81,6 +81,11 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         return Ok(await _bookingService.GetAllBookingsAsync());
     }
 
+    /// <summary>
+    /// Удаляет бронирование по идентификатору.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [HttpDelete("{id:guid}")]

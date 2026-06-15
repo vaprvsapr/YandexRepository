@@ -5,10 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.DataAccess.Repositories;
 
+/// <summary>
+/// Репозиторий для управления бронированиями событий, обеспечивающий операции создания, получения и удаления бронирований.
+/// </summary>
+/// <param name="context">Контекст базы данных.</param>
 public class BookingRepository(AppDbContext context) : IBookingRepository
 {
     private readonly AppDbContext _context = context;
     private readonly Lock _bookingLock = new();
+
+    /// <inheritdoc/>
     public async Task<Booking> CreateAsync(Guid eventId)
     {
         // Проверка, что указанное событие существует.
@@ -37,7 +43,8 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await _context.SaveChangesAsync();
         return newBooking;
     }
-
+    
+    /// <inheritdoc/>
     public async Task DeleteByIdAsync(Guid id)
     {
         var existingBooking = _context.Bookings.Find(id) ??
@@ -46,11 +53,13 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await _context.SaveChangesAsync();
     }
 
+    /// <inheritdoc/>
     public IQueryable<Booking> GetAll()
     {
         return _context.Bookings;
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId)
     {
         var existingEvent = await _context.Events.FindAsync(eventId) ??
@@ -59,6 +68,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         
     }
 
+    /// <inheritdoc/>
     public async Task<Booking> GetByIdAsync(Guid id)
     {
         var existingBooking = await _context.Bookings.FindAsync(id) ??
