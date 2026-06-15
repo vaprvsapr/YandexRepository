@@ -26,7 +26,7 @@ public class Event
     /// Время начала события.
     /// </summary>
     public required DateTime? StartAt { get; set; }
-
+    
     /// <summary>
     /// Время окончания события.
     /// </summary>

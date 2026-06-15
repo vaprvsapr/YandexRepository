@@ -1,5 +1,4 @@
-﻿using EventManager.DataAccess;
-using EventManager.DataAccess.Repositories;
+﻿using EventManager.DataAccess.Repositories;
 using EventManager.Interfaces;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;
@@ -48,10 +47,10 @@ public class EventService(
 
         // Фильтрация
         if (getQuery.From.HasValue)
-            events = events.Where(e => e.StartAt >= getQuery.From.Value);
+            events = events.Where(e => e.StartAt >= getQuery.From.Value.ToUniversalTime());
 
         if (getQuery.To.HasValue)
-            events = events.Where(e => e.EndAt <= getQuery.To.Value);
+            events = events.Where(e => e.EndAt <= getQuery.To.Value.ToUniversalTime());
 
         if (!string.IsNullOrEmpty(getQuery.Title))
             events = events
