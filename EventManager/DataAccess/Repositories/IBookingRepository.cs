@@ -40,4 +40,8 @@ public interface IBookingRepository
     /// <param name="eventId"></param>
     /// <returns></returns>
     public Task<Booking> CreateAsync(Guid eventId);
+
+    public Task ConfirmByIdAsync(Guid id);
+
+    public Task RejectByIdAsync(Guid id);
 }

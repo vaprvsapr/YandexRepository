@@ -77,4 +77,18 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     {
         return await _context.Bookings.FindAsync(id);
     }
+
+    public async Task ConfirmByIdAsync(Guid id)
+    {
+        var existingBooking = await _context.Bookings.FindAsync(id);
+        existingBooking?.Confirm();
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RejectByIdAsync(Guid id)
+    {
+        var existingBooking = await _context.Bookings.FindAsync(id);
+        existingBooking?.Reject();
+        await _context.SaveChangesAsync();
+    }
 }

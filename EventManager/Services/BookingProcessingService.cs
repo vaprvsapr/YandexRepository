@@ -4,6 +4,7 @@ using EventManager.Models.Events;
 using EventManager.DependencyInjection;
 using EventManager.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using EventManager.DataAccess.Repositories;
 
 namespace EventManager.Services;
 
@@ -52,7 +53,7 @@ public class BookingProcessingService(
             if (pendingBookings.Count > 0)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("Обработка {n} ожидающих бронирований в: {time}", 
+                    _logger.LogInformation("Обработка {n} ожидающих бронирований в: {time}",
                         pendingBookings.Count, DateTime.Now);
 
                 var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking.Id, stoppingToken));
@@ -74,40 +75,26 @@ public class BookingProcessingService(
     public async Task ProcessBookingAsync(Guid bookingId, CancellationToken ct)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        // CA2016 fix
-        Booking? bookingToProcess = await context.Bookings.FindAsync([bookingId], cancellationToken: ct);
-        Event? existingEvent = await context.Events.FindAsync([bookingToProcess?.EventId], cancellationToken: ct);
-        try
+        var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+        var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
+
+        Booking? bookingToProcess = await bookingRepository.GetByIdAsync(bookingId);
+        Event? existingEvent = await eventRepository.GetByIdAsync(bookingToProcess?.EventId ?? Guid.Empty);
+
+        // Упростил логику обработки: если событие существует, подтверждаем бронирование, иначе отклоняем его.
+        // Считаю, что на данный момент нет смысла усложнять.
+        if (existingEvent != null)
         {
-            if (existingEvent is not null)
-            {
-                bookingToProcess?.Confirm();
-                if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("Бронирование {id} для события {title} подтверждено.",
-                        bookingToProcess?.Id, existingEvent.Title);
-            }
-            else
-            {
-                bookingToProcess?.Reject();
-                _logger.LogWarning("Бронирование с ID {id} отклонено. Событие с ID {eventId} не найдено.",
-                    bookingToProcess?.Id, bookingToProcess?.EventId);
-            }
+            await bookingRepository.ConfirmByIdAsync(bookingId);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Бронирование {id} для события {title} подтверждено.",
+                    bookingToProcess?.Id, existingEvent.Title);
         }
-        catch
+        else
         {
-            bookingToProcess?.Reject();
-            existingEvent?.ReleaseSeats();
-            if (existingEvent != null)
-                _logger.LogWarning("Бронирование {id} отклонено из-за ошибки во время обработки. Места освобождены для события {eventId}.",
-                    bookingToProcess?.Id, bookingToProcess?.EventId);
-            else
-                _logger.LogWarning("Бронирование {id} отклонено из-за ошибки во время обработки. Событие с ID {eventId} не найдено.",
-                    bookingToProcess?.Id, bookingToProcess?.EventId);
-        }
-        finally
-        {
-            await context.SaveChangesAsync(ct);
+            await bookingRepository.RejectByIdAsync(bookingId);
+            _logger.LogWarning("Бронирование с ID {id} отклонено. Событие с ID {eventId} не найдено.",
+                bookingToProcess?.Id, bookingToProcess?.EventId);
         }
     }
 }
