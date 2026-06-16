@@ -12,7 +12,7 @@ public interface IEventRepository
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public Task<Event> GetByIdAsync(Guid id);
+    public Task<Event?> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Получает все события в виде IQueryable, что позволяет выполнять дополнительные операции LINQ на уровне базы данных.

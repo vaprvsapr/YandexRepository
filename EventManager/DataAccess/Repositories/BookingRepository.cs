@@ -73,10 +73,8 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Booking> GetByIdAsync(Guid id)
+    public async Task<Booking?> GetByIdAsync(Guid id)
     {
-        var existingBooking = await _context.Bookings.FindAsync(id) ??
-                throw new KeyNotFoundException("Бронь с Id:{id} не найдена.");
-        return existingBooking;
+        return await _context.Bookings.FindAsync(id);
     }
 }
