@@ -41,7 +41,20 @@ public interface IBookingRepository
     /// <returns></returns>
     public Task<Booking> CreateAsync(Guid eventId);
 
+
+    /// <summary>
+    /// Подтверждает бронирование по его уникальному идентификатору, 
+    /// изменяя его статус на "Подтверждено" и сохраняет изменения в базе данных.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public Task ConfirmByIdAsync(Guid id);
 
+    /// <summary>
+    /// Отклонеяет бронирование по его уникальному идентификатору,
+    /// изменяя его статус на "Отклонено" и сохраняет изменения в базе данных.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public Task RejectByIdAsync(Guid id);
 }

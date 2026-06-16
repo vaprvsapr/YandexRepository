@@ -9,12 +9,8 @@ using Testcontainers.PostgreSql;
 
 namespace EventManager.IntegrationTests;
 
-public class EventRepositoryTests : PostgresTest
+public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
 {
-    public EventRepositoryTests(PostgresFixture postgresFixture) : base(postgresFixture)
-    {
-    }
-
     [Fact]
     [Trait("Category", "EventRepository")]
     public async Task CreateEvent_SavesEventToDatabase()

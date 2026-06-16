@@ -13,7 +13,7 @@ public interface IEventService
     /// </summary>
     /// <param name="id">Идентификатор события.</param>
     /// <returns>Объект <see cref="EventInfoDto"/>, если событие найдено; в противном случае — <see langword="null"/>.</returns>
-    public Task<EventInfoDto?> GetEvent(Guid id);
+    public Task<EventInfoDto> GetEvent(Guid id);
 
     /// <summary>
     /// Возвращает коллекцию всех доступных событий.

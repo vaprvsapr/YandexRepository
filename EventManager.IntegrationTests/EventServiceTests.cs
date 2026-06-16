@@ -10,11 +10,8 @@ using EventManager.Models.Queries;
 
 namespace EventManager.IntegrationTests;
 
-public class EventServiceTests : PostgresTest
+public class EventServiceTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
 {
-    public EventServiceTests(PostgresFixture postgresFixture) : base(postgresFixture)
-    { }
-
     [Fact]
     [Trait("Category", "EventService")]
     public async Task GetAllEvents_WithTitleQuery_ReturnsEventsMatchingTitle()

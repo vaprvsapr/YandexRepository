@@ -7,12 +7,8 @@ using Testcontainers.PostgreSql;
 
 namespace EventManager.IntegrationTests;
 
-public class BookingRepositoryTests : PostgresTest
+public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
 {
-    public BookingRepositoryTests(PostgresFixture postgresFixture) : base(postgresFixture)
-    {
-    }
-
     [Fact]
     [Trait("Category", "BookingRepository")]
     public async Task CreateAsync_ShouldCreateBooking()

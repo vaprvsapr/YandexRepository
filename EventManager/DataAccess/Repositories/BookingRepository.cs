@@ -79,6 +79,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
             throw new KeyNotFoundException($"Бронирование с Id:{id} не найдена.");
     }
 
+    /// <inheritdoc/>
     public async Task ConfirmByIdAsync(Guid id)
     {
         var existingBooking = await _context.Bookings.FindAsync(id);
@@ -86,6 +87,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await _context.SaveChangesAsync();
     }
 
+    /// <inheritdoc/>
     public async Task RejectByIdAsync(Guid id)
     {
         var existingBooking = await _context.Bookings.FindAsync(id);
