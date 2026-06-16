@@ -18,7 +18,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     public async Task<Booking> CreateAsync(Guid eventId, CancellationToken ct = default)
     {
         // Проверка, что указанное событие существует.
-        Event? existingEvent = await _context.Events.FindAsync(eventId, ct) ??
+        Event? existingEvent = await _context.Events.FindAsync([ eventId, ct ], cancellationToken: ct) ??
             throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
 
         // Блокируем доступ к бронированию мест для данного события, чтобы избежать гонок при одновременных запросах.
@@ -48,7 +48,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     public async Task DeleteByIdAsync(Guid id, CancellationToken ct = default)
     {
         var existingBooking = await GetByIdAsync(id, ct);
-        var existingEvent = await _context.Events.FindAsync(existingBooking.EventId, ct) ?? 
+        var existingEvent = await _context.Events.FindAsync([ existingBooking.EventId, ct ], cancellationToken: ct) ?? 
             throw new KeyNotFoundException($"Событие с Id:{existingBooking.EventId} не найдено.");
     
         existingEvent.ReleaseSeats();
@@ -65,7 +65,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     /// <inheritdoc/>
     public async Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId, CancellationToken ct = default)
     {
-        var existingEvent = await _context.Events.FindAsync(eventId, ct) ??
+        var existingEvent = await _context.Events.FindAsync([ eventId, ct ], cancellationToken: ct) ??
             throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
         return await _context.Bookings.Where(b => b.EventId == eventId).ToListAsync(ct);
         
@@ -74,7 +74,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     /// <inheritdoc/>
     public async Task<Booking> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Bookings.FindAsync(id, ct) ??
+        return await _context.Bookings.FindAsync([ id, ct ], cancellationToken: ct) ??
             throw new KeyNotFoundException($"Бронирование с Id:{id} не найдена.");
     }
 
