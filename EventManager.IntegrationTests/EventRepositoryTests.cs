@@ -9,34 +9,10 @@ using Testcontainers.PostgreSql;
 
 namespace EventManager.IntegrationTests;
 
-public class EventRepositoryTests : IAsyncLifetime
+public class EventRepositoryTests : PostgresTest
 {
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder(image: "postgres:16-alpine").Build();
-    public async Task DisposeAsync()
+    public EventRepositoryTests(PostgresFixture postgresFixture) : base(postgresFixture)
     {
-        await _postgres.DisposeAsync();
-    }
-
-    public async Task InitializeAsync()
-    {
-        await _postgres.StartAsync();
-    }
-
-    private AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(_postgres.GetConnectionString())
-            .Options;
-        var context = new AppDbContext(options);
-        context.Database.Migrate();
-        return context;
-    }
-
-    private async Task ResetDatabaseAsync()
-    {
-        await using var context = CreateDbContext();
-        await context.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE events, bookings Restart IDENTITY CASCADE");
     }
 
     [Fact]
@@ -45,7 +21,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
 
         var eventCreateDto = new EventCreateDto
         {
@@ -62,7 +38,7 @@ public class EventRepositoryTests : IAsyncLifetime
         await eventRepository.CreateAsync(eventCreateDto);
 
         // Assert
-        await using var verifyingContext = CreateDbContext();
+        await using var verifyingContext = await CreateContextAsync();
         var createdEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == eventCreateDto.Id);
         Assert.NotNull(createdEvent);
         Assert.Equal(eventCreateDto.Title, createdEvent.Title);
@@ -77,7 +53,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var eventCreateDto = new EventCreateDto
         {
             Id = Guid.NewGuid(),
@@ -99,7 +75,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var existingEvent = new Event
         {
             Id = Guid.NewGuid(),
@@ -111,7 +87,7 @@ public class EventRepositoryTests : IAsyncLifetime
         };
         context.Events.Add(existingEvent);
         await context.SaveChangesAsync();
-        await using var retrievingContext = CreateDbContext();
+        await using var retrievingContext = await CreateContextAsync();
         var eventRepository = new EventRepository(retrievingContext);
         // Act
         var retrievedEvent = await eventRepository.GetByIdAsync(existingEvent.Id);
@@ -128,7 +104,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var eventRepository = new EventRepository(context);
         var nonExistentEventId = Guid.NewGuid();
         // Act & Assert
@@ -142,7 +118,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var eventToDelete = new Event
         {
             Id = Guid.NewGuid(),
@@ -154,12 +130,12 @@ public class EventRepositoryTests : IAsyncLifetime
         };
         context.Events.Add(eventToDelete);
         await context.SaveChangesAsync();
-        await using var deletingContext = CreateDbContext();
+        await using var deletingContext = await CreateContextAsync();
         var eventRepository = new EventRepository(deletingContext);
         // Act
         await eventRepository.DeleteByIdAsync(eventToDelete.Id);
         // Assert
-        await using var verifyingContext = CreateDbContext();
+        await using var verifyingContext = await CreateContextAsync();
         var deletedEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == eventToDelete.Id);
         Assert.Null(deletedEvent);
     }
@@ -170,7 +146,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var eventRepository = new EventRepository(context);
         var nonExistentEventId = Guid.NewGuid();
         // Act & Assert
@@ -184,7 +160,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var existingEvent = new Event
         {
             Id = Guid.NewGuid(),
@@ -196,7 +172,7 @@ public class EventRepositoryTests : IAsyncLifetime
         };
         context.Events.Add(existingEvent);
         await context.SaveChangesAsync();
-        await using var updatingContext = CreateDbContext();
+        await using var updatingContext = await CreateContextAsync();
         var eventRepository = new EventRepository(updatingContext);
         var updatedEvent = new Event
         {
@@ -210,7 +186,7 @@ public class EventRepositoryTests : IAsyncLifetime
         // Act
         await eventRepository.UpdateAsync(updatedEvent);
         // Assert
-        await using var verifyingContext = CreateDbContext();
+        await using var verifyingContext = await CreateContextAsync();
         var retrievedEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == existingEvent.Id);
         Assert.NotNull(retrievedEvent);
         Assert.Equal(updatedEvent.Title, retrievedEvent.Title);
@@ -226,7 +202,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var eventRepository = new EventRepository(context);
         var nonExistentEvent = new Event
         {
@@ -248,7 +224,7 @@ public class EventRepositoryTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var context = CreateDbContext();
+        await using var context = await CreateContextAsync();
         var events = new List<Event>
         {
             new()
@@ -272,7 +248,7 @@ public class EventRepositoryTests : IAsyncLifetime
         };
         context.Events.AddRange(events);
         await context.SaveChangesAsync();
-        await using var retrievingContext = CreateDbContext();
+        await using var retrievingContext = await CreateContextAsync();
         var eventRepository = new EventRepository(retrievingContext);
         // Act
         var retrievedEvents = await eventRepository.GetAll().ToListAsync();

@@ -10,35 +10,10 @@ using EventManager.Models.Queries;
 
 namespace EventManager.IntegrationTests;
 
-public class EventServiceTests : IAsyncLifetime
+public class EventServiceTests : PostgresTest
 {
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder(image: "postgres:16-alpine").Build();
-    public async Task DisposeAsync()
-    {
-        await _postgres.DisposeAsync();
-    }
-
-    public async Task InitializeAsync()
-    {
-        await _postgres.StartAsync();
-    }
-
-    private AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(_postgres.GetConnectionString())
-            .Options;
-        var context = new AppDbContext(options);
-        context.Database.Migrate();
-        return context;
-    }
-
-    private async Task ResetDatabaseAsync()
-    {
-        await using var context = CreateDbContext();
-        await context.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE events, bookings Restart IDENTITY CASCADE");
-    }
+    public EventServiceTests(PostgresFixture postgresFixture) : base(postgresFixture)
+    { }
 
     [Fact]
     [Trait("Category", "EventService")]
@@ -46,8 +21,8 @@ public class EventServiceTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var arrangeContext = CreateDbContext();
-        await using var actContext = CreateDbContext();
+        await using var arrangeContext = await CreateContextAsync();
+        await using var actContext = await CreateContextAsync();
 
         var eventRepository = new EventRepository(actContext);
         var mockLogger = new Mock<ILogger<EventService>>();
@@ -95,8 +70,8 @@ public class EventServiceTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var arrangeContext = CreateDbContext();
-        await using var actContext = CreateDbContext();
+        await using var arrangeContext = await CreateContextAsync();
+        await using var actContext = await CreateContextAsync();
         var eventRepository = new EventRepository(actContext);
         var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(eventRepository, mockLogger.Object);
@@ -168,8 +143,8 @@ public class EventServiceTests : IAsyncLifetime
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var arrangeContext = CreateDbContext();
-        await using var actContext = CreateDbContext();
+        await using var arrangeContext = await CreateContextAsync();
+        await using var actContext = await CreateContextAsync();
         var eventRepository = new EventRepository(actContext);
         var mockLogger = new Mock<ILogger<EventService>>();
         var eventService = new EventService(eventRepository, mockLogger.Object);
