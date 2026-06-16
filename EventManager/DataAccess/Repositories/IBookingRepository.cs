@@ -11,15 +11,17 @@ public interface IBookingRepository
     /// Метод получения бронирования по индентификатору.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<Booking> GetByIdAsync(Guid id);
+    public Task<Booking> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
     /// Метод получения всех бронирований, связанных с определенным событием, по идентификатору события.
     /// </summary>
     /// <param name="eventId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId);
+    public Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId, CancellationToken ct = default);
 
     /// <summary>
     /// Метод получения всех бронирований, доступных в базе данных.
@@ -31,15 +33,17 @@ public interface IBookingRepository
     /// Метод удаления бронирования по идентификатору.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task DeleteByIdAsync(Guid id);
+    public Task DeleteByIdAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
     /// Метод создания нового бронирования для определенного события по идентификатору события.
     /// </summary>
     /// <param name="eventId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<Booking> CreateAsync(Guid eventId);
+    public Task<Booking> CreateAsync(Guid eventId, CancellationToken ct = default);
 
 
     /// <summary>
@@ -47,14 +51,16 @@ public interface IBookingRepository
     /// изменяя его статус на "Подтверждено" и сохраняет изменения в базе данных.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task ConfirmByIdAsync(Guid id);
+    public Task ConfirmByIdAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
     /// Отклонеяет бронирование по его уникальному идентификатору,
     /// изменяя его статус на "Отклонено" и сохраняет изменения в базе данных.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task RejectByIdAsync(Guid id);
+    public Task RejectByIdAsync(Guid id, CancellationToken ct = default);
 }

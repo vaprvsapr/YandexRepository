@@ -78,7 +78,7 @@ public class BookingProcessingService(
         var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
         var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 
-        Booking? bookingToProcess = await bookingRepository.GetByIdAsync(bookingId);
+        Booking? bookingToProcess = await bookingRepository.GetByIdAsync(bookingId, ct);
         Event? existingEvent = await eventRepository.GetByIdAsync(bookingToProcess?.EventId ?? Guid.Empty);
 
         // Упростил логику обработки: если событие существует, подтверждаем бронирование, иначе отклоняем его.

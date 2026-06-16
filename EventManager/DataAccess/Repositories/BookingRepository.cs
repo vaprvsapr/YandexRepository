@@ -15,10 +15,10 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     private readonly Lock _bookingLock = new();
 
     /// <inheritdoc/>
-    public async Task<Booking> CreateAsync(Guid eventId)
+    public async Task<Booking> CreateAsync(Guid eventId, CancellationToken ct = default)
     {
         // Проверка, что указанное событие существует.
-        Event? existingEvent = await _context.Events.FindAsync(eventId) ??
+        Event? existingEvent = await _context.Events.FindAsync(eventId, ct) ??
             throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
 
         // Блокируем доступ к бронированию мест для данного события, чтобы избежать гонок при одновременных запросах.
@@ -39,22 +39,21 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         };
 
         // Сохраняем изменения в базе данных.
-        await _context.Bookings.AddAsync(newBooking);
-        await _context.SaveChangesAsync();
+        await _context.Bookings.AddAsync(newBooking, ct);
+        await _context.SaveChangesAsync(ct);
         return newBooking;
     }
     
     /// <inheritdoc/>
-    public async Task DeleteByIdAsync(Guid id)
+    public async Task DeleteByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var existingBooking = _context.Bookings.Find(id) ??
-            throw new KeyNotFoundException($"Бронь с Id:{id} не найдена.");
-        var existingEvent = await _context.Events.FindAsync(existingBooking.EventId) ?? 
+        var existingBooking = await GetByIdAsync(id, ct);
+        var existingEvent = await _context.Events.FindAsync(existingBooking.EventId, ct) ?? 
             throw new KeyNotFoundException($"Событие с Id:{existingBooking.EventId} не найдено.");
     
         existingEvent.ReleaseSeats();
         _context.Bookings.Remove(existingBooking);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
     }
 
     /// <inheritdoc/>
@@ -64,34 +63,34 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId)
+    public async Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId, CancellationToken ct = default)
     {
-        var existingEvent = await _context.Events.FindAsync(eventId) ??
+        var existingEvent = await _context.Events.FindAsync(eventId, ct) ??
             throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-        return await _context.Bookings.Where(b => b.EventId == eventId).ToListAsync();
+        return await _context.Bookings.Where(b => b.EventId == eventId).ToListAsync(ct);
         
     }
 
     /// <inheritdoc/>
-    public async Task<Booking> GetByIdAsync(Guid id)
+    public async Task<Booking> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Bookings.FindAsync(id) ??
+        return await _context.Bookings.FindAsync(id, ct) ??
             throw new KeyNotFoundException($"Бронирование с Id:{id} не найдена.");
     }
 
     /// <inheritdoc/>
-    public async Task ConfirmByIdAsync(Guid id)
+    public async Task ConfirmByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var existingBooking = await _context.Bookings.FindAsync(id);
-        existingBooking?.Confirm();
-        await _context.SaveChangesAsync();
+        var existingBooking = await GetByIdAsync(id, ct);
+        existingBooking.Confirm();
+        await _context.SaveChangesAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task RejectByIdAsync(Guid id)
+    public async Task RejectByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var existingBooking = await _context.Bookings.FindAsync(id);
-        existingBooking?.Reject();
-        await _context.SaveChangesAsync();
+        var existingBooking = await GetByIdAsync(id, ct);
+        existingBooking.Reject();
+        await _context.SaveChangesAsync(ct);
     }
 }
