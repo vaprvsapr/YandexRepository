@@ -150,7 +150,7 @@ public class BookingServiceTests
 
     [Fact]
     [Trait("Category", "BookingService")]
-    public async Task GetBookingByIdAsync_WithInvalidBookingId_ReturnsNull()
+    public async Task GetBookingByIdAsync_WithInvalidBookingId_ThrowsKeyNotFoundException()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<BookingService>>();
@@ -163,7 +163,8 @@ public class BookingServiceTests
         IBookingRepository bookingRepository = new BookingRepository(context);
         var bookingService = new BookingService(bookingRepository, mockLogger.Object);
         // Act, Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.GetBookingByIdAsync(Guid.NewGuid()));
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await bookingService.GetBookingByIdAsync(Guid.NewGuid()));
     }
 
     [Fact]

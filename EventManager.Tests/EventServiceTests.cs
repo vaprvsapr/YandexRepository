@@ -230,7 +230,7 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    public async Task GetEvent_NonExistingId_ReturnsNull()
+    public async Task GetEvent_WithInvalidId_ThrowsKeyNotFoundException()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
@@ -245,11 +245,9 @@ public class EventServiceTests
         var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
-        // Act
-
         // Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await eventService.GetEvent(Guid.NewGuid()));
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await eventService.GetEvent(Guid.NewGuid()));
     }
 
     [Fact]

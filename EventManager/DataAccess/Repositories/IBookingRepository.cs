@@ -12,7 +12,7 @@ public interface IBookingRepository
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public Task<Booking?> GetByIdAsync(Guid id);
+    public Task<Booking> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Метод получения всех бронирований, связанных с определенным событием, по идентификатору события.

@@ -124,7 +124,7 @@ public class EventRepositoryTests : IAsyncLifetime
 
     [Fact]
     [Trait("Category", "EventRepository")]
-    public async Task GetByIdAsync_ThrowsKeyNotFoundException_WhenEventDoesNotExist()
+    public async Task GetByIdAsync_WithInvalidEventId_ThrowsKeyNotFoundException()
     {
         // Arrange
         await ResetDatabaseAsync();

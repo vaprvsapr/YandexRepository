@@ -71,7 +71,7 @@ public class EventService(
     }
 
     /// <inheritdoc/>
-    public async Task<EventInfoDto?> GetEvent(Guid id)
+    public async Task<EventInfoDto> GetEvent(Guid id)
     {
         var existingEvent = await _eventRepository.GetByIdAsync(id);
         return EventMapper.ToEventInfoDto(existingEvent);

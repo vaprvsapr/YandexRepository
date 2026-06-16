@@ -131,9 +131,8 @@ public class BookingRepositoryTests : IAsyncLifetime
         var bookingId = Guid.NewGuid();
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-        {
-            await repository.GetByIdAsync(bookingId);
-        });
+            await repository.GetByIdAsync(bookingId)
+        );
     }
 
     [Fact]

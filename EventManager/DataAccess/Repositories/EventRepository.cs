@@ -62,9 +62,10 @@ public class EventRepository(AppDbContext context) : IEventRepository
     /// <param name="id"></param>
     /// <returns></returns>
     /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<Event?> GetByIdAsync(Guid id)
+    public async Task<Event> GetByIdAsync(Guid id)
     {
-        return await _context.Events.FindAsync(id);
+        return await _context.Events.FindAsync(id) ?? 
+            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
     }
 
     /// <summary>
