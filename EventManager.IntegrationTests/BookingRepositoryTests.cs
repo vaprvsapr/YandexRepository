@@ -144,7 +144,8 @@ public class BookingRepositoryTests : IAsyncLifetime
         await ResetDatabaseAsync();
         await using var arrangeContext = CreateDbContext();
         await using var actContext = CreateDbContext();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var arrangeRepository = new DataAccess.Repositories.BookingRepository(arrangeContext);
+        var actRepository = new DataAccess.Repositories.BookingRepository(actContext);
         var eventId = Guid.NewGuid();
         arrangeContext.Events.Add(new Models.Events.Event
         {
@@ -156,19 +157,11 @@ public class BookingRepositoryTests : IAsyncLifetime
             TotalSeats = 10
         });
         await arrangeContext.SaveChangesAsync();
-        var booking = new Models.Bookings.Booking
-        {
-            Id = Guid.NewGuid(),
-            EventId = eventId,
-            Status = Models.Bookings.BookingStatus.Pending,
-            CreatedAt = DateTime.Now.ToUniversalTime()
-        };
-        arrangeContext.Bookings.Add(booking);
-        await arrangeContext.SaveChangesAsync();
+        var createdBooking = await arrangeRepository.CreateAsync(eventId);
         // Act
-        await repository.DeleteByIdAsync(booking.Id);
+        await actRepository.DeleteByIdAsync(createdBooking.Id);
         // Assert
-        var deletedBooking = await actContext.Bookings.FindAsync(booking.Id);
+        var deletedBooking = await actContext.Bookings.FindAsync(createdBooking.Id);
         Assert.Null(deletedBooking);
     }
 
