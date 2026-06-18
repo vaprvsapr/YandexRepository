@@ -12,24 +12,10 @@ namespace EventManager.DataAccess.Repositories;
 public class BookingRepository(AppDbContext context) : IBookingRepository
 {
     private readonly AppDbContext _context = context;
-    private readonly Lock _bookingLock = new();
 
     /// <inheritdoc/>
     public async Task<Booking> CreateAsync(Guid eventId, CancellationToken ct = default)
     {
-        // Проверка, что указанное событие существует.
-        Event? existingEvent = await _context.Events.FindAsync([ eventId, ct ], cancellationToken: ct) ??
-            throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-
-        // Блокируем доступ к бронированию мест для данного события, чтобы избежать гонок при одновременных запросах.
-        lock (_bookingLock)
-        {
-            if (!existingEvent.TryReserveSeats())
-                throw new NoAvailableSeatsException
-                    ($"Нет доступных мест для события с Id:{eventId}.");
-        }
-
-        // Создаем новую бронь для указанного события.
         Booking newBooking = new()
         {
             Id = Guid.NewGuid(), // Создаем новое Id для брони.
@@ -48,10 +34,6 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     public async Task DeleteByIdAsync(Guid id, CancellationToken ct = default)
     {
         var existingBooking = await GetByIdAsync(id, ct);
-        var existingEvent = await _context.Events.FindAsync([ existingBooking.EventId, ct ], cancellationToken: ct) ?? 
-            throw new KeyNotFoundException($"Событие с Id:{existingBooking.EventId} не найдено.");
-    
-        existingEvent.ReleaseSeats();
         _context.Bookings.Remove(existingBooking);
         await _context.SaveChangesAsync(ct);
     }
