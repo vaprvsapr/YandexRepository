@@ -1,5 +1,4 @@
-﻿using EventManager.Models.Events;
-using EventManager.Models.Bookings;
+﻿using EventManager.Models.Bookings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

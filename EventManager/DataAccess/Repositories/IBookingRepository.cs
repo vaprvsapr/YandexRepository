@@ -1,4 +1,5 @@
 ﻿using EventManager.Models.Bookings;
+
 namespace EventManager.DataAccess.Repositories;
 
 /// <summary>

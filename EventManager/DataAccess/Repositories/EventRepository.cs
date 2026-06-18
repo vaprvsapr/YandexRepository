@@ -1,6 +1,4 @@
 ﻿using EventManager.Models.Events;
-using EventManager.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.DataAccess.Repositories;
 

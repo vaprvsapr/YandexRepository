@@ -1,5 +1,4 @@
-﻿using System;
-using EventManager.Models.Bookings;
+﻿using EventManager.Models.Bookings;
 
 namespace EventManager.Tests;
 

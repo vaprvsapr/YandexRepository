@@ -1,10 +1,9 @@
-﻿using EventManager.Interfaces;
-using EventManager.Models.Bookings;
+﻿using EventManager.Models.Bookings;
 using EventManager.Models.Events;
 using EventManager.DependencyInjection;
 using EventManager.DataAccess;
-using Microsoft.EntityFrameworkCore;
 using EventManager.DataAccess.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Services;
 

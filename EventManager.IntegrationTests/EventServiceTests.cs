@@ -7,6 +7,7 @@ using Moq;
 
 namespace EventManager.IntegrationTests;
 
+[Collection("Postgres collection")]
 public class EventServiceTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
 {
     [Fact]

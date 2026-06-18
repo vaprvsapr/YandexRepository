@@ -1,14 +1,10 @@
-﻿using EventManager.DataAccess;
-using EventManager.DataAccess.Repositories;
+﻿using EventManager.DataAccess.Repositories;
 using EventManager.Models.Events;
-using EventManager.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Testcontainers.PostgreSql;
 
 namespace EventManager.IntegrationTests;
 
+[Collection("Postgres collection")]
 public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
 {
     [Fact]

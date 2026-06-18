@@ -1,12 +1,11 @@
 ﻿using EventManager.DataAccess;
 using EventManager.DataAccess.Repositories;
-using EventManager.Interfaces;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;
 using EventManager.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace EventManager.Tests;

@@ -1,13 +1,13 @@
-﻿using Moq;
-using EventManager.Models.Bookings;
+﻿using EventManager.Models.Bookings;
 using EventManager.Models.Events;
 using EventManager.Services;
 using EventManager.ExceptionHandling;
+using EventManager.DataAccess.Repositories;
+using EventManager.DataAccess;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using EventManager.DataAccess;
 using Microsoft.EntityFrameworkCore;
-using EventManager.DataAccess.Repositories;
+using Moq;
 
 namespace EventManager.Tests;
 

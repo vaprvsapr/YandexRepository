@@ -1,6 +1,6 @@
 ﻿using EventManager.Models.Events;
-namespace EventManager.DataAccess.Repositories;
 
+namespace EventManager.DataAccess.Repositories;
 
 /// <summary>
 /// Интерфейс репозитория событий, определяющий методы для управления данными событий в базе данных.

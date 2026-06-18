@@ -1,10 +1,8 @@
-﻿using EventManager.DataAccess;
-using EventManager.DataAccess.Repositories;
+﻿using EventManager.DataAccess.Repositories;
 using EventManager.ExceptionHandling;
 using EventManager.Interfaces;
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Services
 {
