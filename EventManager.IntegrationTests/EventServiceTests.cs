@@ -1,12 +1,9 @@
-﻿using EventManager.DataAccess;
-using EventManager.DataAccess.Repositories;
+﻿using EventManager.DataAccess.Repositories;
 using EventManager.Models.Events;
+using EventManager.Models.Queries;
 using EventManager.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Testcontainers.PostgreSql;
-using EventManager.Models.Queries;
 
 namespace EventManager.IntegrationTests;
 

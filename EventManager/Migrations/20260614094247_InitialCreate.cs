@@ -21,7 +21,7 @@ namespace EventManager.Migrations
                     start_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     total_seats = table.Column<int>(type: "integer", maxLength: 10000, nullable: false),
-                    abailable_seats = table.Column<int>(type: "integer", maxLength: 10000, nullable: false)
+                    available_seats = table.Column<int>(type: "integer", maxLength: 10000, nullable: false)
                 },
                 constraints: table =>
                 {

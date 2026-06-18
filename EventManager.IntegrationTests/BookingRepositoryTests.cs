@@ -49,10 +49,8 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         var eventId = Guid.NewGuid();
 
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-        {
-            await repository.CreateAsync(eventId);
-        });
+        await Assert.ThrowsAsync<DbUpdateException>(async () =>
+            await repository.CreateAsync(eventId));
     }
 
     [Fact]

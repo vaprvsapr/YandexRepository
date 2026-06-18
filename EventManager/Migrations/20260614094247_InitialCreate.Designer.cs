@@ -64,7 +64,7 @@ namespace EventManager.Migrations
                     b.Property<int>("AvailableSeats")
                         .HasMaxLength(10000)
                         .HasColumnType("integer")
-                        .HasColumnName("abailable_seats");
+                        .HasColumnName("available_seats");
 
                     b.Property<string>("Description")
                         .IsRequired()
