@@ -34,7 +34,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
     }
 
     [Fact]
-    [Trait("Category", "BookingRepoisitory")]
+    [Trait("Category", "BookingRepository")]
     public async Task CreateAsync_WithInvalidEventId_ThrowsKeyNotFoundException()
     {
         // Arrange
