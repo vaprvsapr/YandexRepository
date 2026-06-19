@@ -10,7 +10,7 @@ namespace EventManager.IntegrationTests;
 [Collection("Postgres collection")]
 public class PaginationTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
 {
-    public static int numberOfEvents = 25;
+    private static readonly int numberOfEvents = 25;
     public static IEnumerable<EventCreateDto> TestData()
     {
         for (int i = 0; i < numberOfEvents; i++)

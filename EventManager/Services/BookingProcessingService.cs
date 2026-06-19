@@ -78,20 +78,20 @@ public class BookingProcessingService(
         var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 
         Booking? bookingToProcess = await bookingRepository.GetByIdAsync(bookingId, ct);
-        Event? existingEvent = await eventRepository.GetByIdAsync(bookingToProcess?.EventId ?? Guid.Empty);
+        Event? existingEvent = await eventRepository.GetByIdAsync(bookingToProcess?.EventId ?? Guid.Empty, ct);
 
         // Упростил логику обработки: если событие существует, подтверждаем бронирование, иначе отклоняем его.
         // Считаю, что на данный момент нет смысла усложнять.
         if (existingEvent != null)
         {
-            await bookingRepository.ConfirmByIdAsync(bookingId);
+            await bookingRepository.ConfirmByIdAsync(bookingId, ct);
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("Бронирование {id} для события {title} подтверждено.",
                     bookingToProcess?.Id, existingEvent.Title);
         }
         else
         {
-            await bookingRepository.RejectByIdAsync(bookingId);
+            await bookingRepository.RejectByIdAsync(bookingId, ct);
             _logger.LogWarning("Бронирование с ID {id} отклонено. Событие с ID {eventId} не найдено.",
                 bookingToProcess?.Id, bookingToProcess?.EventId);
         }
