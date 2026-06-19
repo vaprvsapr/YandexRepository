@@ -40,10 +40,10 @@ public class BookingProcessingService(
         while (!stoppingToken.IsCancellationRequested)
         {
             var scope = _serviceScopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
 
-            List<Booking> pendingBookings = await context
-                .Bookings
+            List<Booking> pendingBookings = await bookingRepository
+                .GetAll()
                 .Where(b => b.Status == BookingStatus.Pending)
                 .OrderBy(b => b.CreatedAt)
                 .Take(maxConcurrentBookings)
