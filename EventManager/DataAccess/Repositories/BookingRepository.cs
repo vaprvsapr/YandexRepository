@@ -45,7 +45,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     /// <inheritdoc/>
     public async Task<IEnumerable<Booking>> GetBookingsByEventIdAsync(Guid eventId, CancellationToken ct = default)
     {
-        var existingEvent = await _context.Events.FindAsync([ eventId, ct ], cancellationToken: ct) ??
+        var existingEvent = await _context.Events.FindAsync([ eventId ], cancellationToken: ct) ??
             throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
         return await _context.Bookings.Where(b => b.EventId == eventId).ToListAsync(ct);
         
@@ -54,7 +54,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     /// <inheritdoc/>
     public async Task<Booking> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Bookings.FindAsync([ id, ct ], cancellationToken: ct) ??
+        return await _context.Bookings.FindAsync([ id ], cancellationToken: ct) ??
             throw new KeyNotFoundException($"Бронирование с Id:{id} не найдена.");
     }
 

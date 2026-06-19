@@ -20,7 +20,7 @@ public class EventRepository(AppDbContext context) : IEventRepository
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<Event> CreateAsync(EventCreateDto eventCreateDto, CancellationToken ct = default)
     {
-        var existingEvent = await _context.Events.FindAsync([ eventCreateDto.Id, ct ], cancellationToken: ct);
+        var existingEvent = await _context.Events.FindAsync([ eventCreateDto.Id ], cancellationToken: ct);
         if (existingEvent is not null)
             throw new InvalidOperationException($"Событие с id {eventCreateDto.Id} уже существует.");
         var newEvent = EventMapper.ToEvent(eventCreateDto);
@@ -64,7 +64,7 @@ public class EventRepository(AppDbContext context) : IEventRepository
     /// <exception cref="KeyNotFoundException"></exception>
     public async Task<Event> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Events.FindAsync([ id, ct ], cancellationToken: ct) ?? 
+        return await _context.Events.FindAsync([ id ], cancellationToken: ct) ?? 
             throw new KeyNotFoundException($"Событие с id {id} не найдено.");
     }
 
