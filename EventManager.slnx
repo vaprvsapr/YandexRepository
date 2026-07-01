@@ -8,5 +8,4 @@
   <Project Path="EventManager.Tests.Integration/EventManager.Tests.Integration.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
   <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" Id="87a35e7d-e3d5-4fc4-9f9a-9e48628393aa" />
   <Project Path="EventManager.Tests.Unit/EventManager.Tests.Unit.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
-  <Project Path="Eventmanager/EventManager.csproj" />
 </Solution>
