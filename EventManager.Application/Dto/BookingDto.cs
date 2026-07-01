@@ -1,4 +1,6 @@
-﻿namespace EventManager.Application.Dto;
+﻿using EventManager.Domain.Models;
+
+namespace EventManager.Application.Dto;
 
 /// <summary>
 /// Модель данных для представления бронирования события.
