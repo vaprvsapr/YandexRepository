@@ -1,10 +1,10 @@
-﻿using EventManager.Domain.Models;
+﻿using EventManager.Application.Services;
 using EventManager.Domain.Exceptions;
-using EventManager.Application.Services;
+using EventManager.Domain.Models;
 using EventManager.Infrastructure.DataAccess;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace EventManager.Tests.Unit;

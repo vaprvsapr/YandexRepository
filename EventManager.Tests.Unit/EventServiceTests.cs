@@ -1,12 +1,12 @@
-﻿using EventManager.Domain.Models;
-using EventManager.Application.Services;
-using EventManager.Application.Dto;
+﻿using EventManager.Application.Dto;
 using EventManager.Application.Queries;
 using EventManager.Application.Repositories;
+using EventManager.Application.Services;
+using EventManager.Domain.Models;
 using EventManager.Infrastructure.DataAccess;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace EventManager.Tests.Unit;
@@ -150,11 +150,11 @@ public class EventServiceTests
     public async Task GetAllEvents_WithCombinedFiltration_ReturnsEvents()
     {
         // Arrange
-        GetEventQuery query = new() 
-        { 
-            Title = "I", 
-            From = new DateTime().AddDays(4).ToUniversalTime(), 
-            To = new DateTime().AddDays(8).ToUniversalTime() 
+        GetEventQuery query = new()
+        {
+            Title = "I",
+            From = new DateTime().AddDays(4).ToUniversalTime(),
+            To = new DateTime().AddDays(8).ToUniversalTime()
         };
 
         var mockLogger = new Mock<ILogger<EventService>>();
@@ -236,7 +236,7 @@ public class EventServiceTests
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options 
+        services.AddDbContext<AppDbContext>(options
             => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
@@ -304,7 +304,7 @@ public class EventServiceTests
                     Title = "Updated Event",
                     StartAt = new DateTime(0),
                     EndAt = new DateTime(1)
-            }));
+                }));
     }
 
     [Fact]

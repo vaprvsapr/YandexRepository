@@ -1,7 +1,7 @@
-﻿using EventManager.Domain.Models;
-using EventManager.Application.Repositories;
-using EventManager.Infrastructure.Services;
+﻿using EventManager.Application.Repositories;
+using EventManager.Domain.Models;
 using EventManager.Infrastructure.DataAccess;
+using EventManager.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -65,7 +65,7 @@ public class BookingProcessingServiceTests
         var serviceProviderMock = new Mock<IServiceProvider>();
         serviceProviderMock.Setup(sp => sp.GetService(typeof(IBookingRepository))).Returns(new BookingRepository(context));
         serviceProviderMock.Setup(sp => sp.GetService(typeof(IEventRepository))).Returns(new EventRepository(context));
-    
+
 
         var scopeMock = new Mock<IServiceScope>();
         scopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);

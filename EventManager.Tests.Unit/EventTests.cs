@@ -1,5 +1,5 @@
-﻿using EventManager.Domain.Models;
-using EventManager.Application.Dto;
+﻿using EventManager.Application.Dto;
+using EventManager.Domain.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace EventManager.Tests.Unit;
