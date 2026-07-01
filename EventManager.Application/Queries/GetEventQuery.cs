@@ -1,11 +1,11 @@
-﻿namespace EventManager.Domain.Models;
+﻿namespace EventManager.Application.Queries;
 
 using System.ComponentModel.DataAnnotations;
 
 /// <summary>
 /// Модель данных для параметров запроса при получении событий.
 /// </summary>
-public class GetQuery
+public class GetEventQuery
 {
     /// <summary>
     /// Подстрока для фильтрации по названию.
