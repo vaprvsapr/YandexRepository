@@ -6,7 +6,7 @@
   <Project Path="../EventManager.Domain/EventManager.Domain.csproj" Id="2302be5d-c2c5-4683-9e86-1421669f650a" />
   <Project Path="../EventManager.Infrastructure/EventManager.Infrastructure.csproj" Id="5cf2e94e-7ffa-42a8-b63a-0b9287de4231" />
   <Project Path="../EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
-  <Project Path="../EventManager.Presentation/EventManager.Presentation.csproj" Id="44477b2b-c69f-480f-b70f-0bfbab351930" />
+  <Project Path="../EventManager.Presentation/EventManager.Presentation.csproj" Id="87a35e7d-e3d5-4fc4-9f9a-9e48628393aa" />
   <Project Path="../EventManager.Tests/EventManager.Tests.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
   <Project Path="EventManager.csproj" />
 </Solution>
