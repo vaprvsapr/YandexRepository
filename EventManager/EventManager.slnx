@@ -2,6 +2,7 @@
   <Folder Name="/Элементы решения/">
     <File Path="../README.md" />
   </Folder>
+  <Project Path="../EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
   <Project Path="../EventManager.Tests/EventManager.Tests.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
   <Project Path="EventManager.csproj" />
 </Solution>

@@ -1,11 +1,11 @@
 ﻿using EventManager.DataAccess;
-using EventManager.Interfaces;
+using EventManager.DataAccess.Repositories;
 using EventManager.Models.Events;
 using EventManager.Models.Queries;
 using EventManager.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace EventManager.Tests;
@@ -14,17 +14,17 @@ public class EventServiceTests
 {
     private readonly List<Event> _events =
     [
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"), Title = "First", StartAt = new DateTime(0), EndAt = new DateTime(1), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af02"), Title = "Second", StartAt = new DateTime(1), EndAt = new DateTime(2), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af03"), Title = "Third", StartAt = new DateTime(2), EndAt = new DateTime(3), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af04"), Title = "Fourth", StartAt = new DateTime(3), EndAt = new DateTime(4), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af05"), Title = "Fifth", StartAt = new DateTime(4), EndAt = new DateTime(5), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af06"), Title = "Sixth", StartAt = new DateTime(5), EndAt = new DateTime(6), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af07"), Title = "Seventh", StartAt = new DateTime(6), EndAt = new DateTime(7), TotalSeats = 10},
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af08"), Title = "Eighth", StartAt = new DateTime(7), EndAt = new DateTime(8), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af09"), Title = "Ninth", StartAt = new DateTime(8), EndAt = new DateTime(9), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af10"), Title = "Tenth", StartAt = new DateTime(9), EndAt = new DateTime(10), TotalSeats = 10 },
-        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af11"), Title = "Eleventh", StartAt = new DateTime(10), EndAt = new DateTime(11), TotalSeats = 10 }
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"), Title = "First", StartAt = new DateTime().AddDays(0).ToUniversalTime(), EndAt = new DateTime().AddDays(1).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af02"), Title = "Second", StartAt = new DateTime().AddDays(1).ToUniversalTime(), EndAt = new DateTime().AddDays(2).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af03"), Title = "Third", StartAt = new DateTime().AddDays(2).ToUniversalTime(), EndAt = new DateTime().AddDays(3).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af04"), Title = "Fourth", StartAt = new DateTime().AddDays(3).ToUniversalTime(), EndAt = new DateTime().AddDays(4).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af05"), Title = "Fifth", StartAt = new DateTime().AddDays(4).ToUniversalTime(), EndAt = new DateTime().AddDays(5).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af06"), Title = "Sixth", StartAt = new DateTime().AddDays(5).ToUniversalTime(), EndAt = new DateTime().AddDays(6).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af07"), Title = "Seventh", StartAt = new DateTime().AddDays(6).ToUniversalTime(), EndAt = new DateTime().AddDays(7).ToUniversalTime(), TotalSeats = 10},
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af08"), Title = "Eighth", StartAt = new DateTime().AddDays(7).ToUniversalTime(), EndAt = new DateTime().AddDays(8).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af09"), Title = "Ninth", StartAt = new DateTime().AddDays(8).ToUniversalTime(), EndAt = new DateTime().AddDays(9).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af10"), Title = "Tenth", StartAt = new DateTime().AddDays(9).ToUniversalTime(), EndAt = new DateTime().AddDays(10).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af11"), Title = "Eleventh", StartAt = new DateTime().AddDays(10).ToUniversalTime(), EndAt = new DateTime().AddDays(11).ToUniversalTime(), TotalSeats = 10 }
     ];
 
     [Fact]
@@ -48,7 +48,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         // Act
         var createdEvent = await eventService.CreateEvent(newEvent);
 
@@ -73,7 +74,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
@@ -98,7 +100,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
@@ -114,9 +117,9 @@ public class EventServiceTests
     public async Task GetAllEvents_WithDateFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery fromQuery = new() { From = new DateTime(5) };
-        GetQuery toQuery = new() { To = new DateTime(5) };
-        GetQuery fromToQuery = new() { From = new DateTime(4), To = new DateTime(6) };
+        GetQuery fromQuery = new() { From = new DateTime().AddDays(5).ToUniversalTime() };
+        GetQuery toQuery = new() { To = new DateTime().AddDays(5).ToUniversalTime() };
+        GetQuery fromToQuery = new() { From = new DateTime().AddDays(4).ToUniversalTime(), To = new DateTime().AddDays(6).ToUniversalTime() };
 
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
@@ -125,7 +128,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
@@ -145,7 +149,12 @@ public class EventServiceTests
     public async Task GetAllEvents_WithCombinedFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new() { Title = "I", From = new DateTime(4), To = new DateTime(8) };
+        GetQuery query = new() 
+        { 
+            Title = "I", 
+            From = new DateTime().AddDays(4).ToUniversalTime(), 
+            To = new DateTime().AddDays(8).ToUniversalTime() 
+        };
 
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
@@ -154,7 +163,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
@@ -179,7 +189,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -205,7 +216,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -217,7 +229,7 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
-    public async Task GetEvent_NonExistingId_ReturnsNull()
+    public async Task GetEvent_WithInvalidId_ThrowsKeyNotFoundException()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
@@ -228,14 +240,13 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
-        // Act
-
         // Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await eventService.GetEvent(Guid.NewGuid()));
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await eventService.GetEvent(Guid.NewGuid()));
     }
 
     [Fact]
@@ -250,7 +261,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -279,7 +291,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         // Act
 
         // Assert
@@ -305,7 +318,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -326,7 +340,8 @@ public class EventServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var eventService = new EventService(context, mockLogger.Object);
+        IEventRepository eventRepository = new EventRepository(context);
+        var eventService = new EventService(eventRepository, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act

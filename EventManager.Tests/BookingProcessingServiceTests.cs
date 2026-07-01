@@ -1,11 +1,12 @@
-﻿using Moq;
-using EventManager.DataAccess;
+﻿using EventManager.DataAccess;
 using EventManager.Models.Bookings;
 using EventManager.Models.Events;
 using EventManager.Services;
+using EventManager.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EventManager.Tests;
 
@@ -63,7 +64,9 @@ public class BookingProcessingServiceTests
         await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
-        serviceProviderMock.Setup(sp => sp.GetService(typeof(AppDbContext))).Returns(context);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(IBookingRepository))).Returns(new BookingRepository(context));
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(IEventRepository))).Returns(new EventRepository(context));
+    
 
         var scopeMock = new Mock<IServiceScope>();
         scopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);

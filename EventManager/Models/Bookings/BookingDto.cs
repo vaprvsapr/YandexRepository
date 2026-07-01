@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EventManager.Models.Bookings
+﻿namespace EventManager.Models.Bookings
 {
     /// <summary>
     /// Модель данных для представления бронирования события.

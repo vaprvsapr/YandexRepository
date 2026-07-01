@@ -32,4 +32,11 @@ public interface IBookingService
     /// Возвращает список всех бронирований.
     /// </summary>
     public Task<List<BookingDto>> GetAllBookingsAsync();
+
+    /// <summary>
+    /// Удаляет бронирование по идентификатору.
+    /// </summary>
+    /// <param name="id">Идентификатор бронирования.</param>
+    /// <returns></returns>
+    public Task DeleteBookingByIdAsync(Guid id);
 }
