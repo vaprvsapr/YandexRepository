@@ -1,7 +1,7 @@
-﻿using EventManager.DataAccess;
+﻿using EventManager.Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 [Collection("Postgres collection")]
 public abstract class PostgresTest(PostgresFixture postgresFixture)

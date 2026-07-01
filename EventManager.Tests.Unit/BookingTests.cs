@@ -1,6 +1,6 @@
-﻿using EventManager.Models.Bookings;
+﻿using EventManager.Domain.Models;
 
-namespace EventManager.Tests;
+namespace EventManager.Tests.Unit;
 
 public class BookingTests
 {

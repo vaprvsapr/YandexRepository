@@ -1,8 +1,9 @@
-﻿using EventManager.DataAccess.Repositories;
-using EventManager.Models.Events;
+﻿using EventManager.Domain.Models;
+using EventManager.Application.Dto;
+using EventManager.Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 [Collection("Postgres collection")]
 public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
@@ -15,28 +16,29 @@ public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTes
         await ResetDatabaseAsync();
         await using var context = await CreateContextAsync();
 
-        var eventCreateDto = new EventCreateDto
+        var newEvent = new Event
         {
             Id = Guid.NewGuid(),
             Title = "Test",
             Description = "Test event",
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1),
+            TotalSeats = 100
         };
 
         var eventRepository = new EventRepository(context);
 
         // Act
-        await eventRepository.CreateAsync(eventCreateDto);
+        await eventRepository.CreateAsync(newEvent);
 
         // Assert
         await using var verifyingContext = await CreateContextAsync();
-        var createdEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == eventCreateDto.Id);
+        var createdEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == newEvent.Id);
         Assert.NotNull(createdEvent);
-        Assert.Equal(eventCreateDto.Title, createdEvent.Title);
-        Assert.Equal(eventCreateDto.Description, createdEvent.Description);
-        Assert.InRange((TimeSpan)(eventCreateDto.StartAt - createdEvent.StartAt)!, TimeSpan.Zero, TimeSpan.FromMicroseconds(1));
-        Assert.InRange((TimeSpan)(eventCreateDto.EndAt - createdEvent.EndAt)!, TimeSpan.Zero, TimeSpan.FromMicroseconds(1));
+        Assert.Equal(newEvent.Title, createdEvent.Title);
+        Assert.Equal(newEvent.Description, createdEvent.Description);
+        Assert.InRange((TimeSpan)(newEvent.StartAt - createdEvent.StartAt)!, TimeSpan.Zero, TimeSpan.FromMicroseconds(1));
+        Assert.InRange((TimeSpan)(newEvent.EndAt - createdEvent.EndAt)!, TimeSpan.Zero, TimeSpan.FromMicroseconds(1));
     }
 
     [Fact]
@@ -46,19 +48,22 @@ public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTes
         // Arrange
         await ResetDatabaseAsync();
         await using var context = await CreateContextAsync();
-        var eventCreateDto = new EventCreateDto
+
+        var newEvent = new Event
         {
             Id = Guid.NewGuid(),
             Title = "Test",
             Description = "Test event",
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1),
+            TotalSeats = 100
         };
+
         var eventRepository = new EventRepository(context);
-        await eventRepository.CreateAsync(eventCreateDto);
+        await eventRepository.CreateAsync(newEvent);
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await eventRepository.CreateAsync(eventCreateDto));
+            await eventRepository.CreateAsync(newEvent));
     }
 
     [Fact]

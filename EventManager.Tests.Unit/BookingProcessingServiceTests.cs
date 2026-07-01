@@ -1,14 +1,13 @@
-﻿using EventManager.DataAccess;
-using EventManager.Models.Bookings;
-using EventManager.Models.Events;
-using EventManager.Services;
-using EventManager.DataAccess.Repositories;
+﻿using EventManager.Domain.Models;
+using EventManager.Application.Repositories;
+using EventManager.Infrastructure.Services;
+using EventManager.Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace EventManager.Tests;
+namespace EventManager.Tests.Unit;
 
 public class BookingProcessingServiceTests
 {

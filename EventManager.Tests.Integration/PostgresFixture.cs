@@ -1,6 +1,6 @@
 ﻿using Testcontainers.PostgreSql;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 public class PostgresFixture : IAsyncLifetime
 {

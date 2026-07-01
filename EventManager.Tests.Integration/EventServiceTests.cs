@@ -1,11 +1,12 @@
-﻿using EventManager.DataAccess.Repositories;
-using EventManager.Models.Events;
-using EventManager.Models.Queries;
-using EventManager.Services;
+﻿using EventManager.Domain.Models;
+using EventManager.Application.Services;
+using EventManager.Application.Queries;
+using EventManager.Application.Dto;
+using EventManager.Infrastructure.DataAccess;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 [Collection("Postgres collection")]
 public class EventServiceTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
@@ -45,13 +46,13 @@ public class EventServiceTests(PostgresFixture postgresFixture) : PostgresTest(p
         await arrangeContext.Events.AddRangeAsync(event1, event2);
         arrangeContext.SaveChanges();
 
-        var getQuery = new GetQuery
+        var GetEventQuery = new GetEventQuery
         {
             Title = "Concert"
         };
 
         // Act
-        PaginatedResultDto result = await eventService.GetAllEvents(getQuery);
+        PaginatedResultDto result = await eventService.GetAllEvents(GetEventQuery);
 
         // Assert
         Assert.NotNull(result);
@@ -90,31 +91,31 @@ public class EventServiceTests(PostgresFixture postgresFixture) : PostgresTest(p
         };
         await arrangeContext.Events.AddRangeAsync(event1, event2);
         arrangeContext.SaveChanges();
-        var getQuery1 = new GetQuery
+        var GetEventQuery1 = new GetEventQuery
         {
             From = new DateTime(2024, 6, 1, 7, 0, 0),
             To = new DateTime(2024, 6, 1, 12, 0, 0)
         };
-        var getQuery2 = new GetQuery
+        var GetEventQuery2 = new GetEventQuery
         {
             From = new DateTime(2024, 6, 1, 17, 0, 0),
             To = new DateTime(2024, 6, 1, 20, 0, 0)
         };
-        var getQuery3 = new GetQuery
+        var GetEventQuery3 = new GetEventQuery
         {
             From = new DateTime(2024, 6, 1, 12, 0, 0),
             To = new DateTime(2024, 6, 1, 17, 0, 0)
         };
-        var getQuery4 = new GetQuery
+        var GetEventQuery4 = new GetEventQuery
         {
             From = new DateTime(2024, 6, 1, 7, 0, 0),
             To = new DateTime(2024, 6, 1, 20, 0, 0)
         };
         // Act
-        var result1 = await eventService.GetAllEvents(getQuery1);
-        var result2 = await eventService.GetAllEvents(getQuery2);
-        var result3 = await eventService.GetAllEvents(getQuery3);
-        var result4 = await eventService.GetAllEvents(getQuery4);
+        var result1 = await eventService.GetAllEvents(GetEventQuery1);
+        var result2 = await eventService.GetAllEvents(GetEventQuery2);
+        var result3 = await eventService.GetAllEvents(GetEventQuery3);
+        var result4 = await eventService.GetAllEvents(GetEventQuery4);
 
         // Assert
         Assert.NotNull(result1);
@@ -172,13 +173,13 @@ public class EventServiceTests(PostgresFixture postgresFixture) : PostgresTest(p
         };
         await arrangeContext.Events.AddRangeAsync(event1, event2, event3);
         arrangeContext.SaveChanges();
-        var getQuery = new GetQuery
+        var GetEventQuery = new GetEventQuery
         {
             Title = "br",
             To = new DateTime(2024, 6, 1, 12, 0, 0)
         };
         // Act
-        var result = await eventService.GetAllEvents(getQuery);
+        var result = await eventService.GetAllEvents(GetEventQuery);
         // Assert
         Assert.NotNull(result);
         Assert.Single(result.Events);

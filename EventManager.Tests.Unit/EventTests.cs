@@ -1,7 +1,8 @@
-﻿using EventManager.Models.Events;
+﻿using EventManager.Domain.Models;
+using EventManager.Application.Dto;
 using System.ComponentModel.DataAnnotations;
 
-namespace EventManager.Tests;
+namespace EventManager.Tests.Unit;
 
 public class EventTests
 {

@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EventManager.Domain.Models;
+using EventManager.Infrastructure.DataAccess;
+using Microsoft.EntityFrameworkCore;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 [Collection("Postgres collection")]
 public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
@@ -13,9 +15,9 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
-        arrangeContext.Events.Add(new Models.Events.Event
+        arrangeContext.Events.Add(new Event
         {
             Id = eventId,
             Title = "Test Event",
@@ -30,7 +32,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         // Assert
         Assert.NotNull(booking);
         Assert.Equal(eventId, booking.EventId);
-        Assert.Equal(Models.Bookings.BookingStatus.Pending, booking.Status);
+        Assert.Equal(BookingStatus.Pending, booking.Status);
     }
 
     [Fact]
@@ -41,7 +43,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
 
         // Act & Assert
@@ -57,9 +59,9 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
-        arrangeContext.Events.Add(new Models.Events.Event
+        arrangeContext.Events.Add(new Event
         {
             Id = eventId,
             Title = "Test Event",
@@ -69,11 +71,11 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             TotalSeats = 10
         });
         await arrangeContext.SaveChangesAsync();
-        var booking = new Models.Bookings.Booking
+        var booking = new Booking
         {
             Id = Guid.NewGuid(),
             EventId = eventId,
-            Status = Models.Bookings.BookingStatus.Pending,
+            Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
         arrangeContext.Bookings.Add(booking);
@@ -93,7 +95,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var bookingId = Guid.NewGuid();
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
@@ -109,10 +111,10 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var arrangeRepository = new DataAccess.Repositories.BookingRepository(arrangeContext);
-        var actRepository = new DataAccess.Repositories.BookingRepository(actContext);
+        var arrangeRepository = new BookingRepository(arrangeContext);
+        var actRepository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
-        arrangeContext.Events.Add(new Models.Events.Event
+        arrangeContext.Events.Add(new Event
         {
             Id = eventId,
             Title = "Test Event",
@@ -138,7 +140,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var bookingId = Guid.NewGuid();
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
@@ -155,11 +157,11 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var eventId1 = Guid.NewGuid();
         var eventId2 = Guid.NewGuid();
 
-        var event1 = new Models.Events.Event
+        var event1 = new Event
         {
             Id = eventId1,
             Title = "Test Event 1",
@@ -169,7 +171,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             TotalSeats = 10
         };
 
-        var event2 = new Models.Events.Event
+        var event2 = new Event
         {
             Id = eventId2,
             Title = "Test Event 2",
@@ -182,7 +184,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         arrangeContext.Events.AddRange(event1, event2);
         await arrangeContext.SaveChangesAsync();
 
-        var bookingRepository = new DataAccess.Repositories.BookingRepository(actContext);
+        var bookingRepository = new BookingRepository(actContext);
 
         // Act
         await bookingRepository.CreateAsync(eventId1);
@@ -210,9 +212,9 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
-        var repository = new DataAccess.Repositories.BookingRepository(actContext);
+        var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
-        arrangeContext.Events.Add(new Models.Events.Event
+        arrangeContext.Events.Add(new Event
         {
             Id = eventId,
             Title = "Test Event",
@@ -222,18 +224,18 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             TotalSeats = 10
         });
         await arrangeContext.SaveChangesAsync();
-        var booking1 = new Models.Bookings.Booking
+        var booking1 = new Booking
         {
             Id = Guid.NewGuid(),
             EventId = eventId,
-            Status = Models.Bookings.BookingStatus.Pending,
+            Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
-        var booking2 = new Models.Bookings.Booking
+        var booking2 = new Booking
         {
             Id = Guid.NewGuid(),
             EventId = eventId,
-            Status = Models.Bookings.BookingStatus.Confirmed,
+            Status = BookingStatus.Confirmed,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
         arrangeContext.Bookings.AddRange(booking1, booking2);

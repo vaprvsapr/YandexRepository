@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 [Collection("Postgres collection")]
 public class MigrationTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)

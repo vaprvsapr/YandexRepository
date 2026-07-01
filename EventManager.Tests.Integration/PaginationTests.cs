@@ -1,11 +1,11 @@
-﻿using EventManager.DataAccess.Repositories;
-using EventManager.Services;
-using EventManager.Models.Events;
-using EventManager.Models.Queries;
+﻿using EventManager.Application.Dto;
+using EventManager.Application.Queries;
+using EventManager.Application.Services;
+using EventManager.Infrastructure.DataAccess;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace EventManager.IntegrationTests;
+namespace EventManager.Tests.Integration;
 
 [Collection("Postgres collection")]
 public class PaginationTests(PostgresFixture postgresFixture) : PostgresTest(postgresFixture)
@@ -40,7 +40,7 @@ public class PaginationTests(PostgresFixture postgresFixture) : PostgresTest(pos
         var repository = new EventRepository(context);
         var mockLogger = new Mock<ILogger<EventService>>();
         var eventsService = new EventService(repository, mockLogger.Object);
-        var query = new GetQuery() { Page = pageNumber };
+        var query = new GetEventQuery() { Page = pageNumber };
 
         foreach (var eventCreateDto in TestData())
             await eventsService.CreateEvent(eventCreateDto);
@@ -82,7 +82,7 @@ public class PaginationTests(PostgresFixture postgresFixture) : PostgresTest(pos
         // Act & Assert
         for (int page = 1; page <= numberOfPages; page++)
         {
-            var result = await eventsService.GetAllEvents(new GetQuery() { Page = page, PageSize = pageSize });
+            var result = await eventsService.GetAllEvents(new GetEventQuery() { Page = page, PageSize = pageSize });
             var expectedCount = page < numberOfPages 
                 ? pageSize 
                 : numberOfEvents - (page - 1) * pageSize;

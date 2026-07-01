@@ -1,15 +1,13 @@
-﻿using EventManager.Models.Bookings;
-using EventManager.Models.Events;
-using EventManager.Services;
-using EventManager.ExceptionHandling;
-using EventManager.DataAccess.Repositories;
-using EventManager.DataAccess;
+﻿using EventManager.Domain.Models;
+using EventManager.Domain.Exceptions;
+using EventManager.Application.Services;
+using EventManager.Infrastructure.DataAccess;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
-namespace EventManager.Tests;
+namespace EventManager.Tests.Unit;
 
 public class BookingServiceTests
 {
@@ -36,8 +34,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
 
         // Act
@@ -71,8 +69,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         var result1 = await bookingService.CreateBookingAsync(eventId);
@@ -108,8 +106,8 @@ public class BookingServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
 
         // Act, Assert
@@ -139,8 +137,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         var booking = await bookingService.CreateBookingAsync(eventId);
@@ -164,8 +162,8 @@ public class BookingServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act, Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
@@ -195,8 +193,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         var result = await bookingService.GetBookingsByEventIdAsync(eventId);
@@ -228,8 +226,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         await bookingService.CreateBookingAsync(eventId);
@@ -253,8 +251,8 @@ public class BookingServiceTests
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         // Act & Assert
@@ -286,8 +284,8 @@ public class BookingServiceTests
         context.SaveChanges();
         context.Events.Remove(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
 
         // Act & Assert
@@ -317,8 +315,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
 
         // Act, Assert
@@ -348,8 +346,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act 1
         await bookingService.CreateBookingAsync(eventId);
@@ -392,8 +390,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
         var tasks = Enumerable.Range(0, totalSeats).Select(async i => await bookingService.CreateBookingAsync(eventId));
@@ -426,8 +424,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
         context.SaveChanges();
-        BookingRepository bookingRepository = new BookingRepository(context);
-        EventRepository eventRepository = new EventRepository(context);
+        var bookingRepository = new BookingRepository(context);
+        var eventRepository = new EventRepository(context);
         var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
         // Act
 

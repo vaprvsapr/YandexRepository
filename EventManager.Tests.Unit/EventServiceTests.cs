@@ -1,14 +1,15 @@
-﻿using EventManager.DataAccess;
-using EventManager.DataAccess.Repositories;
-using EventManager.Models.Events;
-using EventManager.Models.Queries;
-using EventManager.Services;
+﻿using EventManager.Domain.Models;
+using EventManager.Application.Services;
+using EventManager.Application.Dto;
+using EventManager.Application.Queries;
+using EventManager.Application.Repositories;
+using EventManager.Infrastructure.DataAccess;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
-namespace EventManager.Tests;
+namespace EventManager.Tests.Unit;
 
 public class EventServiceTests
 {
@@ -65,7 +66,7 @@ public class EventServiceTests
     {
         // Arrange
 
-        GetQuery query = new();
+        GetEventQuery query = new();
 
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
@@ -91,7 +92,7 @@ public class EventServiceTests
     public async Task GetAllEvents_WithTitleFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new() { Title = "th" };
+        GetEventQuery query = new() { Title = "th" };
 
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
@@ -117,9 +118,9 @@ public class EventServiceTests
     public async Task GetAllEvents_WithDateFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery fromQuery = new() { From = new DateTime().AddDays(5).ToUniversalTime() };
-        GetQuery toQuery = new() { To = new DateTime().AddDays(5).ToUniversalTime() };
-        GetQuery fromToQuery = new() { From = new DateTime().AddDays(4).ToUniversalTime(), To = new DateTime().AddDays(6).ToUniversalTime() };
+        GetEventQuery fromQuery = new() { From = new DateTime().AddDays(5).ToUniversalTime() };
+        GetEventQuery toQuery = new() { To = new DateTime().AddDays(5).ToUniversalTime() };
+        GetEventQuery fromToQuery = new() { From = new DateTime().AddDays(4).ToUniversalTime(), To = new DateTime().AddDays(6).ToUniversalTime() };
 
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
@@ -149,7 +150,7 @@ public class EventServiceTests
     public async Task GetAllEvents_WithCombinedFiltration_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new() 
+        GetEventQuery query = new() 
         { 
             Title = "I", 
             From = new DateTime().AddDays(4).ToUniversalTime(), 
@@ -180,7 +181,7 @@ public class EventServiceTests
     public async Task GetAllEvents_Pagination_ReturnsEvents()
     {
         // Arrange
-        GetQuery query = new() { Page = 4, PageSize = 3 };
+        GetEventQuery query = new() { Page = 4, PageSize = 3 };
 
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();

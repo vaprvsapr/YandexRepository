@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Элементы решения/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="EventManager.Application/EventManager.Application.csproj" Id="d3074723-0bd2-4318-bcd1-4ef199b2f75f" />
+  <Project Path="EventManager.Domain/EventManager.Domain.csproj" Id="2302be5d-c2c5-4683-9e86-1421669f650a" />
+  <Project Path="EventManager.Infrastructure/EventManager.Infrastructure.csproj" Id="5cf2e94e-7ffa-42a8-b63a-0b9287de4231" />
+  <Project Path="EventManager.Tests.Integration/EventManager.Tests.Integration.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
+  <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" Id="87a35e7d-e3d5-4fc4-9f9a-9e48628393aa" />
+  <Project Path="EventManager.Tests.Unit/EventManager.Tests.Unit.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
+  <Project Path="Eventmanager/EventManager.csproj" />
+</Solution>
