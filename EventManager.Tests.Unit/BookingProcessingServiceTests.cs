@@ -60,7 +60,7 @@ public class BookingProcessingServiceTests
 
         context.Events.Add(eventWithSeats);
         context.Bookings.AddRange(bookings);
-        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await context.SaveChangesAsync(CancellationToken.None);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
         serviceProviderMock.Setup(sp => sp.GetService(typeof(IBookingRepository))).Returns(new BookingRepository(context));
@@ -78,11 +78,11 @@ public class BookingProcessingServiceTests
         var service = new BookingProcessingService(scopeFactoryMock.Object, loggerMock.Object);
 
         // Act
-        var tasks = bookings.Select(b => service.ProcessBookingAsync(b.Id, TestContext.Current.CancellationToken));
+        var tasks = bookings.Select(b => service.ProcessBookingAsync(b.Id, CancellationToken.None));
         await Task.WhenAll(tasks);
 
         // Assert
-        var updatedBookings = await context.Bookings.ToListAsync(TestContext.Current.CancellationToken);
+        var updatedBookings = await context.Bookings.ToListAsync(CancellationToken.None);
         Assert.Equal(3, updatedBookings.Count(b => b.Status == BookingStatus.Confirmed));
     }
 }
