@@ -14,7 +14,7 @@ RESTful API для управления событиями, написанное
 
 ### Настройка строки подключения к базе данных
 
-1. Откройте файл `appsettings.json` в корневой папке проекта `EventManager`.
+1. Откройте файл `appsettings.json` в корневой папке проекта `EventManager.Presentation`.
 2. Укажите правильную строку подключения к вашей базе данных PostgreSQL в разделе `ConnectionStrings`.
 
 При запуске проекта схема БД создается автоматически с помощью Migrate().
@@ -22,13 +22,13 @@ RESTful API для управления событиями, написанное
 ### Через Visual Studio
 
 1. Откройте решение в Visual Studio.
-2. Убедитесь, что `EventManager` установлен как запускаемый проект.
+2. Убедитесь, что `EventManager.Presentation` установлен как запускаемый проект.
 3. Нажмите `F5` или кнопку "Пуск" (IIS Express / http / https).
 4. Автоматически откроется браузер со страницей **Swagger UI**, где можно протестировать API.
 
 ### Через командную строку (CLI)
 
-1. Откройте терминал в папке проекта `EventManager`.
+1. Откройте терминал в папке проекта `EventManager.Presentation`.
 2. Выполните команду запуска:
    ```bash
    dotnet run
@@ -172,7 +172,41 @@ GET /events?title=встреча&from=2026-05-01T00:00:00Z&to=2026-05-31T23:59:5
 ```
 Свойство `instance` указывает на маршрут, при обращении к которому возникла ошибка.
 
-## Архитектура и сервисы приложения
+## Архитектура
+
+Проект построен с использованием принципов **чистой архитектуры** и разделения ответственности на слои:
+
+### EventManager.Domain
+EventManager.Domain — содержит сущности (Event, Booking, BookingStatus), кастомные исключения (NoAvailableSeatsException).
+Проект не ссылается на другие проекты и не зависит от инфраструктуры, что позволяет легко тестировать бизнес-логику.
+
+### EventManager.Application
+EventManager.Application — содержит сервисы (EventService, BookingService), которые реализуют бизнес-логику приложения.
+Содержит DTO модели. Интерфейсы репозиториев (IEventRepository, IBookingRepository) для абстракции доступа к данным.
+Мапперы для преобразования сущностей в DTO и обратно (EventMapper, BookingMapper).
+Проект ссылается только на EventManager.Domain.
+
+### EventManager.Infrastructure
+EventManager.Infrastructure — содержит реализацию репозиториев (EventRepository, BookingRepository),
+контекст данных (AppDbContext) для работы с базой данных через Entity Framework Core,
+конфигурации сущностей (EventConfiguration, BookingConfiguration) и миграции базы данных.
+Содержит сервис BookingProcessingService, который автоматически подтверждает новые бронирования в фоновом режиме.
+Для DI используется метод-расширение `AddInfrastructure` в `Program.cs`.
+Проект ссылается только на EventManager.Domain и EventManager.Application.
+
+### EventManager.Presentation
+EventManager.Presentation — проект, содержащий контроллеры API (EventsController, BookingsController),
+Middleware для глобальной обработки исключений, Swagger-конфигурацию и точку входа приложения.
+Проект ссылается на EventManager.Domain, EventManager.Application и EventManager.Infrastructure.
+Является запускаемым проектом, который стартует веб-сервер и предоставляет REST API.
+
+### EventManager.Tests.Unit
+EventManager.Tests.Unit — проект с модульными тестами для проверки бизнес-логики сервисов и корректности работы API.
+
+### EventManager.Tests.Integration
+EventManager.Tests.Integration — проект с интеграционными тестами, проверяющими взаимодействие между компонентами приложения и работу с базой данных.
+
+## Сервисы приложения
 
 ### BookingRepository
 BookingRepository — реализация интерфейса IBookingRepository для управления данными бронирований в базе данных.
