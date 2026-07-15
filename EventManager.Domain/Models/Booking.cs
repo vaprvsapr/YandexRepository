@@ -17,6 +17,8 @@ public class Booking
     /// </summary>
     public required Guid EventId { get; init; }
 
+    public required Guid UserId { get; init; }
+
     /// <summary>
     /// Статус бронирования.
     /// </summary>
@@ -50,9 +52,16 @@ public class Booking
         ProcessedAt = DateTime.Now.ToUniversalTime();
     }
 
+    public void Cancel()
+    {
+        Status = BookingStatus.Canceled;
+        ProcessedAt = DateTime.Now.ToUniversalTime();
+    }
+
     /// <summary>
     /// Объект события.
     /// </summary>
     public Event Event { get; set; } = null!;
 
+    public User User { get; set; } = null!;
 }

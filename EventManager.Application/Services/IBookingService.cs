@@ -11,8 +11,9 @@ public interface IBookingService
     /// Создаёт новое бронирование для указанного события.
     /// </summary>
     /// <param name="eventId">Идентификатор события, для которого создаётся бронирование.</param>
+    /// <param name="userId">Идентификатор пользователя, который создаёт бронирование.</param>
     /// <returns>Данные созданного бронирования.</returns>
-    public Task<BookingDto> CreateBookingAsync(Guid eventId);
+    public Task<BookingDto> CreateBookingAsync(Guid eventId, Guid userId);
 
     /// <summary>
     /// Возвращает бронирование по идентификатору.

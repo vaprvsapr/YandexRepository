@@ -24,7 +24,7 @@ public class BookingService(
     private readonly SemaphoreSlim _bookingSemaphore = new(1, 1); // Семафор для синхронизации доступа к бронированию мест
 
     /// <inheritdoc/>
-    public async Task<BookingDto> CreateBookingAsync(Guid eventId)
+    public async Task<BookingDto> CreateBookingAsync(Guid eventId, Guid userId)
     {
         Event existingEvent = await _eventRepository.GetByIdAsync(eventId);
         Booking newBooking;
@@ -35,7 +35,7 @@ public class BookingService(
             if (existingEvent.TryReserveSeats())
             {
                 await _eventRepository.UpdateAsync(existingEvent);
-                newBooking = await _bookingRepository.CreateAsync(eventId);
+                newBooking = await _bookingRepository.CreateAsync(eventId, userId);
             }
             else
             {

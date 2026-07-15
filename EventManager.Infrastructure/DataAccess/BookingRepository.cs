@@ -13,12 +13,13 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     private readonly AppDbContext _context = context;
 
     /// <inheritdoc/>
-    public async Task<Booking> CreateAsync(Guid eventId, CancellationToken ct = default)
+    public async Task<Booking> CreateAsync(Guid eventId, Guid userId, CancellationToken ct = default)
     {
         Booking newBooking = new()
         {
             Id = Guid.NewGuid(), // Создаем новое Id для брони.
             EventId = eventId,
+            UserId = userId,
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };

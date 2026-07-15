@@ -42,9 +42,10 @@ public interface IBookingRepository
     /// Метод создания нового бронирования для определенного события по идентификатору события.
     /// </summary>
     /// <param name="eventId"></param>
+    /// <param name="userId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<Booking> CreateAsync(Guid eventId, CancellationToken ct = default);
+    public Task<Booking> CreateAsync(Guid eventId, Guid userId, CancellationToken ct = default);
 
 
     /// <summary>

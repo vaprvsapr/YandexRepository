@@ -8,14 +8,19 @@ namespace EventManager.Application.Dto;
 public class BookingDto
 {
     /// <summary>
+    /// Идентификатор бронирования.
+    /// </summary>
+    public Guid Id { get; init; } = Guid.Empty;
+
+    /// <summary>
     /// Идентификатор события.
     /// </summary>
     public Guid EventId { get; init; }
 
     /// <summary>
-    /// Идентификатор бронирования.
+    /// Идентификатор пользователя, который сделал бронирование.
     /// </summary>
-    public Guid Id { get; init; } = Guid.Empty;
+    public Guid UserId { get; init; }
 
     /// <summary>
     /// Статус бронирования.

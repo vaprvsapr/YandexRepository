@@ -21,7 +21,8 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <summary>
     /// Размещает бронирование для события по идентификатору.
     /// </summary>
-    /// <param name="id">Идентификатор события, для которого создаётся бронирование.</param>
+    /// <param name="eventId">Идентификатор события, для которого создаётся бронирование.</param>
+    /// <param name="userId">Идентификатор пользователя, который создаёт бронирование.</param>
     /// <returns>Информация о созданном бронировании.</returns>
     /// <response code="202">Бронирование принято к обработке.</response>
     /// <response code="404">Событие не найдено.</response>
@@ -30,11 +31,11 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
-    [Route("~/events/{id}/book")]
+    [Route("book")]
     [HttpPost]
-    public async Task<ActionResult<BookingDto>> Book([FromRoute] Guid id)
+    public async Task<ActionResult<BookingDto>> Book([FromQuery] Guid eventId, [FromQuery] Guid userId)
     {
-        BookingDto createdBooking = await _bookingService.CreateBookingAsync(id);
+        BookingDto createdBooking = await _bookingService.CreateBookingAsync(eventId, userId);
         return Accepted($"/bookings/{createdBooking.Id}", createdBooking);
     }
 
