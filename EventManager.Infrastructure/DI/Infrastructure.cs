@@ -31,6 +31,9 @@ public static partial class DependencyInjectionExtensions
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
 
+        // Сервис пользователей и его репозиторий
+        services.AddScoped<IUserRepository, UserRepository>();
+
         // Фоновый сервис для обработки бронирований
         services.AddHostedService<BookingProcessingService>();
 
