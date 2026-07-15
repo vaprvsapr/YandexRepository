@@ -5,11 +5,11 @@ using System.Text;
 
 namespace EventManager.Application.Services;
 
-public class TokenGeneratingService
+public static class TokenGeneratingService
 {
-    private readonly string _jwtKey = "secret_key";
+    private static readonly string _jwtKey = "asdfjkasdjf83u8efjaisdjf8f3ue8fiaj8ef38EF38YUF3f33F33F";
 
-    public string GenerateToken(Guid userId, string login, UserRole role)
+    public static string GenerateToken(Guid userId, string login, UserRole role)
     {
         var claims = new Dictionary<string, object>
         {

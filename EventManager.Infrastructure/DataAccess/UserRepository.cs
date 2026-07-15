@@ -41,6 +41,13 @@ internal class UserRepository(AppDbContext context) : IUserRepository
         return existingUser;
     }
 
+    public async Task<User> GetByLoginAsync(string login)
+    {
+        var existingUser = await _context.Users.FirstAsync(u => u.Login == login) ??
+            throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
+        return existingUser;
+    }
+
     public async Task<User> UpdateAsync(User user)
     {
         var existingUser = await GetByIdAsync(user.Id);
