@@ -4,6 +4,6 @@
 /// Исключение, которое выбрасывается, когда пользователь пытается создать бронирование, превышающее лимит активных бронирований.
 /// </summary>
 /// <param name="message"></param>
-internal class ExceedingActiveBookingLimitException(string message) : Exception(message)
+public class ExceedingActiveBookingLimitException(string message) : Exception(message)
 {
 }

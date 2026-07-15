@@ -12,14 +12,17 @@ namespace EventManager.Application.Services;
 /// </summary>
 /// <param name="bookingRepository">Репозиторий бронирований.</param>
 /// <param name="eventRepository">Репозиторий событий.</param>
+/// <param name="userRepository">Репозиторий пользователей.</param>
 /// <param name="logger">Логгер для записи информации о процессе управления бронированиями.</param>
 public class BookingService(
     IBookingRepository bookingRepository,
     IEventRepository eventRepository,
+    IUserRepository userRepository,
     ILogger<BookingService> logger) : IBookingService
 {
     private readonly IBookingRepository _bookingRepository = bookingRepository;
     private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly IUserRepository _userRepository = userRepository;
     private readonly ILogger<BookingService> _logger = logger;
     private readonly SemaphoreSlim _bookingSemaphore = new(1, 1); // Семафор для синхронизации доступа к бронированию мест
 
@@ -27,24 +30,26 @@ public class BookingService(
     public async Task<BookingDto> CreateBookingAsync(Guid eventId, Guid userId)
     {
         Event existingEvent = await _eventRepository.GetByIdAsync(eventId);
+        User existingUser = await _userRepository.GetByIdAsync(userId);
         Booking newBooking;
 
         await _bookingSemaphore.WaitAsync();
         try
         {
-            if (existingEvent.TryReserveSeats())
-            {
-                await _eventRepository.UpdateAsync(existingEvent);
-                newBooking = await _bookingRepository.CreateAsync(eventId, userId);
-            }
-            else
-            {
+            if (existingEvent.StartAt <= DateTime.UtcNow)
+                throw new PastEventBookingException($"Невозможно создать бронирование для события с id: {eventId}, так как оно уже началось или завершилось.");
+
+            if (existingUser.Bookings.Count >= 10)
+                throw new ExceedingActiveBookingLimitException($"Пользователь с id: {userId} превысил лимит активных бронирований.");
+
+            if (!existingEvent.TryReserveSeats())
                 throw new NoAvailableSeatsException($"Нет достаточного количества свободных мест на событие с id: {eventId}.");
-            }
+
+            await _eventRepository.UpdateAsync(existingEvent);
+            newBooking = await _bookingRepository.CreateAsync(eventId, userId);
         }
         catch (NoAvailableSeatsException)
         {
-
             throw;
         }
         finally
