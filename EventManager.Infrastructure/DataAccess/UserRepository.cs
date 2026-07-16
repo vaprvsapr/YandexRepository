@@ -36,7 +36,7 @@ internal class UserRepository(AppDbContext context) : IUserRepository
 
     public async Task<User> GetByIdAsync(Guid id)
     {
-        var existingUser = await _context.Users.Include(u => u.Bookings).FirstAsync(u => u.Id == id) ??
+        var existingUser = await _context.Users.FirstAsync(u => u.Id == id) ??
             throw new KeyNotFoundException($"Пользователь с ID {id} не найден.");
         return existingUser;
     }

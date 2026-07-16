@@ -32,6 +32,7 @@ public class BookingService(
     {
         Event existingEvent = await _eventRepository.GetByIdAsync(eventId);
         User existingUser = await _userRepository.GetByIdAsync(userId);
+
         Booking newBooking;
 
         await _bookingSemaphore.WaitAsync();
@@ -40,10 +41,10 @@ public class BookingService(
             if (existingEvent.StartAt <= DateTime.UtcNow)
                 throw new PastEventBookingException($"Невозможно создать бронирование для события с id: {eventId}, так как оно уже началось или завершилось.");
 
-            if (existingUser.Bookings
-                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
-                .Count(b => b.Event.StartAt < DateTime.UtcNow)
-                >= 10)
+            var activeBookingsCount = _bookingRepository.GetAll()
+                .Where(b => b.UserId == userId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending))
+                .Count(b => b.Event.StartAt > DateTime.UtcNow);
+            if (activeBookingsCount >= 10)
                 throw new ExceedingActiveBookingLimitException($"Пользователь с id: {userId} превысил лимит активных бронирований.");
 
             if (!existingEvent.TryReserveSeats())
