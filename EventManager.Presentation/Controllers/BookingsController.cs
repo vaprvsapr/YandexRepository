@@ -1,8 +1,9 @@
 ﻿using EventManager.Application.Dto;
+using EventManager.Application.Services.Interfaces;
+using EventManager.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using Microsoft.AspNetCore.Authorization;
-using EventManager.Application.Services.Interfaces;
 
 
 namespace EventManager.Presentation.Controllers;
@@ -96,17 +97,23 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// Удаляет бронирование по идентификатору.
     /// </summary>
     /// <param name="id"></param>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteBookingById([FromRoute] Guid id)
     {
-        var existingBooking = await _bookingService.GetBookingByIdAsync(id);
-        if (existingBooking?.UserId != GetUserIdFromClaims())
-            return Forbid();
-
         await _bookingService.DeleteBookingByIdAsync(id);
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/cancel")]
+    public async Task<IActionResult> CancelBookingById([FromRoute] Guid id)
+    {
+        var existingBooking = await _bookingService.GetBookingByIdAsync(id);
+        if (existingBooking?.UserId != GetUserIdFromClaims() || !GetUserRoleFromClaims().Equals(UserRole.Admin))
+            return Forbid();
+        await _bookingService.CancelBookingByIdAsync(id);
         return NoContent();
     }
 
@@ -116,5 +123,12 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
             throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
         return userId;
+    }
+    private UserRole GetUserRoleFromClaims()
+    {
+        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role");
+        if (roleClaim == null)
+            throw new InvalidOperationException("Роль пользователя не найдена в токене.");
+        return Enum.Parse<UserRole>(roleClaim.Value);
     }
 }

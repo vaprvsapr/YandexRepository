@@ -65,4 +65,6 @@ public interface IBookingRepository
     /// <param name="ct"></param>
     /// <returns></returns>
     public Task RejectByIdAsync(Guid id, CancellationToken ct = default);
+
+    public Task CancelByIdAsync(Guid id, CancellationToken ct = default);
 }

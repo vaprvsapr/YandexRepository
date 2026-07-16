@@ -75,4 +75,11 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         existingBooking.Reject();
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task CancelByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        var existingBooking = await GetByIdAsync(id, ct);
+        existingBooking.Cancel();
+        await _context.SaveChangesAsync(ct);
+    }
 }

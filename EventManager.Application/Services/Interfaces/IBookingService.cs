@@ -40,4 +40,6 @@ public interface IBookingService
     /// <param name="id">Идентификатор бронирования.</param>
     /// <returns></returns>
     public Task DeleteBookingByIdAsync(Guid id);
+
+    public Task CancelBookingByIdAsync(Guid id);
 }

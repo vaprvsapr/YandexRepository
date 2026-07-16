@@ -101,4 +101,17 @@ public class BookingService(
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Deleted booking with Id:{id}.", id);
     }
+
+    public async Task CancelBookingByIdAsync(Guid id)
+    {
+        var existingBooking = await _bookingRepository.GetByIdAsync(id);
+        var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
+
+        await _bookingRepository.CancelByIdAsync(id);
+        existingEvent.ReleaseSeats();
+
+        await _eventRepository.UpdateAsync(existingEvent);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Cancelled booking with Id:{id}.", id);
+    }
 }
