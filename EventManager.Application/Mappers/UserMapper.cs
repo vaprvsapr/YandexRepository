@@ -10,7 +10,8 @@ public static class UserMapper
         return new UserInfoDto
         {
             Id = user.Id,
-            Login = user.Login
+            Login = user.Login,
+            Role = user.Role.ToString()
         };
     }
 }

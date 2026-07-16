@@ -34,4 +34,12 @@ public class UserService(IUserRepository userRepository, TokenGeneratingService 
             return _tokenGeneratingService.GenerateToken(existingUser.Id, existingUser.Login, existingUser.Role);
         throw new InvalidOperationException($"Пароль для логина {login} не подходит.");
     }
+
+    public async Task Delete(string login)
+    {
+        var existingUser = await _userRepository.GetByLoginAsync(login);
+        if (existingUser == null)
+            throw new InvalidOperationException($"Пользователь с логином {login} не найден.");
+        await _userRepository.DeleteAsync(existingUser.Id);
+    }
 }

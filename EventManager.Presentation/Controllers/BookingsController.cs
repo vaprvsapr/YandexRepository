@@ -3,7 +3,6 @@ using EventManager.Application.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 
 namespace EventManager.Presentation.Controllers;
@@ -38,11 +37,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<BookingDto>> Book([FromRoute] Guid eventId)
     {
-        Guid userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value is string userIdString &&
-            Guid.TryParse(userIdString, out Guid parsedUserId) 
-            ? parsedUserId 
-            : throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
-
+        Guid userId = GetUserIdFromClaims();
         BookingDto createdBooking = await _bookingService.CreateBookingAsync(eventId, userId);
         return Accepted($"/bookings/{createdBooking.Id}", createdBooking);
     }
@@ -54,13 +49,15 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <returns>Список бронирований для события.</returns>
     /// <response code="200">Список успешно возвращён.</response>
     /// <response code="404">Событие не найдено.</response>
+    [Authorize]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpGet("event/{id:guid}")]
     public async Task<ActionResult<List<BookingDto>>> GetBookingsByEventId([FromRoute] Guid id)
     {
-        return Ok(await _bookingService.GetBookingsByEventIdAsync(id));
+        return Ok((await _bookingService.GetBookingsByEventIdAsync(id))
+            .Where(b => b.UserId == GetUserIdFromClaims()));
     }
 
     /// <summary>
@@ -70,12 +67,16 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <returns>Информация о бронировании.</returns>
     /// <response code="200">Бронирование найдено.</response>
     /// <response code="404">Бронирование не найдено.</response>
+    [Authorize]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] Guid id)
     {
+        var existingBooking = await _bookingService.GetBookingByIdAsync(id);
+        if (existingBooking?.UserId != GetUserIdFromClaims())
+            return Forbid();
         return Ok(await _bookingService.GetBookingByIdAsync(id));
     }
 
@@ -83,6 +84,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// Возвращает список всех бронирований.
     /// </summary>
     /// <response code="200">Список успешно возвращён.</response>
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [HttpGet]
     public async Task<ActionResult<List<BookingDto>>> GetAllBookings()
@@ -94,13 +96,25 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// Удаляет бронирование по идентификатору.
     /// </summary>
     /// <param name="id"></param>
-    /// <returns></returns>
+    [Authorize]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteBookingById([FromRoute] Guid id)
     {
+        var existingBooking = await _bookingService.GetBookingByIdAsync(id);
+        if (existingBooking?.UserId != GetUserIdFromClaims())
+            return Forbid();
+
         await _bookingService.DeleteBookingByIdAsync(id);
         return NoContent();
+    }
+
+    private Guid GetUserIdFromClaims()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub");
+        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
+            throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
+        return userId;
     }
 }

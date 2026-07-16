@@ -14,6 +14,7 @@ namespace EventManager.Presentation.Controllers;
 /// Этот контроллер реализует стандартные CRUD-операции для сущности события. Все методы возвращают результат посредством ActionResult.
 /// </remarks>
 /// <param name="eventService">Сервис, реализующий бизнес-логику для операций с событиями.</param>
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("events")]
 public class EventsController(IEventService eventService) : ControllerBase
@@ -26,6 +27,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Коллекция событий.</returns>
     /// <response code="200">Возвращается успешный ответ с коллекцией событий и HTTP статус-кодом 200 OK.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
+    [AllowAnonymous]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
@@ -43,6 +45,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Данные найденного события.</returns>
     /// <response code="200">Возвращается успешный ответ с данными события и HTTP статус-кодом 200 OK.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если событие не найдено.</response>
+    [AllowAnonymous]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
@@ -61,7 +64,6 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <response code="201">Возвращается успешный ответ с данными созданного события и HTTP статус-кодом 201 Created.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
     /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие.</response>
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.Created)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
@@ -82,7 +84,6 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <response code="200">Возвращается HTTP статус-код 200 OK, если событие успешно обновлено.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если не удалось обновить событие.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
-    [Authorize(Roles  = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -101,7 +102,6 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Результат удаления события.</returns>
     /// <response code="204">Возвращается HTTP статус-код 204 No Content, если событие успешно удалено.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если событие не найдено или не удалено.</response>
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]
