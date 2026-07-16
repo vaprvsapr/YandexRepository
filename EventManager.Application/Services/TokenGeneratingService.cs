@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace EventManager.Application.Services;
@@ -19,12 +20,13 @@ public class TokenGeneratingService
     {
         var claims = new Dictionary<string, object>
         {
-            [JwtRegisteredClaimNames.Sub] = userId.ToString(),
+            ["sub"] = userId.ToString(),
             ["login"] = login,
             ["role"] = role.ToString()
         };
 
-        var jwtKey = _configuration["JWT:SekretKey"] ?? throw new InvalidOperationException("JWT:SekretKey is missing");
+        var jwtKey = _configuration["JWT:SekretKey"] ?? 
+            throw new SecurityTokenEncryptionKeyNotFoundException("JWT:SekretKey is missing");
         var issuer = _configuration["JWT:Issuer"];
         var audience = _configuration["JWT:Audience"];
         var lifetime = TimeSpan.Parse(_configuration["JWT:TokenLifetime"] ?? "00:15:00");

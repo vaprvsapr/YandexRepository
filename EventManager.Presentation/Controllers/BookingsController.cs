@@ -2,6 +2,9 @@
 using EventManager.Application.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
 
 namespace EventManager.Presentation.Controllers;
 
@@ -22,19 +25,24 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// Размещает бронирование для события по идентификатору.
     /// </summary>
     /// <param name="eventId">Идентификатор события, для которого создаётся бронирование.</param>
-    /// <param name="userId">Идентификатор пользователя, который создаёт бронирование.</param>
     /// <returns>Информация о созданном бронировании.</returns>
     /// <response code="202">Бронирование принято к обработке.</response>
     /// <response code="404">Событие не найдено.</response>
     /// <response code="409">Нет доступных мест.</response>
+    [Authorize]
     [ProducesResponseType((int)HttpStatusCode.Accepted)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     [Produces("application/json")]
-    [Route("book")]
+    [Route("~/events/{eventId:guid}/book")]
     [HttpPost]
-    public async Task<ActionResult<BookingDto>> Book([FromQuery] Guid eventId, [FromQuery] Guid userId)
+    public async Task<ActionResult<BookingDto>> Book([FromRoute] Guid eventId)
     {
+        Guid userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value is string userIdString &&
+            Guid.TryParse(userIdString, out Guid parsedUserId) 
+            ? parsedUserId 
+            : throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
+
         BookingDto createdBooking = await _bookingService.CreateBookingAsync(eventId, userId);
         return Accepted($"/bookings/{createdBooking.Id}", createdBooking);
     }
