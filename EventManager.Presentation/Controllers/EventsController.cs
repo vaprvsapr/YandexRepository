@@ -3,6 +3,7 @@ using EventManager.Application.Dto;
 using EventManager.Application.Queries;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EventManager.Presentation.Controllers;
 
@@ -60,6 +61,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <response code="201">Возвращается успешный ответ с данными созданного события и HTTP статус-кодом 201 Created.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
     /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие.</response>
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.Created)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
@@ -80,6 +82,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <response code="200">Возвращается HTTP статус-код 200 OK, если событие успешно обновлено.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если не удалось обновить событие.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
+    [Authorize(Roles  = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -98,6 +101,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Результат удаления события.</returns>
     /// <response code="204">Возвращается HTTP статус-код 204 No Content, если событие успешно удалено.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если событие не найдено или не удалено.</response>
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     [Produces("application/json")]

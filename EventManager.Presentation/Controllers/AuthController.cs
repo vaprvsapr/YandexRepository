@@ -8,7 +8,7 @@ namespace EventManager.Presentation.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UsersController(IUserService userService) : ControllerBase
+public class AuthController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 

@@ -1,15 +1,21 @@
 ﻿using EventManager.Domain.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 namespace EventManager.Application.Services;
 
-public static class TokenGeneratingService
+public class TokenGeneratingService
 {
-    private static readonly string _jwtKey = "asdfjkasdjf83u8efjaisdjf8f3ue8fiaj8ef38EF38YUF3f33F33F";
+    private readonly IConfiguration _configuration;
 
-    public static string GenerateToken(Guid userId, string login, UserRole role)
+    public TokenGeneratingService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    public string GenerateToken(Guid userId, string login, UserRole role)
     {
         var claims = new Dictionary<string, object>
         {
@@ -18,14 +24,20 @@ public static class TokenGeneratingService
             ["role"] = role.ToString()
         };
 
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_jwtKey));
+        var jwtKey = _configuration["JWT:SekretKey"] ?? throw new InvalidOperationException("JWT:SekretKey is missing");
+        var issuer = _configuration["JWT:Issuer"];
+        var audience = _configuration["JWT:Audience"];
+        var lifetime = TimeSpan.Parse(_configuration["JWT:TokenLifetime"] ?? "00:15:00");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var descriptor = new SecurityTokenDescriptor
         {
+            Issuer = issuer,
+            Audience = audience,
             Claims = claims,
-            Expires = DateTime.UtcNow.AddMinutes(15),
+            Expires = DateTime.UtcNow.Add(lifetime),
             IssuedAt = DateTime.UtcNow,
             SigningCredentials = creds
         };

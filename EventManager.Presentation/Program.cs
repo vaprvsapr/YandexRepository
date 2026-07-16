@@ -31,6 +31,8 @@ if (app.Environment.IsDevelopment())
 
 // Пайплайн обработки запросов, включая глобальный обработчик исключений
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();

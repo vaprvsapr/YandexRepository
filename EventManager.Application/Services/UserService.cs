@@ -6,9 +6,10 @@ using EventManager.Application.Security;
 
 namespace EventManager.Application.Services;
 
-public class UserService(IUserRepository userRepository) : IUserService
+public class UserService(IUserRepository userRepository, TokenGeneratingService tokenGeneratingService) : IUserService
 {
     private readonly IUserRepository _userRepository = userRepository;
+    private readonly TokenGeneratingService _tokenGeneratingService = tokenGeneratingService;
 
     public async Task<UserInfoDto> Register(string login, string password, UserRole role)
     {
@@ -30,7 +31,7 @@ public class UserService(IUserRepository userRepository) : IUserService
         var passwordHash = PasswordManager.HashPassword(password);
         var existingUser = await _userRepository.GetByLoginAsync(login);
         if (existingUser.PasswordHash == passwordHash)
-            return TokenGeneratingService.GenerateToken(existingUser.Id, existingUser.Login, existingUser.Role);
+            return _tokenGeneratingService.GenerateToken(existingUser.Id, existingUser.Login, existingUser.Role);
         throw new InvalidOperationException($"Пароль для логина {login} не подходит.");
     }
 }
