@@ -40,7 +40,10 @@ public class BookingService(
             if (existingEvent.StartAt <= DateTime.UtcNow)
                 throw new PastEventBookingException($"Невозможно создать бронирование для события с id: {eventId}, так как оно уже началось или завершилось.");
 
-            if (existingUser.Bookings.Count(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending) >= 10)
+            if (existingUser.Bookings
+                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
+                .Count(b => b.Event.StartAt < DateTime.UtcNow)
+                >= 10)
                 throw new ExceedingActiveBookingLimitException($"Пользователь с id: {userId} превысил лимит активных бронирований.");
 
             if (!existingEvent.TryReserveSeats())
