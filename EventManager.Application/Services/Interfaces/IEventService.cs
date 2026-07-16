@@ -1,8 +1,7 @@
-﻿
-using EventManager.Application.Dto;
+﻿using EventManager.Application.Dto;
 using EventManager.Application.Queries;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Application.Services.Interfaces;
 
 /// <summary>
 /// Сервис для бизнес-логики управления событиями, предоставляющий методы для получения, создания, обновления и удаления событий.

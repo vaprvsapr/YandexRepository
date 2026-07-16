@@ -5,6 +5,7 @@ using EventManager.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using EventManager.Application.Services.Interfaces;
 
 namespace EventManager.Infrastructure.DI;
 

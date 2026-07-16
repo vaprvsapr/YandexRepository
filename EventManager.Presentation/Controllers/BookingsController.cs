@@ -1,8 +1,8 @@
-﻿using EventManager.Application.Services;
-using EventManager.Application.Dto;
+﻿using EventManager.Application.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using EventManager.Application.Services.Interfaces;
 
 
 namespace EventManager.Presentation.Controllers;

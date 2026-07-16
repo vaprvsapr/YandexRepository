@@ -16,8 +16,4 @@
     <ProjectReference Include="..\EventManager.Domain\EventManager.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Interfaces\" />
-  </ItemGroup>
-
 </Project>

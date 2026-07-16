@@ -1,6 +1,6 @@
 ﻿using EventManager.Application.Dto;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Application.Services.Interfaces;
 
 /// <summary>
 /// Определяет контракт сервиса для управления бронированиями событий.

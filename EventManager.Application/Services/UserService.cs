@@ -3,6 +3,7 @@ using EventManager.Application.Dto;
 using EventManager.Application.Mappers;
 using EventManager.Domain.Models;
 using EventManager.Application.Security;
+using EventManager.Application.Services.Interfaces;
 
 namespace EventManager.Application.Services;
 

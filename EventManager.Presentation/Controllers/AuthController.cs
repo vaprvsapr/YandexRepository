@@ -1,6 +1,6 @@
 ﻿
 using EventManager.Application.Dto;
-using EventManager.Application.Services;
+using EventManager.Application.Services.Interfaces;
 using EventManager.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
