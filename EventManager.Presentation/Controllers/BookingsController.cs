@@ -114,7 +114,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         if (existingBooking?.UserId != GetUserIdFromClaims() || !GetUserRoleFromClaims().Equals(UserRole.Admin))
             return Forbid();
         await _bookingService.CancelBookingByIdAsync(id);
-        return NoContent();
+        return Ok();
     }
 
     private Guid GetUserIdFromClaims()

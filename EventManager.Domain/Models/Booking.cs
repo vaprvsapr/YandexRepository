@@ -54,7 +54,7 @@ public class Booking
 
     public void Cancel()
     {
-        Status = BookingStatus.Canceled;
+        Status = BookingStatus.Cancelled;
         ProcessedAt = DateTime.Now.ToUniversalTime();
     }
 

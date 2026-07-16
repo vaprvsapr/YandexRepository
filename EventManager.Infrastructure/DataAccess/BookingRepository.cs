@@ -57,7 +57,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     public async Task<Booking> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Bookings.FindAsync([ id ], cancellationToken: ct) ??
-            throw new KeyNotFoundException($"Бронирование с Id:{id} не найдена.");
+            throw new KeyNotFoundException($"Бронирование с Id:{id} не найдено.");
     }
 
     /// <inheritdoc/>

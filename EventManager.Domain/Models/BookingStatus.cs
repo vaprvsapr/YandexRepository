@@ -20,6 +20,6 @@ public enum BookingStatus
     /// <summary>
     /// Отменено.
     /// </summary>
-    Canceled
+    Cancelled
 }
 

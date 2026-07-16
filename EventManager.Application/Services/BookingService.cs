@@ -99,8 +99,12 @@ public class BookingService(
         var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
 
         await _bookingRepository.DeleteByIdAsync(id);
-        existingEvent.ReleaseSeats();
-        await _eventRepository.UpdateAsync(existingEvent);
+
+        if(existingBooking.Status != BookingStatus.Cancelled && existingBooking.Status != BookingStatus.Rejected)
+        {
+            existingEvent.ReleaseSeats();
+            await _eventRepository.UpdateAsync(existingEvent);
+        }
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Deleted booking with Id:{id}.", id);
@@ -109,6 +113,8 @@ public class BookingService(
     public async Task CancelBookingByIdAsync(Guid id)
     {
         var existingBooking = await _bookingRepository.GetByIdAsync(id);
+        if (existingBooking.Status == BookingStatus.Cancelled)
+            throw new InvalidOperationException($"Booking with Id:{id} is already cancelled.");
         var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
 
         await _bookingRepository.CancelByIdAsync(id);
