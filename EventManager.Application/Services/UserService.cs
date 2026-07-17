@@ -13,10 +13,10 @@ namespace EventManager.Application.Services;
 /// </summary>
 /// <param name="userRepository"></param>
 /// <param name="tokenGeneratingService"></param>
-public class UserService(IUserRepository userRepository, TokenGeneratingService tokenGeneratingService) : IUserService
+public class UserService(IUserRepository userRepository, ITokenGeneratingService tokenGeneratingService) : IUserService
 {
     private readonly IUserRepository _userRepository = userRepository;
-    private readonly TokenGeneratingService _tokenGeneratingService = tokenGeneratingService;
+    private readonly ITokenGeneratingService _tokenGeneratingService = tokenGeneratingService;
 
     /// <inheritdoc/>
     public async Task<UserInfoDto> Register(string login, string password, UserRole role)

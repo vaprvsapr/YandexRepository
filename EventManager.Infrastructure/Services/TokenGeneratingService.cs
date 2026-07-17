@@ -2,10 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using System.Text;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Infrastructure.Services;
 
 /// <summary>
 /// Сервис для генерации JWT токенов для аутентификации пользователей.
