@@ -104,47 +104,26 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     }
 
     /// <summary>
-    /// Удаляет бронирование по идентификатору.
-    /// </summary>
-    /// <param name="id">Идентификатор бронирования.</param>
-    /// <response code="204">Бронирование успешно удалено.</response>
-    /// <response code="401">Пользователь не авторизован.</response>
-    /// <response code="403">Пользователь не имеет прав доступа.</response>
-    /// <response code="404">Бронирование не найдено.</response>
-    [Authorize(Roles = "Admin")]
-    [ProducesResponseType((int)HttpStatusCode.NoContent)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteBookingById([FromRoute] Guid id)
-    {
-        await _bookingService.DeleteBookingByIdAsync(id);
-        return NoContent();
-    }
-
-    /// <summary>
     /// Отменяет бронирование по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор бронирования.</param>
     /// <returns>Обновленное событие.</returns>
-    /// <response code="200">Бронирование успешно отменено.</response>
+    /// <response code="204">Бронирование успешно отменено.</response>
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="403">Пользователь не имеет прав доступа.</response>
     /// <response code="404">Бронирование не найдено.</response>
     [Authorize]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)] 
     [ProducesResponseType((int)HttpStatusCode.Forbidden)]
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [HttpPut("{id:guid}/cancel")]
+    [HttpDelete("{id:guid}")]
     public async Task<ActionResult<BookingDto>> CancelBookingById([FromRoute] Guid id)
     {
         var existingBooking = await _bookingService.GetBookingByIdAsync(id);
-        if (existingBooking?.UserId != GetUserIdFromClaims() || !GetUserRoleFromClaims().Equals(UserRole.Admin))
+        if (existingBooking?.UserId != GetUserIdFromClaims() && !GetUserRoleFromClaims().Equals(UserRole.Admin))
             return Forbid();
-        var cancelledBooking = await _bookingService.CancelBookingByIdAsync(id);
-        return Ok(cancelledBooking);
+        return NoContent();
     }
 
     private Guid GetUserIdFromClaims()
