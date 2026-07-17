@@ -15,13 +15,13 @@ public class UserRepository(AppDbContext context) : IUserRepository
     /// <inheritdoc/>
     public async Task<User> CreateAsync(User user)
     {
-        var existingUser = await _context.Users.FindAsync(user.Id);
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
         if (existingUser != null)
             throw new InvalidOperationException($"User with ID {user.Id} already exists.");
 
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        var createdUser = await _context.Users.FindAsync(user.Id) ?? 
+        var createdUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id) ?? 
             throw new KeyNotFoundException($"Не удалось создать пользователя с ID {user.Id}");
 
         return createdUser;
@@ -44,7 +44,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
     /// <inheritdoc/>
     public async Task<User> GetByIdAsync(Guid id)
     {
-        var existingUser = await _context.Users.FirstAsync(u => u.Id == id) ??
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id) ??
             throw new KeyNotFoundException($"Пользователь с ID {id} не найден.");
         return existingUser;
     }
@@ -52,7 +52,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
     /// <inheritdoc/>
     public async Task<User> GetByLoginAsync(string login)
     {
-        var existingUser = await _context.Users.FirstAsync(u => u.Login == login) ??
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == login) ??
             throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
         return existingUser;
     }
