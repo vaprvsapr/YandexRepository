@@ -25,19 +25,19 @@ public class AuthController(IUserService userService) : ControllerBase
     /// <param name="password"></param>
     /// <param name="role"></param>
     /// <returns>Возвращает информацию о зарегистрированном пользователе.</returns>
-    /// <response code="200">Пользователь успешно зарегистрирован.</response>
-    /// <response code="409">Пользователь с таким логином уже существует.</response>
+    /// <response code="204">Пользователь успешно зарегистрирован.</response>
+    /// <response code="400">Не удалось зарегистрировать пользователя.</response>
     [HttpPost]
     [Route("register")]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.Conflict)]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     public async Task<ActionResult<UserInfoDto>> Register(
         [FromQuery] string login, 
         [FromQuery] string password, 
         [FromQuery] UserRole role = UserRole.User)
     {
         var userInfo = await _userService.Register(login, password, role);
-        return Ok(userInfo);
+        return NoContent();
     }
 
     /// <summary>

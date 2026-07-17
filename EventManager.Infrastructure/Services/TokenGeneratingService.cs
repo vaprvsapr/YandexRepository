@@ -1,4 +1,5 @@
 ﻿using EventManager.Domain.Models;
+using EventManager.Application.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +11,7 @@ namespace EventManager.Infrastructure.Services;
 /// Сервис для генерации JWT токенов для аутентификации пользователей.
 /// </summary>
 /// <param name="configuration">Конфигурация приложения для получения настроек JWT.</param>
-public class TokenGeneratingService(IConfiguration configuration)
+public class TokenGeneratingService(IConfiguration configuration) : ITokenGeneratingService
 {
     private readonly IConfiguration _configuration = configuration;
 

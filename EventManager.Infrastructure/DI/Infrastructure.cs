@@ -36,7 +36,7 @@ public static partial class DependencyInjectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
 
-        services.AddScoped<TokenGeneratingService>();
+        services.AddScoped<ITokenGeneratingService, TokenGeneratingService>();
 
         // Фоновый сервис для обработки бронирований
         services.AddHostedService<BookingProcessingService>();

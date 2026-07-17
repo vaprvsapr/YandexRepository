@@ -17,12 +17,12 @@ public class UserRepository(AppDbContext context) : IUserRepository
     {
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == user.Login);
         if (existingUser != null)
-            throw new InvalidOperationException($"Пользователь с логином {user.Login} уже существует.");
+            throw new ArgumentException($"Пользователь с логином {user.Login} уже существует.");
 
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
         var createdUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == user.Login) ?? 
-            throw new KeyNotFoundException($"Не удалось создать пользователя с логином {user.Login}");
+            throw new ArgumentException($"Не удалось создать пользователя с логином {user.Login}");
 
         return createdUser;
     }
