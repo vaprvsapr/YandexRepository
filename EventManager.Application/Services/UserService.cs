@@ -2,6 +2,7 @@
 using EventManager.Application.Dto;
 using EventManager.Application.Mappers;
 using EventManager.Domain.Models;
+using EventManager.Domain.Exceptions;
 using EventManager.Application.Security;
 using EventManager.Application.Services.Interfaces;
 
@@ -37,17 +38,18 @@ public class UserService(IUserRepository userRepository, TokenGeneratingService 
     public async Task<string> LogIn(string login, string password)
     {
         var passwordHash = PasswordManager.HashPassword(password);
-        var existingUser = await _userRepository.GetByLoginAsync(login);
+        var existingUser = await _userRepository.GetByLoginAsync(login) ??
+            throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
         if (existingUser.PasswordHash == passwordHash)
             return _tokenGeneratingService.GenerateToken(existingUser.Id, existingUser.Login, existingUser.Role);
-        throw new InvalidOperationException($"Пароль для логина {login} не подходит.");
+        throw new WrongPasswordException($"Пароль для логина {login} не подходит.");
     }
 
     /// <inheritdoc/>
     public async Task Delete(string login)
     {
         var existingUser = await _userRepository.GetByLoginAsync(login) ?? 
-            throw new InvalidOperationException($"Пользователь с логином {login} не найден.");
+            throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
         await _userRepository.DeleteAsync(existingUser.Id);
     }
 }
