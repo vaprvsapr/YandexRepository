@@ -8,7 +8,7 @@ namespace EventManager.Infrastructure.DataAccess;
 /// Реализация репозитория пользователей, предоставляющая методы для управления данными пользователей в базе данных.
 /// </summary>
 /// <param name="context"></param>
-internal class UserRepository(AppDbContext context) : IUserRepository
+public class UserRepository(AppDbContext context) : IUserRepository
 {
     private readonly AppDbContext _context = context;
 

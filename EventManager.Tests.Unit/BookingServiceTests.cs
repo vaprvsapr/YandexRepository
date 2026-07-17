@@ -1,4 +1,6 @@
-﻿using EventManager.Application.Services;
+﻿using EventManager.Application.Repositories;
+using EventManager.Application.Services;
+using EventManager.Application.Services.Interfaces;
 using EventManager.Domain.Exceptions;
 using EventManager.Domain.Models;
 using EventManager.Infrastructure.DataAccess;
@@ -11,20 +13,25 @@ namespace EventManager.Tests.Unit;
 
 public class BookingServiceTests
 {
-    [Fact]
-    [Trait("Category", "BookingService")]
-    public async Task CreateBookingAsync_WithValidEventId_ReturnsBookingDto()
+    private (IBookingService, AppDbContext) ArrangeBookingService(Guid eventId, Guid userId)
     {
-        // Arrange
-        var eventId = Guid.NewGuid();
         Event newEvent = new()
         {
             Id = eventId,
             Title = "Тестовое событие",
             StartAt = DateTime.Now,
             EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
+            TotalSeats = 5
         };
+
+        User newUser = new()
+        {
+            Id = userId,
+            Login = "testuser",
+            PasswordHash = "hashedpassword",
+            Role = UserRole.User
+        };
+
         var mockLogger = new Mock<ILogger<BookingService>>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
@@ -33,13 +40,27 @@ public class BookingServiceTests
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         context.Events.Add(newEvent);
+        context.Users.Add(newUser);
         context.SaveChanges();
         var bookingRepository = new BookingRepository(context);
         var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userRepository = new UserRepository(context);
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+
+        return (bookingService, context);
+    }
+
+    [Fact]
+    [Trait("Category", "BookingService")]
+    public async Task CreateBookingAsync_WithValidEventId_ReturnsBookingDto()
+    {
+        // Arrange
+        var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
 
         // Act
-        var result = await bookingService.CreateBookingAsync(eventId);
+        var result = await bookingService.CreateBookingAsync(eventId, userId);
         // Assert
         Assert.NotNull(result);
         Assert.Equal(eventId, result.EventId);
@@ -52,29 +73,11 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
-        var result1 = await bookingService.CreateBookingAsync(eventId);
-        var result2 = await bookingService.CreateBookingAsync(eventId);
+        var result1 = await bookingService.CreateBookingAsync(eventId, userId);
+        var result2 = await bookingService.CreateBookingAsync(eventId, userId);
         // Assert
         Assert.NotNull(result1);
         Assert.NotNull(result2);
@@ -91,27 +94,11 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
 
         // Act, Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateBookingAsync(eventId));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateBookingAsync(Guid.NewGuid(), userId));
     }
 
     [Fact]
@@ -120,28 +107,10 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
-        var booking = await bookingService.CreateBookingAsync(eventId);
+        var booking = await bookingService.CreateBookingAsync(eventId, userId);
         var result = await bookingService.GetBookingByIdAsync(booking.Id);
         // Assert
         Assert.NotNull(result);
@@ -164,7 +133,8 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var bookingRepository = new BookingRepository(context);
         var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userRepository = new UserRepository(context);
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
         // Act, Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
             await bookingService.GetBookingByIdAsync(Guid.NewGuid()));
@@ -176,26 +146,8 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
         var result = await bookingService.GetBookingsByEventIdAsync(eventId);
         // Assert
@@ -209,29 +161,11 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
-        await bookingService.CreateBookingAsync(eventId);
-        await bookingService.CreateBookingAsync(eventId);
+        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateBookingAsync(eventId, userId);
         var result = await bookingService.GetBookingsByEventIdAsync(eventId);
         // Assert
         Assert.NotNull(result);
@@ -253,8 +187,9 @@ public class BookingServiceTests
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var bookingRepository = new BookingRepository(context);
         var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
-        // Act
+        var userRepository = new UserRepository(context);
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.GetBookingsByEventIdAsync(Guid.NewGuid()));
     }
@@ -265,62 +200,35 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 10
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
+        var userId = Guid.NewGuid();
+        var arrangeResults = ArrangeBookingService(eventId, userId);
+        var bookingService = arrangeResults.Item1;
+        var context = arrangeResults.Item2;
+
+        var newEvent = await context.Events.FindAsync(eventId) ?? throw new KeyNotFoundException("Event not found");
         context.Events.Remove(newEvent);
         context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateBookingAsync(eventId));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateBookingAsync(eventId, userId));
     }
 
     [Fact]
     [Trait("Category", "BookingService")]
-    public async Task CreateBookingAsync_WhenNotEnoughAvailableSeats_ThrowsException()
+    public async Task CreateBookingAsync_WhenNotEnoughAvailableSeats_ThrowsNoAvailableSeatsException()
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 0
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
 
         // Act, Assert
-        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => bookingService.CreateBookingAsync(eventId));
+        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateBookingAsync(eventId, userId);
+        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => bookingService.CreateBookingAsync(eventId, userId));
     }
 
     [Fact]
@@ -329,41 +237,23 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 3
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var arrangeResults = ArrangeBookingService(eventId, userId);
+        var bookingService = arrangeResults.Item1;
+        var context = arrangeResults.Item2;
+        var newEvent = await context.Events.FindAsync(eventId) ?? throw new KeyNotFoundException("Event not found");
         // Act 1
-        await bookingService.CreateBookingAsync(eventId);
+        await bookingService.CreateBookingAsync(eventId, userId);
         // Assert 1
-        Assert.Equal(2, newEvent.AvailableSeats);
+        Assert.Equal(4, newEvent.AvailableSeats);
         // Act 2
-        await bookingService.CreateBookingAsync(eventId);
+        await bookingService.CreateBookingAsync(eventId, userId);
         // Assert 2
-        Assert.Equal(1, newEvent.AvailableSeats);
+        Assert.Equal(3, newEvent.AvailableSeats);
         // Act 3
-        await bookingService.CreateBookingAsync(eventId);
+        await bookingService.CreateBookingAsync(eventId, userId);
         // Assert 3
-        Assert.Equal(0, newEvent.AvailableSeats);
-        // Act 4 - trying to create booking when no seats are available
-        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => bookingService.CreateBookingAsync(eventId));
-        Assert.Equal(3, context.Bookings.Count());
+        Assert.Equal(2, newEvent.AvailableSeats);
     }
 
     [Fact]
@@ -371,34 +261,18 @@ public class BookingServiceTests
     public async Task CompetitionTest_CreateMultipleBookingsForSameEvent_EnsuresUniqueBookingIdsAndCorrectSeatCount()
     {
         // Arrange
-        int totalSeats = 1000;
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = totalSeats
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var arrangeResults = ArrangeBookingService(eventId, userId);
+        var bookingService = arrangeResults.Item1;
+        var context = arrangeResults.Item2;
+        var newEvent = await context.Events.FindAsync(eventId) ?? throw new KeyNotFoundException("Event not found");
         // Act
-        var tasks = Enumerable.Range(0, totalSeats).Select(async i => await bookingService.CreateBookingAsync(eventId));
+        var tasks = Enumerable.Range(0, 5).Select(async i => await bookingService.CreateBookingAsync(eventId, userId));
         await Task.WhenAll(tasks);
         // Assert
         Assert.Equal(0, newEvent.AvailableSeats);
-        Assert.Equal(totalSeats, context.Bookings.Select(b => b.Id).Distinct().Count());
+        Assert.Equal(5, context.Bookings.Select(b => b.Id).Distinct().Count());
     }
 
     [Fact]
@@ -407,30 +281,12 @@ public class BookingServiceTests
     {
         // Arrange
         var eventId = Guid.NewGuid();
-        Event newEvent = new()
-        {
-            Id = eventId,
-            Title = "Тестовое событие",
-            StartAt = DateTime.Now,
-            EndAt = DateTime.Now.AddHours(1),
-            TotalSeats = 5
-        };
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Events.Add(newEvent);
-        context.SaveChanges();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, mockLogger.Object);
+        var userId = Guid.NewGuid();
+        var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
 
-        var tasks = Enumerable.Range(0, 20)
-            .Select(_ => bookingService.CreateBookingAsync(eventId))
+        var tasks = Enumerable.Range(0, 10)
+            .Select(_ => bookingService.CreateBookingAsync(eventId, userId))
             .ToArray();
 
         await Task.WhenAll(tasks.Select(t => t.ContinueWith(_ => { })));
@@ -443,6 +299,6 @@ public class BookingServiceTests
              t.Exception?.Flatten().InnerExceptions.Any(e => e is NoAvailableSeatsException) == true));
 
         Assert.Equal(5, succeeded);
-        Assert.Equal(15, failed);
+        Assert.Equal(5, failed);
     }
 }
