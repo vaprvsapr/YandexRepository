@@ -25,7 +25,8 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         };
 
         // Act
-        var created = await repository.CreateAsync(user);
+        await repository.CreateAsync(user);
+        var created = await repository.GetByIdAsync(user.Id);
 
         // Assert
         Assert.NotNull(created);
@@ -64,7 +65,7 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         await arrangeContext.SaveChangesAsync();
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        await Assert.ThrowsAsync<DbUpdateException>(async () =>
         {
             await repository.CreateAsync(user2);
         });
@@ -108,84 +109,11 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         await using var actContext = await CreateContextAsync();
         var repository = new UserRepository(actContext);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-        {
-            await repository.GetByLoginAsync("unknown_login");
-        });
-    }
-
-    [Fact]
-    [Trait("Category", "UserRepository")]
-    public async Task UpdateAsync_ShouldUpdateUser()
-    {
-        // Arrange
-        await ResetDatabaseAsync();
-        await using var arrangeContext = await CreateContextAsync();
-        await using var actContext = await CreateContextAsync();
-        var repository = new UserRepository(actContext);
-
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Login = "old_login",
-            PasswordHash = "old_hash",
-            Role = UserRole.User
-        };
-
-        arrangeContext.Users.Add(user);
-        await arrangeContext.SaveChangesAsync();
-
-        // Act
-        user.Login = "new_login";
-        user.PasswordHash = "new_hash";
-        user.Role = UserRole.Admin;
-
-        var updated = await repository.UpdateAsync(user);
-
+        // Act 
+        var foundUser = await repository.GetByLoginAsync("non_existent_login"); 
+        
         // Assert
-        Assert.Equal("new_login", updated.Login);
-        Assert.Equal("new_hash", updated.PasswordHash);
-        Assert.Equal(UserRole.Admin, updated.Role);
-    }
-
-    [Fact]
-    [Trait("Category", "UserRepository")]
-    public async Task UpdateAsync_WithDuplicateLogin_ShouldThrowDbUpdateException()
-    {
-        // Arrange
-        await ResetDatabaseAsync();
-        await using var arrangeContext = await CreateContextAsync();
-        await using var actContext = await CreateContextAsync();
-        var repository = new UserRepository(actContext);
-
-        var user1 = new User
-        {
-            Id = Guid.NewGuid(),
-            Login = "login1",
-            PasswordHash = "hash1",
-            Role = UserRole.User
-        };
-
-        var user2 = new User
-        {
-            Id = Guid.NewGuid(),
-            Login = "login2",
-            PasswordHash = "hash2",
-            Role = UserRole.User
-        };
-
-        arrangeContext.Users.AddRange(user1, user2);
-        await arrangeContext.SaveChangesAsync();
-
-        // Act
-        user2.Login = "login1"; // пытаемся установить логин, который уже занят
-
-        // Assert
-        await Assert.ThrowsAsync<DbUpdateException>(async () =>
-        {
-            await repository.UpdateAsync(user2);
-        });
+        Assert.Null(foundUser);
     }
 
     [Fact]
@@ -210,7 +138,7 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         await arrangeContext.SaveChangesAsync();
 
         // Act
-        await repository.DeleteAsync(user.Id);
+        await repository.DeleteAsync(user);
 
         // Assert
         var deleted = await actContext.Users.FindAsync(user.Id);
@@ -226,12 +154,10 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         await using var actContext = await CreateContextAsync();
         var repository = new UserRepository(actContext);
 
-        var id = Guid.NewGuid();
-
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () =>
         {
-            await repository.DeleteAsync(id);
+            await repository.DeleteAsync(new User { Id = Guid.NewGuid(), Login = "unknown", PasswordHash = "hash", Role = UserRole.User });
         });
     }
 }

@@ -47,11 +47,11 @@ public class AuthController(IUserService userService) : ControllerBase
     /// <param name="password"></param>
     /// <returns>Возвращает токен аутентификации.</returns>
     /// <response code="200">Успешный вход.</response>
-    /// <response code="400">Неправильный пароль.</response>
-    [HttpGet]
+    /// <response code="404">Не удалось войти в систему.</response>
+    [HttpPost]
     [Route("login")]
     [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
     public async Task<ActionResult<string>> LogIn(
         [FromQuery] string login, 
         [FromQuery] string password)

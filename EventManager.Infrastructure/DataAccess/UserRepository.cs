@@ -13,25 +13,16 @@ public class UserRepository(AppDbContext context) : IUserRepository
     private readonly AppDbContext _context = context;
 
     /// <inheritdoc/>
-    public async Task<User> CreateAsync(User user)
+    public async Task CreateAsync(User user)
     {
-        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == user.Login);
-        if (existingUser != null)
-            throw new ArgumentException($"Пользователь с логином {user.Login} уже существует.");
-
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        var createdUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == user.Login) ?? 
-            throw new ArgumentException($"Не удалось создать пользователя с логином {user.Login}");
-
-        return createdUser;
     }
 
     /// <inheritdoc/>
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(User user)
     {
-        var existingUser = await GetByIdAsync(id);
-        _context.Users.Remove(existingUser);
+        _context.Users.Remove(user);
         await _context.SaveChangesAsync();
     }
 
@@ -42,34 +33,14 @@ public class UserRepository(AppDbContext context) : IUserRepository
     }
     
     /// <inheritdoc/>
-    public async Task<User> GetByIdAsync(Guid id)
+    public async Task<User?> GetByIdAsync(Guid id)
     {
-        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id) ??
-            throw new KeyNotFoundException($"Пользователь с ID {id} не найден.");
-        return existingUser;
+        return await _context.Users.FirstOrDefaultAsync(u => u.Id == id); ;
     }
 
     /// <inheritdoc/>
-    public async Task<User> GetByLoginAsync(string login)
+    public async Task<User?> GetByLoginAsync(string login)
     {
-        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Login == login) ??
-            throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
-        return existingUser;
-    }
-
-    /// <inheritdoc/>
-    public async Task<User> UpdateAsync(User user)
-    {
-        var existingUser = await GetByIdAsync(user.Id);
-
-        existingUser.Role = user.Role;
-        existingUser.Login = user.Login;
-        existingUser.PasswordHash = user.PasswordHash;
-
-        await _context.SaveChangesAsync();
-
-        var updatedUser = await GetByIdAsync(user.Id) ??
-            throw new KeyNotFoundException($"Не удалось обновить пользователя с ID {user.Id}");
-        return updatedUser;
+        return await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
     }
 }

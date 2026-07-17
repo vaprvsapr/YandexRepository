@@ -11,22 +11,21 @@ public interface IUserRepository
     /// Создает нового пользователя в системе.
     /// </summary>
     /// <param name="user">Пользователь для создания.</param>
-    /// <returns>Созданный пользователь.</returns>
-    Task<User> CreateAsync(User user);
+    Task CreateAsync(User user);
 
     /// <summary>
     /// Получает пользователя по его уникальному идентификатору.
     /// </summary>
     /// <param name="id">Уникальный идентификатор пользователя.</param>
     /// <returns>Пользователь с указанным идентификатором.</returns>
-    Task<User> GetByIdAsync(Guid id);
+    Task<User?> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Получает пользователя по его логину.
     /// </summary>
     /// <param name="login">Логин пользователя.</param>
     /// <returns>Пользователь с указанным логином.</returns>
-    Task<User> GetByLoginAsync(string login);
+    Task<User?> GetByLoginAsync(string login);
 
     /// <summary>
     /// Получает список всех пользователей.
@@ -35,15 +34,8 @@ public interface IUserRepository
     Task<IReadOnlyList<User>> GetAllAsync();
 
     /// <summary>
-    /// Обновляет информацию о пользователе.
-    /// </summary>
-    /// <param name="user">Пользователь для обновления.</param>
-    /// <returns>Обновленный пользователь.</returns>
-    Task<User> UpdateAsync(User user);
-
-    /// <summary>
     /// Удаляет пользователя по его уникальному идентификатору.
     /// </summary>
-    /// <param name="id">Уникальный идентификатор пользователя.</param>
-    Task DeleteAsync(Guid id);
+    /// <param name="user">Пользователь для удаления.</param>
+    Task DeleteAsync(User user);
 }
