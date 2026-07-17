@@ -67,7 +67,7 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
     {
         ValidationException => StatusCodes.Status400BadRequest,
         ArgumentException => StatusCodes.Status400BadRequest,
-        WrongPasswordException => StatusCodes.Status400BadRequest,
+        FailedToLogInException => StatusCodes.Status400BadRequest,
         PastEventBookingException => StatusCodes.Status400BadRequest,
 
         KeyNotFoundException => StatusCodes.Status404NotFound,

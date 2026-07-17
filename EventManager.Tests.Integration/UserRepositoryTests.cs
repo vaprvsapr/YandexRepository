@@ -13,7 +13,6 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
     {
         // Arrange
         await ResetDatabaseAsync();
-        await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
         var repository = new UserRepository(actContext);
 
@@ -36,7 +35,7 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
 
     [Fact]
     [Trait("Category", "UserRepository")]
-    public async Task CreateAsync_WithDuplicateLogin_ShouldThrowDbUpdateException()
+    public async Task CreateAsync_WithDuplicateLogin_ShouldThrowInvalidOperationException()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -65,7 +64,7 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         await arrangeContext.SaveChangesAsync();
 
         // Act & Assert
-        await Assert.ThrowsAsync<DbUpdateException>(async () =>
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             await repository.CreateAsync(user2);
         });

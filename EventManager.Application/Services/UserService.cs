@@ -39,10 +39,10 @@ public class UserService(IUserRepository userRepository, ITokenGeneratingService
     {
         var passwordHash = PasswordManager.HashPassword(password);
         var existingUser = await _userRepository.GetByLoginAsync(login) ??
-            throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
+            throw new FailedToLogInException($"Не удалось войти в систему.");
         if (existingUser.PasswordHash == passwordHash)
             return _tokenGeneratingService.GenerateToken(existingUser.Id, existingUser.Login, existingUser.Role);
-        throw new WrongPasswordException($"Пароль для логина {login} не подходит.");
+        throw new FailedToLogInException($"Не удалось войти в систему.");
     }
 
     /// <inheritdoc/>
