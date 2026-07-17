@@ -107,6 +107,11 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Отменяет бронирование по идентификатору.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpPut("{id:guid}/cancel")]
     public async Task<IActionResult> CancelBookingById([FromRoute] Guid id)
     {

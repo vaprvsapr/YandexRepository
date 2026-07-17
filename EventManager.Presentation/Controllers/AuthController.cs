@@ -7,12 +7,23 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventManager.Presentation.Controllers;
 
+/// <summary>
+/// Контроллер для управления аутентификацией и регистрацией пользователей, предоставляющий методы для регистрации, входа в систему и удаления пользователей.
+/// </summary>
+/// <param name="userService"></param>
 [ApiController]
 [Route("[controller]")]
 public class AuthController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 
+    /// <summary>
+    /// Регистрация нового пользователя с указанным логином, паролем и ролью.
+    /// </summary>
+    /// <param name="login"></param>
+    /// <param name="password"></param>
+    /// <param name="role"></param>
+    /// <returns>Возвращает информацию о зарегистрированном пользователе.</returns>
     [HttpPost]
     [Route("register")]
     public async Task<ActionResult<UserInfoDto>> Register(
@@ -24,6 +35,12 @@ public class AuthController(IUserService userService) : ControllerBase
         return Ok(userInfo);
     }
 
+    /// <summary>
+    /// Вход пользователя в систему с указанным логином и паролем, возвращает токен аутентификации.
+    /// </summary>
+    /// <param name="login"></param>
+    /// <param name="password"></param>
+    /// <returns>Возвращает токен аутентификации.</returns>
     [HttpGet]
     [Route("login")]
     public async Task<ActionResult<string>> LogIn(
@@ -34,6 +51,11 @@ public class AuthController(IUserService userService) : ControllerBase
         return Ok(token);
     }
 
+    /// <summary>
+    /// Удаление пользователя с указанным логином. Доступно только для администраторов или самого пользователя.
+    /// </summary>
+    /// <param name="login"></param>
+    /// <returns></returns>
     [Authorize]
     [HttpDelete]
     [Route("delete")]
