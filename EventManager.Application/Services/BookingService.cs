@@ -49,7 +49,7 @@ public class BookingService(
                 .Where(b => b.UserId == userId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending))
                 .Count(b => b.Event.StartAt > DateTime.UtcNow);
             if (activeBookingsCount >= _maxActiveBookingsPerUser)
-                throw new ExceedingActiveBookingLimitException($"Пользователь с id: {userId} превысил лимит активных бронирований.");
+                throw new ExceedingActiveBookingLimitException($"Пользователь с id: {userId} превысил лимит активных бронирований. Лимит: {_maxActiveBookingsPerUser}");
 
             if (!existingEvent.TryReserveSeats())
                 throw new NoAvailableSeatsException($"Нет достаточного количества свободных мест на событие с id: {eventId}.");
