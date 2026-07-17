@@ -29,7 +29,7 @@ public class AuthController(IUserService userService) : ControllerBase
     /// <response code="409">Пользователь с таким логином уже существует.</response>
     [HttpPost]
     [Route("register")]
-    [ProducesResponseType((int)HttpStatusCode.Ok)]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.Conflict)]
     public async Task<ActionResult<UserInfoDto>> Register(
         [FromQuery] string login, 

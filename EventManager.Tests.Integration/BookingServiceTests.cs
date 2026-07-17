@@ -4,6 +4,7 @@ using EventManager.Domain.Models;
 using Moq;
 using Microsoft.Extensions.Logging;
 using EventManager.Domain.Exceptions;
+using Microsoft.Extensions.Configuration;
 
 namespace EventManager.Tests.Integration;
 
@@ -23,7 +24,9 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
         var eventRepository = new EventRepository(actContext);
         var userRepository = new UserRepository(actContext);
         var mockLogger = new Mock<ILogger<BookingService>>();
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
 
         var pastEvent = new Event
         {
@@ -61,7 +64,9 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
         var eventRepository = new EventRepository(actContext);
         var userRepository = new UserRepository(actContext);
         var mockLogger = new Mock<ILogger<BookingService>>();
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
         var futureEvent = new Event
         {
             Id = Guid.NewGuid(),
@@ -102,7 +107,9 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
         var eventRepository = new EventRepository(actContext);
         var userRepository = new UserRepository(actContext);
         var mockLogger = new Mock<ILogger<BookingService>>();
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
         var futureEvent = new Event
         {
             Id = Guid.NewGuid(),

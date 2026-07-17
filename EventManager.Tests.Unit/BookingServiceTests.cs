@@ -5,6 +5,7 @@ using EventManager.Domain.Exceptions;
 using EventManager.Domain.Models;
 using EventManager.Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -13,7 +14,7 @@ namespace EventManager.Tests.Unit;
 
 public class BookingServiceTests
 {
-    private (IBookingService, AppDbContext) ArrangeBookingService(Guid eventId, Guid userId)
+    private static (IBookingService, AppDbContext) ArrangeBookingService(Guid eventId, Guid userId)
     {
         Event newEvent = new()
         {
@@ -45,7 +46,9 @@ public class BookingServiceTests
         var bookingRepository = new BookingRepository(context);
         var eventRepository = new EventRepository(context);
         var userRepository = new UserRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
 
         return (bookingService, context);
     }
@@ -134,7 +137,9 @@ public class BookingServiceTests
         var bookingRepository = new BookingRepository(context);
         var eventRepository = new EventRepository(context);
         var userRepository = new UserRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
         // Act, Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
             await bookingService.GetBookingByIdAsync(Guid.NewGuid()));
@@ -188,7 +193,9 @@ public class BookingServiceTests
         var bookingRepository = new BookingRepository(context);
         var eventRepository = new EventRepository(context);
         var userRepository = new UserRepository(context);
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object);
+        var mockConfiguration = new Mock<IConfiguration>();
+        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
+        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.GetBookingsByEventIdAsync(Guid.NewGuid()));

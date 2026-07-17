@@ -5,6 +5,8 @@ using EventManager.Application.Repositories;
 using EventManager.Application.Mappers;
 using Microsoft.Extensions.Logging;
 using EventManager.Application.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 namespace EventManager.Application.Services;
 
@@ -19,12 +21,14 @@ public class BookingService(
     IBookingRepository bookingRepository,
     IEventRepository eventRepository,
     IUserRepository userRepository,
-    ILogger<BookingService> logger) : IBookingService
+    ILogger<BookingService> logger,
+    IConfiguration configuration) : IBookingService
 {
     private readonly IBookingRepository _bookingRepository = bookingRepository;
     private readonly IEventRepository _eventRepository = eventRepository;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly ILogger<BookingService> _logger = logger;
+    private readonly int _maxActiveBookingsPerUser = int.Parse(configuration["User:MaxActiveBookings"] ?? "1"); // Максимальное количество активных бронирований на пользователя
     private readonly SemaphoreSlim _bookingSemaphore = new(1, 1); // Семафор для синхронизации доступа к бронированию мест
 
     /// <inheritdoc/>
@@ -44,7 +48,7 @@ public class BookingService(
             var activeBookingsCount = _bookingRepository.GetAll()
                 .Where(b => b.UserId == userId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending))
                 .Count(b => b.Event.StartAt > DateTime.UtcNow);
-            if (activeBookingsCount >= 10)
+            if (activeBookingsCount >= _maxActiveBookingsPerUser)
                 throw new ExceedingActiveBookingLimitException($"Пользователь с id: {userId} превысил лимит активных бронирований.");
 
             if (!existingEvent.TryReserveSeats())
