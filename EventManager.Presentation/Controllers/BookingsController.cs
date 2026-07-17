@@ -111,15 +111,15 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// Отменяет бронирование по идентификатору.
     /// </summary>
     /// <param name="id"></param>
-    /// <returns></returns>
+    /// <returns>Обновленное событие.</returns>
     [HttpPut("{id:guid}/cancel")]
-    public async Task<IActionResult> CancelBookingById([FromRoute] Guid id)
+    public async Task<ActionResult<BookingDto>> CancelBookingById([FromRoute] Guid id)
     {
         var existingBooking = await _bookingService.GetBookingByIdAsync(id);
         if (existingBooking?.UserId != GetUserIdFromClaims() || !GetUserRoleFromClaims().Equals(UserRole.Admin))
             return Forbid();
-        await _bookingService.CancelBookingByIdAsync(id);
-        return Ok();
+        var cancelledBooking = await _bookingService.CancelBookingByIdAsync(id);
+        return Ok(cancelledBooking);
     }
 
     private Guid GetUserIdFromClaims()

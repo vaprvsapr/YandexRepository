@@ -41,5 +41,5 @@ public interface IBookingService
     /// <returns></returns>
     public Task DeleteBookingByIdAsync(Guid id);
 
-    public Task CancelBookingByIdAsync(Guid id);
+    public Task<BookingDto> CancelBookingByIdAsync(Guid id);
 }
