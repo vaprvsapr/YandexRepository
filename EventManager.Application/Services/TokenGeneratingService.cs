@@ -7,15 +7,22 @@ using System.Text;
 
 namespace EventManager.Application.Services;
 
-public class TokenGeneratingService
+/// <summary>
+/// Сервис для генерации JWT токенов для аутентификации пользователей.
+/// </summary>
+/// <param name="configuration">Конфигурация приложения для получения настроек JWT.</param>
+public class TokenGeneratingService(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration = configuration;
 
-    public TokenGeneratingService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
+    /// <summary>
+    /// Генерирует JWT токен для указанного пользователя с заданными идентификатором, логином и ролью.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="login">Логин пользователя.</param>
+    /// <param name="role">Роль пользователя.</param>
+    /// <returns>JWT токен.</returns>
+    /// <exception cref="SecurityTokenEncryptionKeyNotFoundException"></exception>
     public string GenerateToken(Guid userId, string login, UserRole role)
     {
         var claims = new Dictionary<string, object>

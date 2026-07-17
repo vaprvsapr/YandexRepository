@@ -4,10 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Infrastructure.DataAccess;
 
+/// <summary>
+/// Реализация репозитория пользователей, предоставляющая методы для управления данными пользователей в базе данных.
+/// </summary>
+/// <param name="context"></param>
 internal class UserRepository(AppDbContext context) : IUserRepository
 {
     private readonly AppDbContext _context = context;
 
+    /// <inheritdoc/>
     public async Task<User> CreateAsync(User user)
     {
         var existingUser = await _context.Users.FindAsync(user.Id);
@@ -22,6 +27,7 @@ internal class UserRepository(AppDbContext context) : IUserRepository
         return createdUser;
     }
 
+    /// <inheritdoc/>
     public async Task DeleteAsync(Guid id)
     {
         var existingUser = await GetByIdAsync(id);
@@ -29,11 +35,13 @@ internal class UserRepository(AppDbContext context) : IUserRepository
         await _context.SaveChangesAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<User>> GetAllAsync()
     {
         return await _context.Users.ToListAsync();
     }
-
+    
+    /// <inheritdoc/>
     public async Task<User> GetByIdAsync(Guid id)
     {
         var existingUser = await _context.Users.FirstAsync(u => u.Id == id) ??
@@ -41,6 +49,7 @@ internal class UserRepository(AppDbContext context) : IUserRepository
         return existingUser;
     }
 
+    /// <inheritdoc/>
     public async Task<User> GetByLoginAsync(string login)
     {
         var existingUser = await _context.Users.FirstAsync(u => u.Login == login) ??
@@ -48,6 +57,7 @@ internal class UserRepository(AppDbContext context) : IUserRepository
         return existingUser;
     }
 
+    /// <inheritdoc/>
     public async Task<User> UpdateAsync(User user)
     {
         var existingUser = await GetByIdAsync(user.Id);

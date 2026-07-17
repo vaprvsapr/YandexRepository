@@ -7,11 +7,17 @@ using EventManager.Application.Services.Interfaces;
 
 namespace EventManager.Application.Services;
 
+/// <summary>
+/// Предоставляет методы для управления пользователями, включая регистрацию, вход в систему и удаление пользователей.
+/// </summary>
+/// <param name="userRepository"></param>
+/// <param name="tokenGeneratingService"></param>
 public class UserService(IUserRepository userRepository, TokenGeneratingService tokenGeneratingService) : IUserService
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly TokenGeneratingService _tokenGeneratingService = tokenGeneratingService;
 
+    /// <inheritdoc/>
     public async Task<UserInfoDto> Register(string login, string password, UserRole role)
     {
         var newUser = new User
@@ -27,6 +33,7 @@ public class UserService(IUserRepository userRepository, TokenGeneratingService 
         return UserMapper.ToUserInfoDto(createUser);
     }
 
+    /// <inheritdoc/>
     public async Task<string> LogIn(string login, string password)
     {
         var passwordHash = PasswordManager.HashPassword(password);
@@ -36,10 +43,10 @@ public class UserService(IUserRepository userRepository, TokenGeneratingService 
         throw new InvalidOperationException($"Пароль для логина {login} не подходит.");
     }
 
+    /// <inheritdoc/>
     public async Task Delete(string login)
     {
-        var existingUser = await _userRepository.GetByLoginAsync(login);
-        if (existingUser == null)
+        var existingUser = await _userRepository.GetByLoginAsync(login) ?? 
             throw new InvalidOperationException($"Пользователь с логином {login} не найден.");
         await _userRepository.DeleteAsync(existingUser.Id);
     }
