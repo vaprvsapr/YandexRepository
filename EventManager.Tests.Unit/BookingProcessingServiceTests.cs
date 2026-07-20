@@ -83,7 +83,7 @@ public class BookingProcessingServiceTests
         var service = new BookingProcessingService(scopeFactoryMock.Object, loggerMock.Object);
 
         // Act
-        var tasks = bookings.Select(b => service.ProcessBookingAsync(b.Id, CancellationToken.None));
+        var tasks = bookings.Select(b => service.ProcessBookingAsync(b, CancellationToken.None));
         await Task.WhenAll(tasks);
 
         // Assert

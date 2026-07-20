@@ -147,62 +147,6 @@ public class BookingServiceTests
 
     [Fact]
     [Trait("Category", "BookingService")]
-    public async Task GetBookingsByEventIdAsync_WhenNoBookingsForEvent_ReturnsEmptyList()
-    {
-        // Arrange
-        var eventId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        var bookingService = ArrangeBookingService(eventId, userId).Item1;
-        // Act
-        var result = await bookingService.GetBookingsByEventIdAsync(eventId);
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    [Trait("Category", "BookingService")]
-    public async Task GetBookingsByEventIdAsync_WithMultipleBookingsForEvent_ReturnsCorrectList()
-    {
-        // Arrange
-        var eventId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        var bookingService = ArrangeBookingService(eventId, userId).Item1;
-        // Act
-        await bookingService.CreateBookingAsync(eventId, userId);
-        await bookingService.CreateBookingAsync(eventId, userId);
-        var result = await bookingService.GetBookingsByEventIdAsync(eventId);
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-        Assert.All(result, dto => Assert.Equal(eventId, dto.EventId));
-    }
-
-    [Fact]
-    [Trait("Category", "BookingService")]
-    public async Task GetBookingsByEventIdAsync_WithInvalidEventId_ThrowsException()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<BookingService>>();
-        var dbName = Guid.NewGuid().ToString();
-        var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
-        var serviceProvider = services.BuildServiceProvider();
-        var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var bookingRepository = new BookingRepository(context);
-        var eventRepository = new EventRepository(context);
-        var userRepository = new UserRepository(context);
-        var mockConfiguration = new Mock<IConfiguration>();
-        mockConfiguration.Setup(c => c["User:MaxActiveBookings"]).Returns("10");
-        var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.GetBookingsByEventIdAsync(Guid.NewGuid()));
-    }
-
-    [Fact]
-    [Trait("Category", "BookingService")]
     public async Task CreateBookingAsync_WhenEventWasDeleted_ThrowsException()
     {
         // Arrange

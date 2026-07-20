@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-
 namespace EventManager.Presentation.Controllers;
 
 /// <summary>
@@ -113,10 +112,10 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
             throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
         return userId;
     }
+
     private UserRole GetUserRoleFromClaims()
     {
-        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role");
-        if (roleClaim == null)
+        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role") ??
             throw new InvalidOperationException("Роль пользователя не найдена в токене.");
         return Enum.Parse<UserRole>(roleClaim.Value);
     }
