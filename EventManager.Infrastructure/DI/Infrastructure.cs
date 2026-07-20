@@ -5,6 +5,7 @@ using EventManager.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using EventManager.Application.Services.Interfaces;
 
 namespace EventManager.Infrastructure.DI;
 
@@ -31,8 +32,16 @@ public static partial class DependencyInjectionExtensions
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
 
+        // Сервис пользователей и его репозиторий
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+
+        services.AddScoped<ITokenGeneratingService, TokenGeneratingService>();
+
         // Фоновый сервис для обработки бронирований
         services.AddHostedService<BookingProcessingService>();
+
+        
 
         return services;
     }

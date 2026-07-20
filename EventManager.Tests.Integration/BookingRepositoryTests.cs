@@ -17,6 +17,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await using var actContext = await CreateContextAsync();
         var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         arrangeContext.Events.Add(new Event
         {
             Id = eventId,
@@ -26,9 +27,24 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             EndAt = DateTime.Now.AddHours(1).ToUniversalTime(),
             TotalSeats = 10
         });
+        arrangeContext.Users.Add(new User
+        {
+            Id = userId,
+            Login = "testuser",
+            PasswordHash = "hashedpassword",
+            Role = UserRole.User
+        });
         await arrangeContext.SaveChangesAsync();
         // Act
-        var booking = await repository.CreateAsync(eventId);
+        var booking = new Booking
+        {
+            Id = Guid.NewGuid(),
+            EventId = eventId,
+            UserId = userId,
+            Status = BookingStatus.Pending,
+            CreatedAt = DateTime.Now.ToUniversalTime()
+        };
+        await repository.CreateAsync(booking);
         // Assert
         Assert.NotNull(booking);
         Assert.Equal(eventId, booking.EventId);
@@ -45,10 +61,19 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await using var actContext = await CreateContextAsync();
         var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
 
         // Act & Assert
+        var booking = new Booking
+        {
+            Id = Guid.NewGuid(),
+            EventId = eventId,
+            UserId = userId,
+            Status = BookingStatus.Pending,
+            CreatedAt = DateTime.Now.ToUniversalTime()
+        };
         await Assert.ThrowsAsync<DbUpdateException>(async () =>
-            await repository.CreateAsync(eventId));
+            await repository.CreateAsync(booking));
     }
 
     [Fact]
@@ -61,6 +86,8 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await using var actContext = await CreateContextAsync();
         var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
         arrangeContext.Events.Add(new Event
         {
             Id = eventId,
@@ -70,11 +97,20 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             EndAt = DateTime.Now.AddHours(1).ToUniversalTime(),
             TotalSeats = 10
         });
+        arrangeContext.Users.Add(new User
+        {
+            Id = userId,
+            Login = "testuser",
+            PasswordHash = "hashedpassword",
+            Role = UserRole.User
+        });
+
         await arrangeContext.SaveChangesAsync();
         var booking = new Booking
         {
             Id = Guid.NewGuid(),
             EventId = eventId,
+            UserId = userId,
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
@@ -89,7 +125,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
 
     [Fact]
     [Trait("Category", "BookingRepository")]
-    public async Task GetByIdAsync_WithInvalidBookingId_ThrowsKeyNotFoundException()
+    public async Task GetByIdAsync_WithInvalidBookingId_ReturnsNull()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -98,14 +134,13 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         var repository = new BookingRepository(actContext);
         var bookingId = Guid.NewGuid();
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await repository.GetByIdAsync(bookingId)
-        );
+        var nullBooking = await repository.GetByIdAsync(bookingId);
+        Assert.Null(nullBooking);
     }
 
     [Fact]
     [Trait("Category", "BookingRepository")]
-    public async Task DeleteByIdAsync_WithValidBookingId_DeletesBooking()
+    public async Task DeleteAsync_WithValidBooking_DeletesBooking()
     {
         // Arrange
         await ResetDatabaseAsync();
@@ -114,6 +149,8 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         var arrangeRepository = new BookingRepository(arrangeContext);
         var actRepository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
         arrangeContext.Events.Add(new Event
         {
             Id = eventId,
@@ -123,86 +160,56 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             EndAt = DateTime.Now.AddHours(1).ToUniversalTime(),
             TotalSeats = 10
         });
+        arrangeContext.Users.Add(new User
+        {
+            Id = userId,
+            Login = "testuser",
+            PasswordHash = "hashedpassword",
+            Role = UserRole.User
+        });
         await arrangeContext.SaveChangesAsync();
-        var createdBooking = await arrangeRepository.CreateAsync(eventId);
+
+        var booking = new Booking
+        {
+            Id = Guid.NewGuid(),
+            EventId = eventId,
+            UserId = userId,
+            Status = BookingStatus.Pending,
+            CreatedAt = DateTime.Now.ToUniversalTime()
+        };
+        await arrangeRepository.CreateAsync(booking);
         // Act
-        await actRepository.DeleteByIdAsync(createdBooking.Id);
+        await actRepository.DeleteAsync(booking);
         // Assert
-        var deletedBooking = await actContext.Bookings.FindAsync(createdBooking.Id);
+        var deletedBooking = await actContext.Bookings.FindAsync(booking.Id);
         Assert.Null(deletedBooking);
     }
 
     [Fact]
     [Trait("Category", "BookingRepository")]
-    public async Task DeleteByIdAsync_WithInvalidBookingId_ThrowsKeyNotFoundException()
+    public async Task DeleteAsync_WithInvalidBooking_ThrowsKeyNotFoundException()
     {
         // Arrange
         await ResetDatabaseAsync();
         await using var arrangeContext = await CreateContextAsync();
         await using var actContext = await CreateContextAsync();
         var repository = new BookingRepository(actContext);
-        var bookingId = Guid.NewGuid();
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+
+        var booking = new Booking
         {
-            await repository.DeleteByIdAsync(bookingId);
+            Id = Guid.NewGuid(),
+            EventId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Status = BookingStatus.Pending,
+            CreatedAt = DateTime.Now.ToUniversalTime()
+        };
+        // Act & Assert
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () =>
+        {
+            await repository.DeleteAsync(booking);
         });
     }
 
-    [Fact]
-    [Trait("Category", "BookingRepository")]
-    public async Task GetBookingByEventIdAsync_ReturnsBookingsForEvent()
-    {
-        // Arrange
-        await ResetDatabaseAsync();
-        await using var arrangeContext = await CreateContextAsync();
-        await using var actContext = await CreateContextAsync();
-        var repository = new BookingRepository(actContext);
-        var eventId1 = Guid.NewGuid();
-        var eventId2 = Guid.NewGuid();
-
-        var event1 = new Event
-        {
-            Id = eventId1,
-            Title = "Test Event 1",
-            Description = "Test Description 1",
-            StartAt = DateTime.Now.ToUniversalTime(),
-            EndAt = DateTime.Now.AddHours(1).ToUniversalTime(),
-            TotalSeats = 10
-        };
-
-        var event2 = new Event
-        {
-            Id = eventId2,
-            Title = "Test Event 2",
-            Description = "Test Description 2",
-            StartAt = DateTime.Now.ToUniversalTime(),
-            EndAt = DateTime.Now.AddHours(1).ToUniversalTime(),
-            TotalSeats = 20
-        };
-
-        arrangeContext.Events.AddRange(event1, event2);
-        await arrangeContext.SaveChangesAsync();
-
-        var bookingRepository = new BookingRepository(actContext);
-
-        // Act
-        await bookingRepository.CreateAsync(eventId1);
-        await bookingRepository.CreateAsync(eventId1);
-        await bookingRepository.CreateAsync(eventId2);
-        await bookingRepository.CreateAsync(eventId2);
-        await bookingRepository.CreateAsync(eventId2);
-
-        var bookingsForEvent1 = await bookingRepository.GetBookingsByEventIdAsync(eventId1);
-        var bookingsForEvent2 = await bookingRepository.GetBookingsByEventIdAsync(eventId2);
-
-        // Assert
-        Assert.Equal(2, bookingsForEvent1.Count());
-        Assert.All(bookingsForEvent1, b => Assert.Equal(eventId1, b.EventId));
-
-        Assert.Equal(3, bookingsForEvent2.Count());
-        Assert.All(bookingsForEvent2, b => Assert.Equal(eventId2, b.EventId));
-    }
 
     [Fact]
     [Trait("Category", "BookingRepository")]
@@ -214,6 +221,8 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         await using var actContext = await CreateContextAsync();
         var repository = new BookingRepository(actContext);
         var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
         arrangeContext.Events.Add(new Event
         {
             Id = eventId,
@@ -223,11 +232,20 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
             EndAt = DateTime.Now.AddHours(1).ToUniversalTime(),
             TotalSeats = 10
         });
+        arrangeContext.Users.Add(new User
+        {
+            Id = userId,
+            Login = "testuser",
+            PasswordHash = "hashedpassword",
+            Role = UserRole.User
+        });
         await arrangeContext.SaveChangesAsync();
+
         var booking1 = new Booking
         {
             Id = Guid.NewGuid(),
             EventId = eventId,
+            UserId = userId,
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
@@ -235,6 +253,7 @@ public class BookingRepositoryTests(PostgresFixture postgresFixture) : PostgresT
         {
             Id = Guid.NewGuid(),
             EventId = eventId,
+            UserId = userId,
             Status = BookingStatus.Confirmed,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };

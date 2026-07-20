@@ -23,6 +23,8 @@ public class BookingProcessingServiceTests
         await using var context = new AppDbContext(dbOptions);
 
         var eventId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
         Event eventWithSeats = new()
         {
             Id = eventId,
@@ -39,6 +41,7 @@ public class BookingProcessingServiceTests
             {
                 Id = Guid.NewGuid(),
                 EventId = eventId,
+                UserId = userId,
                 Status = BookingStatus.Pending,
                 CreatedAt = DateTime.Now
             },
@@ -46,6 +49,7 @@ public class BookingProcessingServiceTests
             {
                 Id = Guid.NewGuid(),
                 EventId = eventId,
+                UserId = userId,
                 Status = BookingStatus.Confirmed,
                 CreatedAt = DateTime.Now
             },
@@ -53,6 +57,7 @@ public class BookingProcessingServiceTests
             {
                 Id = Guid.NewGuid(),
                 EventId = eventId,
+                UserId = userId,
                 Status = BookingStatus.Pending,
                 CreatedAt = DateTime.Now
             }
@@ -78,7 +83,7 @@ public class BookingProcessingServiceTests
         var service = new BookingProcessingService(scopeFactoryMock.Object, loggerMock.Object);
 
         // Act
-        var tasks = bookings.Select(b => service.ProcessBookingAsync(b.Id, CancellationToken.None));
+        var tasks = bookings.Select(b => service.ProcessBookingAsync(b, CancellationToken.None));
         await Task.WhenAll(tasks);
 
         // Assert

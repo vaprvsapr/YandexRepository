@@ -1,6 +1,6 @@
 ﻿using EventManager.Application.Dto;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Application.Services.Interfaces;
 
 /// <summary>
 /// Определяет контракт сервиса для управления бронированиями событий.
@@ -11,8 +11,9 @@ public interface IBookingService
     /// Создаёт новое бронирование для указанного события.
     /// </summary>
     /// <param name="eventId">Идентификатор события, для которого создаётся бронирование.</param>
+    /// <param name="userId">Идентификатор пользователя, который создаёт бронирование.</param>
     /// <returns>Данные созданного бронирования.</returns>
-    public Task<BookingDto> CreateBookingAsync(Guid eventId);
+    public Task<BookingDto> CreateBookingAsync(Guid eventId, Guid userId);
 
     /// <summary>
     /// Возвращает бронирование по идентификатору.
@@ -20,13 +21,6 @@ public interface IBookingService
     /// <param name="id">Идентификатор бронирования.</param>
     /// <returns>Данные найденного бронирования или <see langword="null"/>, если не найдено.</returns>
     public Task<BookingDto?> GetBookingByIdAsync(Guid id);
-
-    /// <summary>
-    /// Возвращает список бронирований для указанного события.
-    /// </summary>
-    /// <param name="eventId">Идентификатор события.</param>
-    /// <returns>Список бронирований для события.</returns>
-    public Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId);
 
     /// <summary>
     /// Возвращает список всех бронирований.
@@ -39,4 +33,6 @@ public interface IBookingService
     /// <param name="id">Идентификатор бронирования.</param>
     /// <returns></returns>
     public Task DeleteBookingByIdAsync(Guid id);
+
+    public Task<BookingDto> CancelBookingByIdAsync(Guid id);
 }

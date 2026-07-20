@@ -24,6 +24,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Booking> Bookings => Set<Booking>();
 
     /// <summary>
+    /// Коллекция пользователей, представляющая таблицу в базе данных для хранения информации о пользователях.
+    /// </summary>
+    public DbSet<User> Users => Set<User>();
+
+    /// <summary>
     /// Метод для настройки модели данных и определения конфигурации сущностей при создании модели базы данных. 
     /// Он применяет все конфигурации, определенные в сборке, содержащей AppDbContext,
     /// что позволяет централизованно управлять настройками модели данных.

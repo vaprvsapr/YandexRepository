@@ -4,6 +4,7 @@ using EventManager.Application.Queries;
 using EventManager.Application.Mappers;
 using EventManager.Domain.Models;
 using Microsoft.Extensions.Logging;
+using EventManager.Application.Services.Interfaces;
 
 namespace EventManager.Application.Services;
 

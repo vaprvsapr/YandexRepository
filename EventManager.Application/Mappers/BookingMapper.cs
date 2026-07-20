@@ -19,6 +19,7 @@ public class BookingMapper
         {
             Id = booking.Id,
             EventId = booking.EventId,
+            UserId = booking.UserId,
             Status = booking.Status,
             CreatedAt = booking.CreatedAt,
             ProcessedAt = booking.ProcessedAt
@@ -36,6 +37,7 @@ public class BookingMapper
         {
             Id = bookingDto.Id,
             EventId = bookingDto.EventId,
+            UserId = bookingDto.UserId,
             Status = bookingDto.Status,
             CreatedAt = bookingDto.CreatedAt,
             ProcessedAt = bookingDto.ProcessedAt

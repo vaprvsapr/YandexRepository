@@ -13,6 +13,7 @@ public class BookingTests
         {
             Id = Guid.NewGuid(),
             EventId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now
         };
@@ -33,6 +34,7 @@ public class BookingTests
         {
             Id = Guid.NewGuid(),
             EventId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
             Status = BookingStatus.Pending,
             CreatedAt = DateTime.Now
         };

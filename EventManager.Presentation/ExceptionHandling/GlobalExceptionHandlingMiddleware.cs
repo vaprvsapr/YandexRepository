@@ -67,9 +67,16 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
     {
         ValidationException => StatusCodes.Status400BadRequest,
         ArgumentException => StatusCodes.Status400BadRequest,
+        FailedToLogInException => StatusCodes.Status400BadRequest,
+        PastEventBookingException => StatusCodes.Status400BadRequest,
+
         KeyNotFoundException => StatusCodes.Status404NotFound,
+
         InvalidOperationException => StatusCodes.Status409Conflict,
         NoAvailableSeatsException => StatusCodes.Status409Conflict,
+        ExceedingActiveBookingLimitException => StatusCodes.Status409Conflict,
+
+        NotEnoughRightsException => StatusCodes.Status403Forbidden,
         _ => StatusCodes.Status500InternalServerError
     };
 }
