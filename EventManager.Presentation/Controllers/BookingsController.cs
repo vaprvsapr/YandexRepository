@@ -46,26 +46,6 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     }
 
     /// <summary>
-    /// Возвращает список бронирований для события по идентификатору.
-    /// </summary>
-    /// <param name="id">Идентификатор события.</param>
-    /// <returns>Список бронирований для события для пользователя, указанного в токене.</returns>
-    /// <response code="200">Список успешно возвращён.</response>
-    /// <response code="401">Пользователь не авторизован.</response>
-    /// <response code="404">Событие не найдено.</response>
-    [Authorize]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [Produces("application/json")]
-    [HttpGet("event/{id:guid}")]
-    public async Task<ActionResult<List<BookingDto>>> GetBookingsByEventId([FromRoute] Guid id)
-    {
-        return Ok((await _bookingService.GetBookingsByEventIdAsync(id))
-            .Where(b => b.UserId == GetUserIdFromClaims()));
-    }
-
-    /// <summary>
     /// Возвращает бронирование по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор бронирования.</param>

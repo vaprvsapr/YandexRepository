@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using EventManager.Application.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace EventManager.Application.Services;
 
@@ -34,8 +35,10 @@ public class BookingService(
     /// <inheritdoc/>
     public async Task<BookingDto> CreateBookingAsync(Guid eventId, Guid userId)
     {
-        Event existingEvent = await _eventRepository.GetByIdAsync(eventId);
-        User existingUser = await _userRepository.GetByIdAsync(userId);
+        Event existingEvent = await _eventRepository.GetByIdAsync(eventId) ?? 
+            throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
+        User existingUser = await _userRepository.GetByIdAsync(userId) ??
+            throw new KeyNotFoundException($"Пользователь с Id:{userId} не найден.");
 
         Booking newBooking;
 
@@ -53,12 +56,25 @@ public class BookingService(
 
             if (!existingEvent.TryReserveSeats())
                 throw new NoAvailableSeatsException($"Нет достаточного количества свободных мест на событие с id: {eventId}.");
-
             await _eventRepository.UpdateAsync(existingEvent);
-            newBooking = await _bookingRepository.CreateAsync(eventId, userId);
+
+            newBooking = new()
+            { 
+                Id = Guid.NewGuid(),
+                EventId = eventId,
+                UserId = userId,
+                Status = BookingStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _bookingRepository.CreateAsync(newBooking);
+
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Created new booking with Id:{id} for EventId:{eventId}.",
+                    newBooking.Id, newBooking.EventId);
         }
-        catch (NoAvailableSeatsException)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Ошибка при создании бронирования для EventId:{eventId} и UserId:{userId}.", eventId, userId);
             throw;
         }
         finally
@@ -66,11 +82,13 @@ public class BookingService(
             _bookingSemaphore.Release();
         }
 
-        if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Created new booking with Id:{id} for EventId:{eventId}.", 
-                newBooking.Id, newBooking.EventId);
-
         return BookingMapper.ToBookingDto(newBooking);
+    }
+
+    /// <inheritdoc/>   
+    public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
+    {
+        return BookingMapper.ToBookingDto(await GetByIdAsync(id));
     }
 
     /// <inheritdoc/>
@@ -82,27 +100,13 @@ public class BookingService(
             ];
     }
 
-    /// <inheritdoc/>   
-    public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
-    {
-        var existingBooking = await _bookingRepository.GetByIdAsync(id);
-        return BookingMapper.ToBookingDto(existingBooking);
-    }
-
-    /// <inheritdoc/>
-    public async Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId)
-    {
-        var bookings = await _bookingRepository.GetBookingsByEventIdAsync(eventId);
-        return [.. bookings.Select(BookingMapper.ToBookingDto)];
-    }
-
     /// <inheritdoc/>
     public async Task DeleteBookingByIdAsync(Guid id)
     {
-        var existingBooking = await _bookingRepository.GetByIdAsync(id);
-        var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
+        var existingBooking = await GetByIdAsync(id);
+        await _bookingRepository.DeleteAsync(existingBooking);
 
-        await _bookingRepository.DeleteByIdAsync(id);
+        var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
 
         if(existingBooking.Status != BookingStatus.Cancelled && existingBooking.Status != BookingStatus.Rejected)
         {
@@ -116,18 +120,27 @@ public class BookingService(
 
     public async Task<BookingDto> CancelBookingByIdAsync(Guid id)
     {
-        var existingBooking = await _bookingRepository.GetByIdAsync(id);
+        var existingBooking = await GetByIdAsync(id);
         if (existingBooking.Status == BookingStatus.Cancelled)
-            throw new InvalidOperationException($"Booking with Id:{id} is already cancelled.");
+            throw new InvalidOperationException($"Событие с Id:{id} уже отменено.");
+        if (existingBooking.Status == BookingStatus.Rejected)
+            throw new InvalidOperationException($"Событие с Id:{id} отклонено.");
+        await _bookingRepository.CancelAsync(existingBooking);
+
         var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
-
-        await _bookingRepository.CancelByIdAsync(id);
-
         existingEvent.ReleaseSeats();
         await _eventRepository.UpdateAsync(existingEvent);
+
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Cancelled booking with Id:{id}.", id);
 
         return BookingMapper.ToBookingDto(existingBooking);
+    }
+
+    private async Task<Booking> GetByIdAsync(Guid id)
+    {
+        var existingBooking = await _bookingRepository.GetByIdAsync(id) ??
+            throw new KeyNotFoundException($"Бронирование с Id:{id} не найдено.");
+        return existingBooking;
     }
 }

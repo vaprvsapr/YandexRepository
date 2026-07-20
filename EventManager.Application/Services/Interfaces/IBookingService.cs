@@ -23,13 +23,6 @@ public interface IBookingService
     public Task<BookingDto?> GetBookingByIdAsync(Guid id);
 
     /// <summary>
-    /// Возвращает список бронирований для указанного события.
-    /// </summary>
-    /// <param name="eventId">Идентификатор события.</param>
-    /// <returns>Список бронирований для события.</returns>
-    public Task<List<BookingDto>> GetBookingsByEventIdAsync(Guid eventId);
-
-    /// <summary>
     /// Возвращает список всех бронирований.
     /// </summary>
     public Task<List<BookingDto>> GetAllBookingsAsync();
