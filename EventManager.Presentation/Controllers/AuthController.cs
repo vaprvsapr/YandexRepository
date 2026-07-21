@@ -4,7 +4,6 @@ using EventManager.Application.Services.Interfaces;
 using EventManager.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace EventManager.Presentation.Controllers;
 
@@ -29,8 +28,8 @@ public class AuthController(IUserService userService) : ControllerBase
     /// <response code="400">Не удалось зарегистрировать пользователя.</response>
     [HttpPost]
     [Route("register")]
-    [ProducesResponseType((int)HttpStatusCode.NoContent)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserInfoDto>> Register(
         [FromQuery] string login, 
         [FromQuery] string password, 
@@ -50,8 +49,8 @@ public class AuthController(IUserService userService) : ControllerBase
     /// <response code="404">Не удалось войти в систему.</response>
     [HttpPost]
     [Route("login")]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<string>> LogIn(
         [FromQuery] string login, 
         [FromQuery] string password)
@@ -70,9 +69,9 @@ public class AuthController(IUserService userService) : ControllerBase
     [Authorize]
     [HttpDelete]
     [Route("delete")]
-    [ProducesResponseType((int)HttpStatusCode.NoContent)]
-    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteUser([FromQuery] string login)
     {
         if(!GetUserRoleFromClaims().Equals(UserRole.Admin) && !GetUserLoginFromClaims().Equals(login))

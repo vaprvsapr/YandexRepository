@@ -3,7 +3,6 @@ using EventManager.Application.Services.Interfaces;
 using EventManager.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace EventManager.Presentation.Controllers;
 
@@ -30,10 +29,10 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <response code="404">Событие не найдено.</response>
     /// <response code="409">Нет доступных мест.</response>
     [Authorize]
-    [ProducesResponseType((int)HttpStatusCode.Accepted)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [ProducesResponseType((int)HttpStatusCode.Conflict)]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [Produces("application/json")]
     [Route("~/events/{eventId:guid}/book")]
     [HttpPost]
@@ -53,9 +52,9 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Бронирование не найдено.</response>
     [Authorize]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] Guid id)
@@ -73,9 +72,9 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="403">Пользователь не имеет прав доступа.</response>
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [HttpGet]
     public async Task<ActionResult<List<BookingDto>>> GetAllBookings()
     {
@@ -92,10 +91,10 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     /// <response code="403">Пользователь не имеет прав доступа.</response>
     /// <response code="404">Бронирование не найдено.</response>
     [Authorize]
-    [ProducesResponseType((int)HttpStatusCode.NoContent)]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized)] 
-    [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<BookingDto>> CancelBookingById([FromRoute] Guid id)
     {
