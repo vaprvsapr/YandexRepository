@@ -13,7 +13,7 @@ namespace EventManager.Presentation.Controllers;
 /// <param name="userService"></param>
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IUserService userService) : ControllerBase
+public class AuthController(IUserService userService) : UserInteractingControllerBase
 {
     private readonly IUserService _userService = userService;
 
@@ -79,21 +79,5 @@ public class AuthController(IUserService userService) : ControllerBase
 
         await _userService.Delete(login);
         return NoContent();
-    }
-
-    private UserRole GetUserRoleFromClaims()
-    {
-        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role");
-        if (roleClaim == null)
-            throw new InvalidOperationException("Роль пользователя не найдена в токене.");
-        return Enum.Parse<UserRole>(roleClaim.Value);
-    }
-
-    private string GetUserLoginFromClaims()
-    {
-        var loginClaim = User.Claims.FirstOrDefault(c => c.Type == "login");
-        if (loginClaim == null)
-            throw new InvalidOperationException("Логин пользователя не найден в токене.");
-        return loginClaim.Value;
     }
 }

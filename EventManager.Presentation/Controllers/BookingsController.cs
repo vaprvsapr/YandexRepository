@@ -15,7 +15,7 @@ namespace EventManager.Presentation.Controllers;
 /// <param name="bookingService">Сервис, реализующий бизнес-логику для операций с бронированиями.</param>
 [ApiController]
 [Route("bookings")]
-public class BookingsController(IBookingService bookingService) : ControllerBase
+public class BookingsController(IBookingService bookingService) : UserInteractingControllerBase
 {
     private readonly IBookingService _bookingService = bookingService;
 
@@ -102,20 +102,5 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         if (existingBooking?.UserId != GetUserIdFromClaims() && !GetUserRoleFromClaims().Equals(UserRole.Admin))
             return Forbid();
         return NoContent();
-    }
-
-    private Guid GetUserIdFromClaims()
-    {
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub");
-        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
-            throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
-        return userId;
-    }
-
-    private UserRole GetUserRoleFromClaims()
-    {
-        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role") ??
-            throw new InvalidOperationException("Роль пользователя не найдена в токене.");
-        return Enum.Parse<UserRole>(roleClaim.Value);
     }
 }
