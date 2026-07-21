@@ -1,5 +1,6 @@
 ﻿using EventManager.Domain.Models;
 using EventManager.Application.Repositories;
+using EventManager.Application.Dto;
 
 namespace EventManager.Infrastructure.DataAccess;
 
@@ -11,84 +12,35 @@ public class EventRepository(AppDbContext context) : IEventRepository
 {
     private readonly AppDbContext _context = context;
 
-    /// <summary>
-    /// Создает новое событие на основе предоставленных данных. Проверяет, что событие с таким ID еще не существует, и сохраняет его в базе данных.
-    /// Выбрасывает исключение, если событие с указанным ID уже существует.
-    /// </summary>
-    /// <param name="eventCreateDto"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task<Event> CreateAsync(Event @event, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task CreateAsync(Event @event, CancellationToken ct = default)
     {
-        var existingEvent = await _context.Events.FindAsync([ @event.Id ], cancellationToken: ct);
-        if (existingEvent is not null)
-            throw new InvalidOperationException($"Событие с id {@event.Id} уже существует.");
         _context.Events.Add(@event);
         await _context.SaveChangesAsync(ct);
-        var createdEvent = await _context.Events.FindAsync([@event.Id], cancellationToken: ct) ??
-            throw new InvalidOperationException($"Не удалось создать событие с id {@event.Id}.");
-
-        return createdEvent;
     }
 
-    /// <summary>
-    /// Удаляет событие по его уникальному идентификатору. Проверяет, что событие с указанным ID существует, и удаляет его из базы данных.
-    /// Выбрасывает исключение, если событие с указанным ID не найдено.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="KeyNotFoundException"></exception>
-    public async Task DeleteByIdAsync(Guid id, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task DeleteAsync(Event @event, CancellationToken ct = default)
     {
-        var existingEvent = await GetByIdAsync(id, ct);
-        _context.Events.Remove(existingEvent);
+        _context.Events.Remove(@event);
         await _context.SaveChangesAsync(ct);
     }
 
-    /// <summary>
-    /// Возвращает все события в виде IQueryable, позволяя выполнять дальнейшие операции фильтрации, сортировки и проекции на уровне базы данных.
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public IQueryable<Event> GetAll()
     {
         return _context.Events;
     }
 
-    /// <summary>
-    /// Возвращает событие по его уникальному идентификатору. Проверяет, что событие с указанным ID существует, и возвращает его.
-    /// Выбрасывает исключение, если событие с указанным ID не найдено.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<Event> GetByIdAsync(Guid id, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task<Event?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Events.FindAsync([ id ], cancellationToken: ct) ?? 
-            throw new KeyNotFoundException($"Событие с id {id} не найдено.");
+        return await _context.Events.FindAsync([ id ], cancellationToken: ct);
     }
 
-    /// <summary>
-    /// Обновляет существующее событие на основе предоставленных данных. Проверяет, что событие с указанным ID существует, и обновляет его поля.
-    /// Выбрасывает исключение, если событие с указанным ID не найдено. Сохраняет изменения в базе данных и возвращает обновленное событие.
-    /// </summary>
-    /// <param name="event"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<Event> UpdateAsync(Event @event, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task UpdateAsync(Event @event, CancellationToken ct = default)
     {
-        var existingEvent = await GetByIdAsync(@event.Id, ct);
-
-        existingEvent.Title = @event.Title;
-        existingEvent.Description = @event.Description;
-        existingEvent.StartAt = @event.StartAt;
-        existingEvent.EndAt = @event.EndAt;
-        existingEvent.TotalSeats = @event.TotalSeats;
-
         await _context.SaveChangesAsync(ct);
-        return existingEvent;
     }
 }

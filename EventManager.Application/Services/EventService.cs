@@ -26,6 +26,10 @@ public class EventService(
     /// <inheritdoc/>
     public async Task<EventInfoDto> CreateEvent(EventCreateDto eventCreateDto)
     {
+        var existingEvent = await _eventRepository.GetByIdAsync(eventCreateDto.Id);
+        if (existingEvent != null)
+            throw new InvalidOperationException($"Событие с ID:{eventCreateDto.Id} уже существует.");
+
         var newEvent = new Event 
         { 
             Id = eventCreateDto.Id,
@@ -35,20 +39,23 @@ public class EventService(
             EndAt = eventCreateDto.EndAt,
             TotalSeats = eventCreateDto.TotalSeats
         };
-        newEvent = await _eventRepository.CreateAsync(newEvent);
+        await _eventRepository.CreateAsync(newEvent);
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event created: {title} with id: {id}", newEvent.Title, newEvent.Id);
-        return EventMapper.ToEventInfoDto(newEvent);
+
+        return await GetEvent(eventCreateDto.Id);
     }
 
     /// <inheritdoc/>
     public async Task DeleteEvent(Guid id)
     {
-        await _eventRepository.DeleteByIdAsync(id);
+        var existingEvent = await GetEventByIdAsync(id);
+
+        await _eventRepository.DeleteAsync(existingEvent);
 
         if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Event with {id} was deleted.", id);
+            _logger.LogInformation("Event with ID:{id} was deleted.", id);
     }
 
     /// <inheritdoc/>
@@ -84,15 +91,29 @@ public class EventService(
     /// <inheritdoc/>
     public async Task<EventInfoDto> GetEvent(Guid id)
     {
-        var existingEvent = await _eventRepository.GetByIdAsync(id);
-        return EventMapper.ToEventInfoDto(existingEvent);
+        return EventMapper.ToEventInfoDto(await GetEventByIdAsync(id));
     }
 
     /// <inheritdoc/>
-    public async Task<EventInfoDto> UpdateEvent(Guid id, EventUpdateDto updatedEventDto)
+    public async Task<EventInfoDto> UpdateEvent(Guid id, EventUpdateDto eventUpdateDto)
     {
-        Event @event = EventMapper.ToEvent(updatedEventDto, id);
-        var updatedEvent = await _eventRepository.UpdateAsync(@event);
-        return EventMapper.ToEventInfoDto(updatedEvent);
+        var existingEvent = await GetEventByIdAsync(id);
+
+        existingEvent.Title = eventUpdateDto.Title ?? existingEvent.Title;
+        existingEvent.Description = eventUpdateDto.Description ?? existingEvent.Description;
+        existingEvent.StartAt = eventUpdateDto.StartAt ?? existingEvent.StartAt;
+        existingEvent.EndAt = eventUpdateDto.EndAt ?? existingEvent.EndAt;
+
+        await _eventRepository.UpdateAsync(existingEvent);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Event with ID:{id} was updated.", id);
+
+        return await GetEvent(id);
+    }
+
+    private async Task<Event> GetEventByIdAsync(Guid id)
+    {
+        return await _eventRepository.GetByIdAsync(id) ??
+            throw new KeyNotFoundException($"Событие с ID:{id} не найдено.");
     }
 }

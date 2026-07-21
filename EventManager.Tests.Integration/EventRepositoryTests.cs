@@ -62,7 +62,7 @@ public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTes
         var eventRepository = new EventRepository(context);
         await eventRepository.CreateAsync(newEvent);
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        await Assert.ThrowsAsync<DbUpdateException>(async () =>
             await eventRepository.CreateAsync(newEvent));
     }
 
@@ -105,8 +105,8 @@ public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTes
         var eventRepository = new EventRepository(context);
         var nonExistentEventId = Guid.NewGuid();
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await eventRepository.GetByIdAsync(nonExistentEventId));
+        var nonExistenEvent = await eventRepository.GetByIdAsync(nonExistentEventId);
+        Assert.Null(nonExistenEvent);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTes
         await using var deletingContext = await CreateContextAsync();
         var eventRepository = new EventRepository(deletingContext);
         // Act
-        await eventRepository.DeleteByIdAsync(eventToDelete.Id);
+        await eventRepository.DeleteAsync(eventToDelete);
         // Assert
         await using var verifyingContext = await CreateContextAsync();
         var deletedEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == eventToDelete.Id);
@@ -145,74 +145,17 @@ public class EventRepositoryTests(PostgresFixture postgresFixture) : PostgresTes
         await ResetDatabaseAsync();
         await using var context = await CreateContextAsync();
         var eventRepository = new EventRepository(context);
-        var nonExistentEventId = Guid.NewGuid();
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await eventRepository.DeleteByIdAsync(nonExistentEventId));
-    }
-
-    [Fact]
-    [Trait("Category", "EventRepository")]
-    public async Task UpdateEvent_UpdatesEventInDatabase()
-    {
-        // Arrange
-        await ResetDatabaseAsync();
-        await using var context = await CreateContextAsync();
-        var existingEvent = new Event
+        var nonExistententEvent = new Event
         {
             Id = Guid.NewGuid(),
-            Title = "Existing Event",
-            Description = "Existing event description",
-            StartAt = DateTime.UtcNow,
-            EndAt = DateTime.UtcNow.AddHours(1),
-            TotalSeats = 100
-        };
-        context.Events.Add(existingEvent);
-        await context.SaveChangesAsync();
-        await using var updatingContext = await CreateContextAsync();
-        var eventRepository = new EventRepository(updatingContext);
-        var updatedEvent = new Event
-        {
-            Id = existingEvent.Id,
-            Title = "Updated Event",
-            Description = "Updated event description",
-            StartAt = DateTime.UtcNow,
-            EndAt = DateTime.UtcNow,
-            TotalSeats = 150
-        };
-        // Act
-        await eventRepository.UpdateAsync(updatedEvent);
-        // Assert
-        await using var verifyingContext = await CreateContextAsync();
-        var retrievedEvent = await verifyingContext.Events.FirstOrDefaultAsync(e => e.Id == existingEvent.Id);
-        Assert.NotNull(retrievedEvent);
-        Assert.Equal(updatedEvent.Title, retrievedEvent.Title);
-        Assert.Equal(updatedEvent.Description, retrievedEvent.Description);
-        Assert.Equal(updatedEvent.TotalSeats, retrievedEvent.TotalSeats);
-        Assert.InRange((TimeSpan)(updatedEvent.StartAt - retrievedEvent.StartAt)!, TimeSpan.Zero, TimeSpan.FromMicroseconds(1));
-        Assert.InRange((TimeSpan)(updatedEvent.EndAt - retrievedEvent.EndAt)!, TimeSpan.Zero, TimeSpan.FromMicroseconds(1));
-    }
-
-    [Fact]
-    [Trait("Category", "EventRepository")]
-    public async Task UpdateEvent_UpdatingNonExistentEvent_ThrowsKeyNotFoundException()
-    {
-        // Arrange
-        await ResetDatabaseAsync();
-        await using var context = await CreateContextAsync();
-        var eventRepository = new EventRepository(context);
-        var nonExistentEvent = new Event
-        {
-            Id = Guid.NewGuid(),
-            Title = "Non-existent Event",
-            Description = "Non-existent event description",
+            Title = "title",
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1),
             TotalSeats = 100
         };
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await eventRepository.UpdateAsync(nonExistentEvent));
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () =>
+            await eventRepository.DeleteAsync(nonExistententEvent));
     }
 
     [Fact]
