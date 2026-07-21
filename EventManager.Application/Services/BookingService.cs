@@ -3,11 +3,10 @@ using EventManager.Domain.Exceptions;
 using EventManager.Application.Dto;
 using EventManager.Application.Repositories;
 using EventManager.Application.Mappers;
-using Microsoft.Extensions.Logging;
 using EventManager.Application.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using System.Reflection.Metadata;
+using System.Security.Authentication;
 
 namespace EventManager.Application.Services;
 
@@ -33,12 +32,10 @@ public class BookingService(
     private readonly SemaphoreSlim _bookingSemaphore = new(1, 1); // Семафор для синхронизации доступа к бронированию мест
 
     /// <inheritdoc/>
-    public async Task<BookingDto> CreateBookingAsync(Guid eventId, Guid userId)
+    public async Task<BookingDto> CreateAsync(Guid eventId, Guid userId)
     {
-        Event existingEvent = await _eventRepository.GetByIdAsync(eventId) ?? 
-            throw new KeyNotFoundException($"Событие с Id:{eventId} не найдено.");
-        User existingUser = await _userRepository.GetByIdAsync(userId) ??
-            throw new KeyNotFoundException($"Пользователь с Id:{userId} не найден.");
+        Event existingEvent = await GetEventByIdAsync(eventId);
+        User existingUser = await GetUserByIdAsync(userId);
 
         Booking newBooking;
 
@@ -86,9 +83,9 @@ public class BookingService(
     }
 
     /// <inheritdoc/>   
-    public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
+    public async Task<BookingDto?> GetByIdAsync(Guid id)
     {
-        return BookingMapper.ToBookingDto(await GetByIdAsync(id));
+        return BookingMapper.ToBookingDto(await GetBookingByIdAsync(id));
     }
 
     /// <inheritdoc/>
@@ -100,47 +97,58 @@ public class BookingService(
             ];
     }
 
-    /// <inheritdoc/>
-    public async Task DeleteBookingByIdAsync(Guid id)
+    public async Task<BookingDto> CancelByIdAsync(Guid bookingId, UserInfoDto userInfoDto)
     {
-        var existingBooking = await GetByIdAsync(id);
-        await _bookingRepository.DeleteAsync(existingBooking);
+        await ValidateUserCredentials(userInfoDto);
+        if (userInfoDto.Role != UserRole.Admin.ToString() && 
+            userInfoDto.Role != UserRole.User.ToString())
+            throw new UnauthorizedAccessException(
+                $"Пользователь с ролью {userInfoDto.Role} не имеет прав на отмену бронирования.");
 
-        var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
-
-        if(existingBooking.Status != BookingStatus.Cancelled && existingBooking.Status != BookingStatus.Rejected)
-        {
-            existingEvent.ReleaseSeats();
-            await _eventRepository.UpdateAsync(existingEvent);
-        }
-
-        if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Deleted booking with Id:{id}.", id);
-    }
-
-    public async Task<BookingDto> CancelBookingByIdAsync(Guid id)
-    {
-        var existingBooking = await GetByIdAsync(id);
+        var existingBooking = await GetBookingByIdAsync(bookingId);
         if (existingBooking.Status == BookingStatus.Cancelled)
-            throw new InvalidOperationException($"Событие с Id:{id} уже отменено.");
+            throw new InvalidOperationException($"Событие с Id:{bookingId} уже отменено.");
         if (existingBooking.Status == BookingStatus.Rejected)
-            throw new InvalidOperationException($"Событие с Id:{id} отклонено.");
+            throw new InvalidOperationException($"Событие с Id:{bookingId} отклонено.");
         await _bookingRepository.CancelAsync(existingBooking);
 
-        var existingEvent = await _eventRepository.GetByIdAsync(existingBooking.EventId);
+        var existingEvent = await GetEventByIdAsync(existingBooking.EventId);
         existingEvent.ReleaseSeats();
         await _eventRepository.UpdateAsync(existingEvent);
 
         if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Cancelled booking with Id:{id}.", id);
+            _logger.LogInformation("Cancelled booking with Id:{id}.", bookingId);
 
         return BookingMapper.ToBookingDto(existingBooking);
     }
 
-    private async Task<Booking> GetByIdAsync(Guid id)
+    private async Task<Booking> GetBookingByIdAsync(Guid id)
     {
         var existingBooking = await _bookingRepository.GetByIdAsync(id) ??
             throw new KeyNotFoundException($"Бронирование с Id:{id} не найдено.");
         return existingBooking;
+    }
+
+    private async Task<Event> GetEventByIdAsync(Guid id)
+    {
+        var existingEvent = await _eventRepository.GetByIdAsync(id) ??
+            throw new KeyNotFoundException($"Событие с Id:{id} не найдено.");
+        return existingEvent;
+    }
+
+    private async Task<User> GetUserByIdAsync(Guid id)
+    {
+        var existingUser = await _userRepository.GetByIdAsync(id) ??
+            throw new KeyNotFoundException($"Пользователь с Id:{id} не найден.");
+        return existingUser;
+    }
+
+    /// ??? Вопрос по хэшу пароля в токене. Если токен украли и пользователь изменил пароль, то нужно заблокировать старый токен.
+    private async Task ValidateUserCredentials(UserInfoDto userInfoDto)
+    {
+        var existingUser = await GetUserByIdAsync(userInfoDto.Id);
+        if (existingUser.Role != Enum.Parse<UserRole>(userInfoDto.Role) || 
+            existingUser.Login != userInfoDto.Login)
+            throw new InvalidCredentialException("Неверные учетные данные пользователя.");
     }
 }

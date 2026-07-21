@@ -1,6 +1,7 @@
 ﻿using EventManager.Domain.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Authentication;
 
 namespace EventManager.Presentation.ExceptionHandling;
 
@@ -70,13 +71,16 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
         FailedToLogInException => StatusCodes.Status400BadRequest,
         PastEventBookingException => StatusCodes.Status400BadRequest,
 
+        NotEnoughRightsException => StatusCodes.Status403Forbidden,
+        InvalidCredentialException => StatusCodes.Status403Forbidden,
+        UnauthorizedAccessException => StatusCodes.Status403Forbidden,
+
         KeyNotFoundException => StatusCodes.Status404NotFound,
 
         InvalidOperationException => StatusCodes.Status409Conflict,
         NoAvailableSeatsException => StatusCodes.Status409Conflict,
         ExceedingActiveBookingLimitException => StatusCodes.Status409Conflict,
 
-        NotEnoughRightsException => StatusCodes.Status403Forbidden,
         _ => StatusCodes.Status500InternalServerError
     };
 }

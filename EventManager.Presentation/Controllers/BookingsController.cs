@@ -38,9 +38,9 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
     [HttpPost]
     public async Task<ActionResult<BookingDto>> Book([FromRoute] Guid eventId)
     {
-        Guid userId = GetUserIdFromClaims();
-        BookingDto createdBooking = await _bookingService.CreateBookingAsync(eventId, userId);
-        return Accepted($"/bookings/{createdBooking.Id}", createdBooking);
+        var userId = GetUserIdFromClaims();
+        var createdBooking = await _bookingService.CreateAsync(eventId, userId);
+        return Accepted(createdBooking);
     }
 
     /// <summary>
@@ -59,10 +59,7 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] Guid id)
     {
-        var existingBooking = await _bookingService.GetBookingByIdAsync(id);
-        if (existingBooking?.UserId != GetUserIdFromClaims())
-            return Forbid();
-        return Ok(await _bookingService.GetBookingByIdAsync(id));
+        return Ok(await _bookingService.GetByIdAsync(id));
     }
 
     /// <summary>
@@ -84,7 +81,7 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
     /// <summary>
     /// Отменяет бронирование по идентификатору.
     /// </summary>
-    /// <param name="id">Идентификатор бронирования.</param>
+    /// <param name="bookingId">Идентификатор бронирования.</param>
     /// <returns>Обновленное событие.</returns>
     /// <response code="204">Бронирование успешно отменено.</response>
     /// <response code="401">Пользователь не авторизован.</response>
@@ -95,12 +92,17 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [HttpDelete("{id:guid}")]
-    public async Task<ActionResult<BookingDto>> CancelBookingById([FromRoute] Guid id)
+    [HttpDelete("{bookingId:guid}")]
+    public async Task<ActionResult<BookingDto>> CancelBookingById([FromRoute] Guid bookingId)
     {
-        var existingBooking = await _bookingService.GetBookingByIdAsync(id);
-        if (existingBooking?.UserId != GetUserIdFromClaims() && !GetUserRoleFromClaims().Equals(UserRole.Admin))
-            return Forbid();
+        var userInfoDto = new UserInfoDto
+        {
+            Id = GetUserIdFromClaims(),
+            Login = GetUserLoginFromClaims(),
+            Role = GetUserRoleFromClaims().ToString()
+        };
+
+        await _bookingService.CancelByIdAsync(bookingId, userInfoDto);
         return NoContent();
     }
 }

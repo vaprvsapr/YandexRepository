@@ -63,7 +63,7 @@ public class BookingServiceTests
         var bookingService = ArrangeBookingService(eventId, userId).Item1;
 
         // Act
-        var result = await bookingService.CreateBookingAsync(eventId, userId);
+        var result = await bookingService.CreateAsync(eventId, userId);
         // Assert
         Assert.NotNull(result);
         Assert.Equal(eventId, result.EventId);
@@ -79,8 +79,8 @@ public class BookingServiceTests
         var userId = Guid.NewGuid();
         var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
-        var result1 = await bookingService.CreateBookingAsync(eventId, userId);
-        var result2 = await bookingService.CreateBookingAsync(eventId, userId);
+        var result1 = await bookingService.CreateAsync(eventId, userId);
+        var result2 = await bookingService.CreateAsync(eventId, userId);
         // Assert
         Assert.NotNull(result1);
         Assert.NotNull(result2);
@@ -101,7 +101,7 @@ public class BookingServiceTests
         var bookingService = ArrangeBookingService(eventId, userId).Item1;
 
         // Act, Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateBookingAsync(Guid.NewGuid(), userId));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateAsync(Guid.NewGuid(), userId));
     }
 
     [Fact]
@@ -113,8 +113,8 @@ public class BookingServiceTests
         var userId = Guid.NewGuid();
         var bookingService = ArrangeBookingService(eventId, userId).Item1;
         // Act
-        var booking = await bookingService.CreateBookingAsync(eventId, userId);
-        var result = await bookingService.GetBookingByIdAsync(booking.Id);
+        var booking = await bookingService.CreateAsync(eventId, userId);
+        var result = await bookingService.GetByIdAsync(booking.Id);
         // Assert
         Assert.NotNull(result);
         Assert.Equal(booking.Id, result.Id);
@@ -142,7 +142,7 @@ public class BookingServiceTests
         var bookingService = new BookingService(bookingRepository, eventRepository, userRepository, mockLogger.Object, mockConfiguration.Object);
         // Act, Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await bookingService.GetBookingByIdAsync(Guid.NewGuid()));
+            await bookingService.GetByIdAsync(Guid.NewGuid()));
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class BookingServiceTests
         context.SaveChanges();
 
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateBookingAsync(eventId, userId));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => bookingService.CreateAsync(eventId, userId));
     }
 
     [Fact]
@@ -174,12 +174,12 @@ public class BookingServiceTests
         var bookingService = ArrangeBookingService(eventId, userId).Item1;
 
         // Act, Assert
-        await bookingService.CreateBookingAsync(eventId, userId);
-        await bookingService.CreateBookingAsync(eventId, userId);
-        await bookingService.CreateBookingAsync(eventId, userId);
-        await bookingService.CreateBookingAsync(eventId, userId);
-        await bookingService.CreateBookingAsync(eventId, userId);
-        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => bookingService.CreateBookingAsync(eventId, userId));
+        await bookingService.CreateAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
+        await Assert.ThrowsAsync<NoAvailableSeatsException>(() => bookingService.CreateAsync(eventId, userId));
     }
 
     [Fact]
@@ -194,15 +194,15 @@ public class BookingServiceTests
         var context = arrangeResults.Item2;
         var newEvent = await context.Events.FindAsync(eventId) ?? throw new KeyNotFoundException("Event not found");
         // Act 1
-        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
         // Assert 1
         Assert.Equal(4, newEvent.AvailableSeats);
         // Act 2
-        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
         // Assert 2
         Assert.Equal(3, newEvent.AvailableSeats);
         // Act 3
-        await bookingService.CreateBookingAsync(eventId, userId);
+        await bookingService.CreateAsync(eventId, userId);
         // Assert 3
         Assert.Equal(2, newEvent.AvailableSeats);
     }
@@ -219,7 +219,7 @@ public class BookingServiceTests
         var context = arrangeResults.Item2;
         var newEvent = await context.Events.FindAsync(eventId) ?? throw new KeyNotFoundException("Event not found");
         // Act
-        var tasks = Enumerable.Range(0, 5).Select(async i => await bookingService.CreateBookingAsync(eventId, userId));
+        var tasks = Enumerable.Range(0, 5).Select(async i => await bookingService.CreateAsync(eventId, userId));
         await Task.WhenAll(tasks);
         // Assert
         Assert.Equal(0, newEvent.AvailableSeats);
@@ -237,7 +237,7 @@ public class BookingServiceTests
         // Act
 
         var tasks = Enumerable.Range(0, 10)
-            .Select(_ => bookingService.CreateBookingAsync(eventId, userId))
+            .Select(_ => bookingService.CreateAsync(eventId, userId))
             .ToArray();
 
         await Task.WhenAll(tasks.Select(t => t.ContinueWith(_ => { })));

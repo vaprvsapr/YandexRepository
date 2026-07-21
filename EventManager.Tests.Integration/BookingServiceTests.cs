@@ -50,7 +50,7 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
         await userRepository.CreateAsync(user);
 
         // Act & Assert
-        Assert.Throws<PastEventBookingException>(() => bookingService.CreateBookingAsync(pastEvent.Id, user.Id).GetAwaiter().GetResult());
+        Assert.Throws<PastEventBookingException>(() => bookingService.CreateAsync(pastEvent.Id, user.Id).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -88,12 +88,12 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
         // Create 10 bookings for the user
         for (int i = 0; i < 10; i++)
         {
-            await bookingService.CreateBookingAsync(futureEvent.Id, user.Id);
+            await bookingService.CreateAsync(futureEvent.Id, user.Id);
         }
         // Act & Assert
         Assert.Throws<ExceedingActiveBookingLimitException>(() => 
-        bookingService.CreateBookingAsync(futureEvent.Id, user.Id).GetAwaiter().GetResult());
-        Assert.Equal(0, (await eventRepository.GetByIdAsync(futureEvent.Id)).AvailableSeats);
+        bookingService.CreateAsync(futureEvent.Id, user.Id).GetAwaiter().GetResult());
+        Assert.Equal(0, (await eventRepository.GetByIdAsync(futureEvent.Id))?.AvailableSeats);
     }
 
     [Fact]
@@ -141,19 +141,19 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
         // Create 10 bookings for user1
         for (int i = 0; i < 10; i++)
         {
-            await bookingService.CreateBookingAsync(futureEvent.Id, user1.Id);
+            await bookingService.CreateAsync(futureEvent.Id, user1.Id);
         }
         // Create 5 bookings for user2
         for (int i = 0; i < 5; i++)
         {
-            await bookingService.CreateBookingAsync(futureEvent.Id, user2.Id);
+            await bookingService.CreateAsync(futureEvent.Id, user2.Id);
         }
 
         // Assert
-        await Assert.ThrowsAsync<ExceedingActiveBookingLimitException>(async () => await bookingService.CreateBookingAsync(futureEvent.Id, user1.Id));
+        await Assert.ThrowsAsync<ExceedingActiveBookingLimitException>(async () => await bookingService.CreateAsync(futureEvent.Id, user1.Id));
         Assert.Equal(10, (await bookingService.GetAllBookingsAsync()).Count(b => b.UserId == user1.Id));
         Assert.Equal(5, (await bookingService.GetAllBookingsAsync()).Count(b => b.UserId == user2.Id));
-        await bookingService.CreateBookingAsync(futureEvent.Id, user2.Id); // This should succeed
+        await bookingService.CreateAsync(futureEvent.Id, user2.Id); // This should succeed
         Assert.Equal(6, (await bookingService.GetAllBookingsAsync()).Count(b => b.UserId == user2.Id));
     }
 }
