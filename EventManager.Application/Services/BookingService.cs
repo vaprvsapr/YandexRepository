@@ -100,12 +100,16 @@ public class BookingService(
     public async Task<BookingDto> CancelByIdAsync(Guid bookingId, UserInfoDto userInfoDto)
     {
         await ValidateUserCredentials(userInfoDto);
-        if (userInfoDto.Role != UserRole.Admin.ToString() && 
-            userInfoDto.Role != UserRole.User.ToString())
-            throw new UnauthorizedAccessException(
-                $"Пользователь с ролью {userInfoDto.Role} не имеет прав на отмену бронирования.");
-
         var existingBooking = await GetBookingByIdAsync(bookingId);
+
+        if (userInfoDto.Role != UserRole.Admin.ToString() && // Amins are able to cancell any booking
+            (
+            userInfoDto.Role != UserRole.User.ToString() ||  // Users are able to cancell their own bookings
+            existingBooking.UserId != userInfoDto.Id
+            ))
+            throw new UnauthorizedAccessException(
+                $"Нельзя отменить чужое бронирование.");
+
         if (existingBooking.Status == BookingStatus.Cancelled)
             throw new InvalidOperationException($"Событие с Id:{bookingId} уже отменено.");
         if (existingBooking.Status == BookingStatus.Rejected)
