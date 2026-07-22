@@ -43,6 +43,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     public async Task ConfirmAsync(Booking booking, CancellationToken ct = default)
     {
         booking.Confirm();
+        _context.Update(booking);
         await _context.SaveChangesAsync(ct);
     }
 
