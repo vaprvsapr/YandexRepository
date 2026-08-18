@@ -1,19 +1,18 @@
 ﻿
-using EventManager.Application.Dto;
-using EventManager.Application.Services.Interfaces;
-using EventManager.Domain.Models;
+using UserMicroService.Domain;
+using UserMicroService.Application;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EventManager.Presentation.Controllers;
+namespace UserMicroService.Presentation;
 
 /// <summary>
 /// Контроллер для управления аутентификацией и регистрацией пользователей, предоставляющий методы для регистрации, входа в систему и удаления пользователей.
 /// </summary>
 /// <param name="userService"></param>
 [ApiController]
-[Route("[controller]")]
-public class AuthController(IUserService userService) : UserInteractingControllerBase
+[Route("Auth")]
+public class UserController(IUserService userService) : UserInteractingControllerBase
 {
     private readonly IUserService _userService = userService;
 

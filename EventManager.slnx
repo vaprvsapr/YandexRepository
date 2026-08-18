@@ -5,18 +5,20 @@
     <Project Path="BookingService.Infrastructure/BookingService.Infrastructure.csproj" Id="591fc10e-4ec6-4628-a571-d530f31aee07" />
     <Project Path="BookingService.Presentation/BookingService.Presentation.csproj" Id="df901c74-71e2-4774-9ae2-6220428e7e64" />
   </Folder>
-  <Folder Name="/Common/" />
+  <Folder Name="/Common/">
+    <Project Path="Common/Common.csproj" Id="27963919-256a-4217-aeba-321d107171d9" />
+  </Folder>
   <Folder Name="/EventService/">
     <Project Path="EventService.Application/EventService.Application.csproj" Id="f8997787-b3d4-4cbb-b0a0-5e1eadd4a2a2" />
     <Project Path="EventService.Domain/EventService.Domain.csproj" Id="7fafc641-7efa-451d-9e15-08339dbfffc4" />
     <Project Path="EventService.Infrastructure/EventService.Infrastructure.csproj" Id="feea978f-0057-47e4-8a23-dc6e412e764c" />
     <Project Path="EventService.Presentation/EventService.Presentation.csproj" Id="a3b2bf33-9f7b-4b03-9dcf-ea7bf04545e6" />
   </Folder>
-  <Folder Name="/UserService/">
-    <Project Path="AuthService.Application/UserService.Application.csproj" Id="a897b9be-c495-45ef-820b-7e7dc4584ee2" />
-    <Project Path="AuthService.Domain/UserService.Domain.csproj" Id="184065d4-fe2b-4960-8c37-33c6311aa813" />
-    <Project Path="AuthService.Infrastructure/UserService.Infrastructure.csproj" Id="3d19c03a-c8ee-492c-a3e1-4ba368f61164" />
-    <Project Path="AuthService.Presentation/UserService.Presentation.csproj" Id="d13b769f-a018-4370-bd74-4d65c92356eb" />
+  <Folder Name="/UserMicroService/">
+    <Project Path="UserMicroService.Presentation/UserMicroService.Presentation.csproj" Id="b16442b3-bc4a-4c7a-8ca7-626d7dad2c44" />
+    <Project Path="UserService.Application/UserMicroService.Application.csproj" Id="1a38fd30-495b-4116-be20-4caa79c965c2" />
+    <Project Path="UserService.Domain/UserMicroService.Domain.csproj" Id="7527a576-5071-40b7-bc32-475e99cd119a" />
+    <Project Path="UserService.Infrastructure/UserMicroService.Infrastructure.csproj" Id="7f1d30b7-a03f-403b-8388-d6ed41d14154" />
   </Folder>
   <Folder Name="/Элементы решения/">
     <File Path="README.md" />
