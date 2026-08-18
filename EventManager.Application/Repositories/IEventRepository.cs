@@ -1,4 +1,5 @@
-﻿using EventManager.Domain.Models;
+﻿using EventManager.Application.Dto;
+using EventManager.Domain.Models;
 
 namespace EventManager.Application.Repositories;
 
@@ -12,36 +13,31 @@ public interface IEventRepository
     /// </summary>
     /// <param name="id"></param>
     /// <param name="ct"></param>
-    /// <returns></returns>
-    public Task<Event> GetByIdAsync(Guid id, CancellationToken ct = default);
+    public Task<Event?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
     /// Получает все события в виде IQueryable, что позволяет выполнять дополнительные операции LINQ на уровне базы данных.
     /// </summary>
-    /// <returns></returns>
     public IQueryable<Event> GetAll();
 
     /// <summary>
-    /// Асинхронно удаляет событие по его уникальному идентификатору.
+    /// Асинхронно удаляет событие.
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="event"></param>
     /// <param name="ct"></param>
-    /// <returns></returns>
-    public Task DeleteByIdAsync(Guid id, CancellationToken ct = default);
+    public Task DeleteAsync(Event @event, CancellationToken ct = default);
 
     /// <summary>
     /// Асинхронно обновляет существующее событие.
     /// </summary>
     /// <param name="event"></param>
     /// <param name="ct"></param>
-    /// <returns></returns>
-    public Task<Event> UpdateAsync(Event @event, CancellationToken ct = default);
+    public Task UpdateAsync(Event @event, CancellationToken ct = default);
 
     /// <summary>
     /// Асинхронно создает новое событие на основе предоставленных данных и сохраняет его в базе данных.
     /// </summary>
     /// <param name="event"></param>
     /// <param name="ct"></param>
-    /// <returns></returns>
-    public Task<Event> CreateAsync(Event @event, CancellationToken ct = default);
+    public Task CreateAsync(Event @event, CancellationToken ct = default);
 }

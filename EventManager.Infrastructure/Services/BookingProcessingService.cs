@@ -15,8 +15,6 @@ namespace EventManager.Infrastructure.Services;
 /// </remarks>
 /// <param name="serviceScopeFactory">Фабрика для создания областей видимости сервисов.</param>
 /// <param name="logger">Логгер для записи информации о процессе обработки бронирований.</param>
-/// <param name="delay">Задержка между проверками бронирований.</param>
-/// <param name="maxConcurrentBookings">Максимальное количество бронирований, обрабатываемых одновременно.</param>
 public class BookingProcessingService(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<BookingProcessingService> logger) : BackgroundService
@@ -55,12 +53,12 @@ public class BookingProcessingService(
                     _logger.LogInformation("Обработка {n} ожидающих бронирований в: {time}",
                         pendingBookings.Count, DateTime.Now);
 
-                var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking.Id, stoppingToken));
+                var tasks = pendingBookings.Select(booking => ProcessBookingAsync(booking, stoppingToken));
                 await Task.WhenAll(tasks);
             }
             else
                 await Task.Delay(_delay, stoppingToken);
-        }
+            }
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingProcessingService остановлен: {time}", DateTime.Now);
@@ -69,31 +67,29 @@ public class BookingProcessingService(
     /// <summary>
     /// Метод обработки бронирования.
     /// </summary>
-    /// <param name="bookingId">Id бронирования, которое нужно обработать.</param>
+    /// <param name="booking">Бронирование, которое нужно обработать.</param>
     /// <param name="ct">Токен отмены.</param>
-    public async Task ProcessBookingAsync(Guid bookingId, CancellationToken ct)
+    public async Task ProcessBookingAsync(Booking booking, CancellationToken ct)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
         var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
-
-        Booking? bookingToProcess = await bookingRepository.GetByIdAsync(bookingId, ct);
-        Event? existingEvent = await eventRepository.GetByIdAsync(bookingToProcess?.EventId ?? Guid.Empty, ct);
+        var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+        var existingEvent = await eventRepository.GetByIdAsync(booking.EventId, ct);
 
         // Упростил логику обработки: если событие существует, подтверждаем бронирование, иначе отклоняем его.
         // Считаю, что на данный момент нет смысла усложнять.
         if (existingEvent != null)
         {
-            await bookingRepository.ConfirmByIdAsync(bookingId, ct);
+            await bookingRepository.ConfirmAsync(booking, ct);
             if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("Бронирование {id} для события {title} подтверждено.",
-                    bookingToProcess?.Id, existingEvent.Title);
+                _logger.LogInformation("Бронирование с ID:{id} для события с ID:{eventId} подтверждено.",
+                    booking.Id, booking.EventId);
         }
         else
         {
-            await bookingRepository.RejectByIdAsync(bookingId, ct);
-            _logger.LogWarning("Бронирование с ID {id} отклонено. Событие с ID {eventId} не найдено.",
-                bookingToProcess?.Id, bookingToProcess?.EventId);
+            await bookingRepository.RejectAsync(booking, ct);
+            _logger.LogWarning("Бронирование с ID:{id} отклонено. Событие с ID:{eventId} не найдено.",
+                booking.Id, booking.EventId);
         }
     }
 }

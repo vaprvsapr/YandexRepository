@@ -22,6 +22,6 @@ public abstract class PostgresTest(PostgresFixture postgresFixture)
     {
         await using var context = await CreateContextAsync();
         await context.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE events, bookings Restart IDENTITY CASCADE");
+            "TRUNCATE TABLE events, bookings, users RESTART IDENTITY CASCADE");
     }
 }

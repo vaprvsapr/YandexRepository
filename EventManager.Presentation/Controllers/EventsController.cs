@@ -1,8 +1,8 @@
-﻿using EventManager.Application.Services;
-using EventManager.Application.Dto;
+﻿using EventManager.Application.Dto;
 using EventManager.Application.Queries;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using EventManager.Application.Services.Interfaces;
 
 namespace EventManager.Presentation.Controllers;
 
@@ -13,6 +13,7 @@ namespace EventManager.Presentation.Controllers;
 /// Этот контроллер реализует стандартные CRUD-операции для сущности события. Все методы возвращают результат посредством ActionResult.
 /// </remarks>
 /// <param name="eventService">Сервис, реализующий бизнес-логику для операций с событиями.</param>
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("events")]
 public class EventsController(IEventService eventService) : ControllerBase
@@ -25,8 +26,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Коллекция событий.</returns>
     /// <response code="200">Возвращается успешный ответ с коллекцией событий и HTTP статус-кодом 200 OK.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Produces("application/json")]
     [HttpGet]
     public async Task<ActionResult<PaginatedResultDto>> GetAllEvents([FromQuery] GetEventQuery query)
@@ -42,8 +44,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Данные найденного события.</returns>
     /// <response code="200">Возвращается успешный ответ с данными события и HTTP статус-кодом 200 OK.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если событие не найдено.</response>
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<EventInfoDto>> GetEventById([FromRoute] Guid id)
@@ -59,10 +62,14 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <returns>Информация о созданном событии.</returns>
     /// <response code="201">Возвращается успешный ответ с данными созданного события и HTTP статус-кодом 201 Created.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
+    /// <response code="401">Возвращается HTTP статус-код 401 Unauthorized, если пользователь не авторизован.</response>
+    /// <response code="403">Возвращается HTTP статус-код 403 Forbidden, если у пользователя нет прав на создание события.</response>
     /// <response code="409">Возвращается HTTP статус-код 409 Conflict, если не удалось создать событие.</response>
-    [ProducesResponseType((int)HttpStatusCode.Created)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType((int)HttpStatusCode.Conflict)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [Produces("application/json")]
     [HttpPost]
     public async Task<ActionResult<EventInfoDto>> PostEvent([FromBody] EventCreateDto newEvent)
@@ -78,11 +85,15 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <param name="updatedEventDto">Новые данные события.</param>
     /// <returns>Результат обновления события.</returns>
     /// <response code="200">Возвращается HTTP статус-код 200 OK, если событие успешно обновлено.</response>
+    /// <response code="401">Возвращается HTTP статус-код 401 Unauthorized, если пользователь не авторизован.</response>
+    /// <response code="403">Возвращается HTTP статус-код 403 Forbidden, если у пользователя нет прав на обновление события.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если не удалось обновить событие.</response>
     /// <response code="400">Возвращается HTTP статус-код 400 Bad Request, если были обнаружены ошибки валидации.</response>
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Produces("application/json")]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<EventInfoDto>> PutEvent([FromRoute] Guid id, [FromBody] EventUpdateDto updatedEventDto)
@@ -97,9 +108,13 @@ public class EventsController(IEventService eventService) : ControllerBase
     /// <param name="id">Идентификатор события, которое требуется удалить.</param>
     /// <returns>Результат удаления события.</returns>
     /// <response code="204">Возвращается HTTP статус-код 204 No Content, если событие успешно удалено.</response>
+    /// <response code="401">Возвращается HTTP статус-код 401 Unauthorized, если пользователь не авторизован.</response>
+    /// <response code="403">Возвращается HTTP статус-код 403 Forbidden, если у пользователя нет прав на удаление события.</response>
     /// <response code="404">Возвращается HTTP статус-код 404 Not Found, если событие не найдено или не удалено.</response>
-    [ProducesResponseType((int)HttpStatusCode.NoContent)]
-    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid id)

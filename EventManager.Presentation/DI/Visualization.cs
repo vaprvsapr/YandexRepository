@@ -1,5 +1,8 @@
 ﻿using System.Reflection;
 
+using Microsoft.OpenApi.Models;
+
+
 namespace EventManager.Presentation.DI;
 
 /// <summary>
@@ -13,7 +16,6 @@ public static partial class DependencyInjectionExtensions
     public static IServiceCollection AddVisualization(this IServiceCollection services)
     {
         // Регистрация Swagger для документации API
-        services.AddOpenApi();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
@@ -21,7 +23,34 @@ public static partial class DependencyInjectionExtensions
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath);
+
+            // Настройка схемы безопасности для использования JWT токенов
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "Введите JWT токен:",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
         });
+
         return services;
     }
 }

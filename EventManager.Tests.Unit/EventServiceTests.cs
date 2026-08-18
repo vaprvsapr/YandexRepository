@@ -42,10 +42,12 @@ public class EventServiceTests
             EndAt = DateTime.Now.AddHours(1),
             TotalSeats = 10
         };
+
         var mockLogger = new Mock<ILogger<EventService>>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
         services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -53,8 +55,6 @@ public class EventServiceTests
         var eventService = new EventService(eventRepository, mockLogger.Object);
         // Act
         var createdEvent = await eventService.CreateEvent(newEvent);
-
-        // Act
 
         // Assert
         Assert.Equal(1, context.Events.Count());
