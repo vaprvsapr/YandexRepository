@@ -1,11 +1,30 @@
 <Solution>
+  <Folder Name="/BookingService/">
+    <Project Path="BookingService.Application/BookingService.Application.csproj" Id="beeb3a83-bc3a-4f41-b05e-418ef62b2e4c" />
+    <Project Path="BookingService.Domain/BookingService.Domain.csproj" Id="461cf42f-aec1-46b8-bf09-e0214e5fb08e" />
+    <Project Path="BookingService.Infrastructure/BookingService.Infrastructure.csproj" Id="591fc10e-4ec6-4628-a571-d530f31aee07" />
+    <Project Path="BookingService.Presentation/BookingService.Presentation.csproj" Id="df901c74-71e2-4774-9ae2-6220428e7e64" />
+  </Folder>
+  <Folder Name="/Common/" />
+  <Folder Name="/EventService/">
+    <Project Path="EventService.Application/EventService.Application.csproj" Id="f8997787-b3d4-4cbb-b0a0-5e1eadd4a2a2" />
+    <Project Path="EventService.Domain/EventService.Domain.csproj" Id="7fafc641-7efa-451d-9e15-08339dbfffc4" />
+    <Project Path="EventService.Infrastructure/EventService.Infrastructure.csproj" Id="feea978f-0057-47e4-8a23-dc6e412e764c" />
+    <Project Path="EventService.Presentation/EventService.Presentation.csproj" Id="a3b2bf33-9f7b-4b03-9dcf-ea7bf04545e6" />
+  </Folder>
+  <Folder Name="/UserService/">
+    <Project Path="AuthService.Application/UserService.Application.csproj" Id="a897b9be-c495-45ef-820b-7e7dc4584ee2" />
+    <Project Path="AuthService.Domain/UserService.Domain.csproj" Id="184065d4-fe2b-4960-8c37-33c6311aa813" />
+    <Project Path="AuthService.Infrastructure/UserService.Infrastructure.csproj" Id="3d19c03a-c8ee-492c-a3e1-4ba368f61164" />
+    <Project Path="AuthService.Presentation/UserService.Presentation.csproj" Id="d13b769f-a018-4370-bd74-4d65c92356eb" />
+  </Folder>
   <Folder Name="/Элементы решения/">
     <File Path="README.md" />
   </Folder>
   <Project Path="EventManager.Application/EventManager.Application.csproj" Id="d3074723-0bd2-4318-bcd1-4ef199b2f75f" />
   <Project Path="EventManager.Domain/EventManager.Domain.csproj" Id="2302be5d-c2c5-4683-9e86-1421669f650a" />
   <Project Path="EventManager.Infrastructure/EventManager.Infrastructure.csproj" Id="5cf2e94e-7ffa-42a8-b63a-0b9287de4231" />
-  <Project Path="EventManager.Tests.Integration/EventManager.Tests.Integration.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
   <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" Id="87a35e7d-e3d5-4fc4-9f9a-9e48628393aa" />
+  <Project Path="EventManager.Tests.Integration/EventManager.Tests.Integration.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
   <Project Path="EventManager.Tests.Unit/EventManager.Tests.Unit.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
 </Solution>
