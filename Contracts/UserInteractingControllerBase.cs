@@ -1,7 +1,6 @@
-﻿using UserMicroService.Domain;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UserMicroService.Presentation;
+namespace Contracts;
 
 /// <summary>
 /// Базовый контроллер для взаимодействия с пользователем, 
@@ -22,12 +21,11 @@ public abstract class UserInteractingControllerBase : ControllerBase
     /// <summary>
     /// Получает роль пользователя из токена аутентификации (JWT) в виде перечисления UserRole.
     /// </summary>
-    protected UserRole GetUserRoleFromClaims()
+    protected string GetUserRoleFromClaims()
     {
-        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role");
-        if (roleClaim == null)
+        var roleClaim = User.Claims.FirstOrDefault(c => c.Type == "role") ??
             throw new InvalidOperationException("Роль пользователя не найдена в токене.");
-        return Enum.Parse<UserRole>(roleClaim.Value);
+        return roleClaim.Value;
     }
 
     /// <summary>
@@ -35,8 +33,7 @@ public abstract class UserInteractingControllerBase : ControllerBase
     /// </summary>
     protected string GetUserLoginFromClaims()
     {
-        var loginClaim = User.Claims.FirstOrDefault(c => c.Type == "login");
-        if (loginClaim == null)
+        var loginClaim = User.Claims.FirstOrDefault(c => c.Type == "login") ??
             throw new InvalidOperationException("Логин пользователя не найден в токене.");
         return loginClaim.Value;
     }

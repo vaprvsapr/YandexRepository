@@ -41,8 +41,6 @@ public static partial class DependencyInjectionExtensions
         // Фоновый сервис для обработки бронирований
         services.AddHostedService<BookingProcessingService>();
 
-        
-
         return services;
     }
 }

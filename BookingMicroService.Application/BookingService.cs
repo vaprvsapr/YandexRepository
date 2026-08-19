@@ -1,0 +1,63 @@
+﻿using BookingMicroService.Domain;
+using Microsoft.Extensions.Logging;
+using System.Security.Authentication;
+
+namespace BookingMicroService.Application;
+
+/// <summary>
+/// Сервис для управления бронированиями событий, реализующий бизнес-логику создания, получения и поиска бронирований.
+/// </summary>
+public class BookingService(
+    IBookingRepository bookingRepository,
+    IBookingCreatedProducer bookingCreatedProducer,
+    ILogger<BookingService> logger) : IBookingService
+{
+    private readonly IBookingRepository _bookingRepository = bookingRepository;
+    private readonly IBookingCreatedProducer _bookingCreatedProducer = bookingCreatedProducer;
+    private readonly ILogger<BookingService> _logger = logger;
+
+    /// <inheritdoc/>
+    public async Task<BookingDto> CreateAsync(Guid eventId, Guid userId)
+    { 
+        var newBooking = new Booking
+        {
+            Id = Guid.NewGuid(),
+            EventId = eventId,
+            UserId = userId,
+            Status = BookingStatus.Pending,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _bookingRepository.CreateAsync(newBooking);
+        await _bookingCreatedProducer.PublishAsync(BookingMapper.ToBookingCreated(newBooking));
+        return BookingMapper.ToBookingDto(newBooking);
+    }
+
+    // <inheritdoc/>
+    public async Task CancelByIdAsync(Guid bookingId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>   
+    public async Task<BookingDto?> GetByIdAsync(Guid id)
+    {
+        return BookingMapper.ToBookingDto(await GetBookingByIdAsync(id));
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<BookingDto>> GetAllBookingsAsync()
+    {
+        return [.. _bookingRepository
+            .GetAll()
+            .Select(BookingMapper.ToBookingDto)
+            ];
+    }
+
+    private async Task<Booking> GetBookingByIdAsync(Guid id)
+    {
+        var existingBooking = await _bookingRepository.GetByIdAsync(id) ??
+            throw new KeyNotFoundException($"Бронирование с Id:{id} не найдено.");
+        return existingBooking;
+    }
+}

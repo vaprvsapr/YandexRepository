@@ -1,6 +1,12 @@
 <Solution>
+  <Folder Name="/BookingMicroService/">
+    <Project Path="BookingMicroService.Application/BookingMicroService.Application.csproj" Id="24ef21db-2048-40f6-8fa2-3e0bb7581648" />
+    <Project Path="BookingMicroService.Domain/BookingMicroService.Domain.csproj" Id="e7759843-1424-4a04-9dce-c2ec8d769206" />
+    <Project Path="BookingMicroService.Infrastructure/BookingMicroService.Infrastructure.csproj" Id="1914c2c4-7780-40ca-a3ed-296282fe5e78" />
+    <Project Path="BookingMicroService.Presentation/BookingMicroService.Presentation.csproj" Id="6cc2912d-a2a4-4892-830a-046b3e631d53" />
+  </Folder>
   <Folder Name="/Common/">
-    <Project Path="Common/Common.csproj" Id="27963919-256a-4217-aeba-321d107171d9" />
+    <Project Path="Contracts/Contracts.csproj" Id="58d5485b-7909-4dd9-8e4f-95a332d42443" />
   </Folder>
   <Folder Name="/EventMicroService/">
     <Project Path="EventMicroService.Application/EventMicroService.Application.csproj" Id="1d21c5df-0ea5-4799-a030-ff8955577d4b" />
@@ -15,6 +21,7 @@
     <Project Path="UserMicroService.Presentation/UserMicroService.Presentation.csproj" Id="b16442b3-bc4a-4c7a-8ca7-626d7dad2c44" />
   </Folder>
   <Folder Name="/Элементы решения/">
+    <File Path="docker-compose.yml" />
     <File Path="README.md" />
   </Folder>
   <Project Path="EventManager.Application/EventManager.Application.csproj" Id="d3074723-0bd2-4318-bcd1-4ef199b2f75f" />

@@ -17,8 +17,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Contracts\Contracts.csproj" />
-	  <ProjectReference Include="..\UserMicroService.Application\UserMicroService.Application.csproj" />
-	  <ProjectReference Include="..\UserMicroService.Infrastructure\UserMicroService.Infrastructure.csproj" />
+		<ProjectReference Include="..\BookingMicroService.Application\BookingMicroService.Application.csproj" />
+		<ProjectReference Include="..\BookingMicroService.Domain\BookingMicroService.Domain.csproj" />
+		<ProjectReference Include="..\BookingMicroService.Infrastructure\BookingMicroService.Infrastructure.csproj" />
 	</ItemGroup>
+
 </Project>
