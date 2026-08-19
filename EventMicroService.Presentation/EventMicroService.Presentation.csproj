@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -6,6 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EventMicroService.Application\EventMicroService.Application.csproj" />
+    <ProjectReference Include="..\EventMicroService.Domain\EventMicroService.Domain.csproj" />
+    <ProjectReference Include="..\EventMicroService.Infrastructure\EventMicroService.Infrastructure.csproj" />
+  </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
@@ -16,8 +22,4 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\UserMicroService.Application\UserMicroService.Application.csproj" />
-	  <ProjectReference Include="..\UserMicroService.Infrastructure\UserMicroService.Infrastructure.csproj" />
-	</ItemGroup>
 </Project>

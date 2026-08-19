@@ -1,24 +1,18 @@
 <Solution>
-  <Folder Name="/BookingService/">
-    <Project Path="BookingService.Application/BookingService.Application.csproj" Id="beeb3a83-bc3a-4f41-b05e-418ef62b2e4c" />
-    <Project Path="BookingService.Domain/BookingService.Domain.csproj" Id="461cf42f-aec1-46b8-bf09-e0214e5fb08e" />
-    <Project Path="BookingService.Infrastructure/BookingService.Infrastructure.csproj" Id="591fc10e-4ec6-4628-a571-d530f31aee07" />
-    <Project Path="BookingService.Presentation/BookingService.Presentation.csproj" Id="df901c74-71e2-4774-9ae2-6220428e7e64" />
-  </Folder>
   <Folder Name="/Common/">
     <Project Path="Common/Common.csproj" Id="27963919-256a-4217-aeba-321d107171d9" />
   </Folder>
-  <Folder Name="/EventService/">
-    <Project Path="EventService.Application/EventService.Application.csproj" Id="f8997787-b3d4-4cbb-b0a0-5e1eadd4a2a2" />
-    <Project Path="EventService.Domain/EventService.Domain.csproj" Id="7fafc641-7efa-451d-9e15-08339dbfffc4" />
-    <Project Path="EventService.Infrastructure/EventService.Infrastructure.csproj" Id="feea978f-0057-47e4-8a23-dc6e412e764c" />
-    <Project Path="EventService.Presentation/EventService.Presentation.csproj" Id="a3b2bf33-9f7b-4b03-9dcf-ea7bf04545e6" />
+  <Folder Name="/EventMicroService/">
+    <Project Path="EventMicroService.Application/EventMicroService.Application.csproj" Id="1d21c5df-0ea5-4799-a030-ff8955577d4b" />
+    <Project Path="EventMicroService.Domain/EventMicroService.Domain.csproj" Id="1d28cfff-d276-4cb7-bee2-9308456dfa7b" />
+    <Project Path="EventMicroService.Infrastructure/EventMicroService.Infrastructure.csproj" Id="d6a2469c-81cd-4223-af9f-b94e4b8ca726" />
+    <Project Path="EventMicroService.Presentation/EventMicroService.Presentation.csproj" Id="3108abc8-220e-4647-8bee-b45ef4d9f996" />
   </Folder>
   <Folder Name="/UserMicroService/">
+    <Project Path="UserMicroService.Application/UserMicroService.Application.csproj" />
+    <Project Path="UserMicroService.Domain/UserMicroService.Domain.csproj" />
+    <Project Path="UserMicroService.Infrastructure/UserMicroService.Infrastructure.csproj" />
     <Project Path="UserMicroService.Presentation/UserMicroService.Presentation.csproj" Id="b16442b3-bc4a-4c7a-8ca7-626d7dad2c44" />
-    <Project Path="UserService.Application/UserMicroService.Application.csproj" Id="1a38fd30-495b-4116-be20-4caa79c965c2" />
-    <Project Path="UserService.Domain/UserMicroService.Domain.csproj" Id="7527a576-5071-40b7-bc32-475e99cd119a" />
-    <Project Path="UserService.Infrastructure/UserMicroService.Infrastructure.csproj" Id="7f1d30b7-a03f-403b-8388-d6ed41d14154" />
   </Folder>
   <Folder Name="/Элементы решения/">
     <File Path="README.md" />
