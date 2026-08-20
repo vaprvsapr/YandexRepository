@@ -41,7 +41,7 @@ public static partial class DependencyInjectionExtensions
             var producer = sp.GetRequiredService<BookingCreatedResponseProducer>();
             var logger = sp.GetRequiredService<ILogger<BookingConfirmationBackgroundService>>();
 
-            var groupId = config.GetRequiredSection("GroupId").Value ?? throw new InvalidOperationException("GroupId configuration is missing.");
+            var groupId = config.GetRequiredSection("BookingConfirmationGroupId").Value ?? throw new InvalidOperationException("GroupId configuration is missing.");
 
             return new BookingConfirmationBackgroundService(
                 scopeFactory,

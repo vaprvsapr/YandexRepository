@@ -1,7 +1,10 @@
 ﻿using BookingMicroService.Application;
+using Confluent.Kafka;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace BookingMicroService.Infrastructure;
 
@@ -34,7 +37,24 @@ public static partial class DependencyInjectionExtensions
         });
 
         // Фоновый сервис для обработки бронирований
-        // services.AddHostedService<BookingProcessingService>();
+        services.AddSingleton<IHostedService>(sp =>
+        {
+            var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+            var logger = sp.GetRequiredService<ILogger<BookingConfirmationResponseBackgroundService>>();
+
+            var config = configuration.GetSection("KafkaSettings");
+            var groupId = config.GetRequiredSection("BookingConfirmationResponseGroupId").Value
+                ?? throw new InvalidOperationException("GroupId configuration is missing.");
+            var bootstrapServers = config.GetValue<string>("BootstrapServers")
+                ?? throw new InvalidOperationException("BootstrapServers configuration is missing.");
+
+            return new BookingConfirmationResponseBackgroundService(
+                scopeFactory,
+                logger,
+                bootstrapServers,
+                groupId
+            );
+        });
 
         return services;
     }

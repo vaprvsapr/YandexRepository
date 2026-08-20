@@ -70,7 +70,7 @@ public class BookingConfirmationBackgroundService : BackgroundService
 
                 var bookingCreatedResponse = new BookingCreatedResponse
                 {
-                    BookingId = bookingCreated.EventId,
+                    BookingId = bookingCreated.BookingId,
                     Confirmed = false,
                 };
 
@@ -88,8 +88,9 @@ public class BookingConfirmationBackgroundService : BackgroundService
                 }
 
                 existingEvent.TryReserveSeats();
+                await eventRepository.UpdateAsync(existingEvent, stoppingToken);
                 if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("Бронирование с ID {bookingId} подтверждено для события с ID {eventId}.", bookingCreated.EventId, bookingCreated.EventId);
+                    _logger.LogInformation("Бронирование с ID {bookingId} подтверждено для события с ID {eventId}.", bookingCreated.BookingId, bookingCreated.EventId);
                 bookingCreatedResponse.Confirmed = true;
                 await _producer.PublishAsync(bookingCreatedResponse);
             }
