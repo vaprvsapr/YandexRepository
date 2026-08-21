@@ -4,11 +4,11 @@ using System.Text.Json;
 
 namespace EventMicroService.Infrastructure;
 
-public class BookingCreatedResponseProducer
+public class BookingProcessResponseProducer
 {
     private readonly IProducer<string, string> _producer;
-    private readonly string _topic = Topics.BookingCreatedResponseTopic;
-    public BookingCreatedResponseProducer(string bootstrapServers)
+    private readonly string _topic = Topics.BookingProcessResponse;
+    public BookingProcessResponseProducer(string bootstrapServers)
     {
         var config = new ProducerConfig
         {
@@ -19,12 +19,12 @@ public class BookingCreatedResponseProducer
         _producer = new ProducerBuilder<string, string>(config)
             .Build();
     }
-    public async Task PublishAsync(BookingCreatedResponse bookingCreatedResponse)
+    public async Task PublishAsync(BookingProcessResponse bookingProcessResponse)
     {
         var result = await _producer.ProduceAsync(_topic, new Message<string, string>
         {
-            Key = bookingCreatedResponse.BookingId.ToString(),
-            Value = JsonSerializer.Serialize(bookingCreatedResponse)
+            Key = bookingProcessResponse.BookingId.ToString(),
+            Value = JsonSerializer.Serialize(bookingProcessResponse)
         });
     }
     public void Dispose()

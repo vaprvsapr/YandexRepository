@@ -8,7 +8,7 @@ namespace BookingMicroService.Infrastructure;
 public class BookingCreatedProducer : IBookingCreatedProducer, IDisposable
 {
     private readonly IProducer<string, string> _producer;
-    private readonly string _topic = Topics.BookingCreatedTopic;
+    private readonly string _topic = Topics.BookingProcessRequest;
     public BookingCreatedProducer(string bootstrapServers)
     {
         var config = new ProducerConfig
@@ -20,7 +20,7 @@ public class BookingCreatedProducer : IBookingCreatedProducer, IDisposable
         _producer = new ProducerBuilder<string, string>(config)
             .Build();
     }
-    public async Task PublishAsync(BookingCreated bookingCreated)
+    public async Task PublishAsync(BookingProcessRequest bookingCreated)
     {
         var result = await _producer.ProduceAsync(_topic, new Message<string, string>
         {

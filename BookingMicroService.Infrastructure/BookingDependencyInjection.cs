@@ -1,5 +1,6 @@
 ﻿using BookingMicroService.Application;
 using Confluent.Kafka;
+using Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,14 +28,20 @@ public static partial class DependencyInjectionExtensions
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
 
-        services.AddSingleton<IBookingCreatedProducer>(sp =>
-        {
-            var config = configuration.GetSection("KafkaSettings");
-            var bootstrapServers = config.GetValue<string>("BootstrapServers") ??
-                throw new InvalidOperationException("BootstrapServers configuration is missing.");
-            return new BookingCreatedProducer(bootstrapServers);
+        var config = configuration.GetSection("KafkaSettings");
 
+        var bootstrapServers = config.GetValue<string>("BootstrapServers") ??
+            throw new InvalidOperationException("BootstrapServers configuration is missing.");
+
+        services.AddSingleton<IBookingCreatedProducer>(new BookingCreatedProducer(bootstrapServers));
+
+        services.AddSingleton(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<KafkaTopicsInitializer>>();
+
+            return new KafkaTopicsInitializer(bootstrapServers, logger);
         });
+        services.AddHostedService<BookingProcessResponseTopicInitializingService>();
 
         // Фоновый сервис для обработки бронирований
         services.AddSingleton<IHostedService>(sp =>
@@ -42,11 +49,8 @@ public static partial class DependencyInjectionExtensions
             var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
             var logger = sp.GetRequiredService<ILogger<BookingConfirmationResponseBackgroundService>>();
 
-            var config = configuration.GetSection("KafkaSettings");
-            var groupId = config.GetRequiredSection("BookingConfirmationResponseGroupId").Value
+            var groupId = config.GetRequiredSection("BookingProcessResponseGroupId").Value
                 ?? throw new InvalidOperationException("GroupId configuration is missing.");
-            var bootstrapServers = config.GetValue<string>("BootstrapServers")
-                ?? throw new InvalidOperationException("BootstrapServers configuration is missing.");
 
             return new BookingConfirmationResponseBackgroundService(
                 scopeFactory,

@@ -43,19 +43,4 @@ public class BookingMapper
             ProcessedAt = bookingDto.ProcessedAt
         };
     }
-
-    /// <summary>
-    /// Метод преобразования модели бронирования в событие создания бронирования.
-    /// </summary>
-    /// <param name="booking"></param>
-    /// <returns></returns>
-    public static BookingCreated ToBookingCreated(Booking booking)
-    {
-        return new BookingCreated
-        {
-            BookingId = booking.Id,
-            UserId = booking.UserId,
-            EventId = booking.EventId
-        };
-    }
 }

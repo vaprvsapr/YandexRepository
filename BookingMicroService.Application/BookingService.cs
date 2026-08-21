@@ -1,4 +1,5 @@
 ﻿using BookingMicroService.Domain;
+using Contracts;
 using Microsoft.Extensions.Logging;
 using System.Security.Authentication;
 
@@ -29,14 +30,37 @@ public class BookingService(
         };
 
         await _bookingRepository.CreateAsync(newBooking);
-        await _bookingCreatedProducer.PublishAsync(BookingMapper.ToBookingCreated(newBooking));
+
+        var bookingProcessRequest = new BookingProcessRequest
+        {
+            BookingId = newBooking.Id,
+            EventId = newBooking.EventId,
+            UserId = newBooking.UserId,
+            Command = BookingProcessCommand.Confirm
+        };
+        await _bookingCreatedProducer.PublishAsync(bookingProcessRequest);
         return BookingMapper.ToBookingDto(newBooking);
     }
 
     // <inheritdoc/>
     public async Task CancelByIdAsync(Guid bookingId, Guid userId)
     {
-        throw new NotImplementedException();
+        var existingBooking = await GetBookingByIdAsync(bookingId) ??
+            throw new KeyNotFoundException($"Бронирование с Id:{bookingId} не найдено.");
+        if (existingBooking.Status == BookingStatus.Cancelled)
+            throw new InvalidOperationException($"Бронирование с Id:{bookingId} уже отменено.");
+
+        var eventId = existingBooking.EventId;
+
+        var bookingProcessRequest = new BookingProcessRequest
+        {
+            BookingId = existingBooking.Id,
+            EventId = eventId,
+            UserId = userId,
+            Command = BookingProcessCommand.Cancel
+        };
+
+        await _bookingCreatedProducer.PublishAsync(bookingProcessRequest);
     }
 
     /// <inheritdoc/>   

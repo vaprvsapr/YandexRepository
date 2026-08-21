@@ -13,7 +13,6 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
     /// Метод конфигурации, который задает правила для отображения сущности Event в базе данных, 
     /// включая имена столбцов, типы данных, ограничения и связи с другими сущностями.
     /// </summary>
-    /// <param name="builder"></param>
     public void Configure(EntityTypeBuilder<Event> builder)
     {
         builder.ToTable("events");
@@ -51,5 +50,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .HasColumnName("title")
             .HasMaxLength(50)
             .IsRequired();
+
+        builder.HasMany(e => e.Bookings);
     }
 }

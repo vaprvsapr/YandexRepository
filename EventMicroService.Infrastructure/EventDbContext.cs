@@ -18,6 +18,8 @@ public class EventDbContext(DbContextOptions<EventDbContext> options) : DbContex
     /// </summary>
     public DbSet<Event> Events => Set<Event>();
 
+    public DbSet<EventBooking> EventBookings => Set<EventBooking>();
+
     /// <summary>
     /// Метод для настройки модели данных и определения конфигурации сущностей при создании модели базы данных. 
     /// Он применяет все конфигурации, определенные в сборке, содержащей AppDbContext,

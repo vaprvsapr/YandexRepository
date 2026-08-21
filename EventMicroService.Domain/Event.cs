@@ -30,6 +30,8 @@ public class Event
     /// </summary>
     public required DateTime? EndAt { get; set; }
 
+    public List<EventBooking> Bookings { get; set; } = [];
+
     private int _totalSeats = 0;
     /// <summary>
     /// Количество мест на событие, обязательное поле.

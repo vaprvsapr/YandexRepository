@@ -1,4 +1,5 @@
-﻿using EventMicroService.Application;
+﻿using Contracts;
+using EventMicroService.Application;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,20 +31,30 @@ public static partial class DependencyInjectionExtensions
         var bootstrapServers = config.GetValue<string>("BootstrapServers") ??
             throw new InvalidOperationException("BootstrapServers configuration is missing.");
 
+
         services.AddSingleton(sp =>
         {
-            return new BookingCreatedResponseProducer(bootstrapServers);
+            var logger = sp.GetRequiredService<ILogger<KafkaTopicsInitializer>>();
+            return new KafkaTopicsInitializer(bootstrapServers, logger);
+        });
+
+        services.AddHostedService<BookingProcessRequestTopicInitializingService>();
+
+        services.AddSingleton(sp =>
+        {
+            return new BookingProcessResponseProducer(bootstrapServers);
         });
 
         services.AddSingleton<IHostedService>(sp =>
         {
             var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
-            var producer = sp.GetRequiredService<BookingCreatedResponseProducer>();
-            var logger = sp.GetRequiredService<ILogger<BookingConfirmationBackgroundService>>();
+            var producer = sp.GetRequiredService<BookingProcessResponseProducer>();
+            var logger = sp.GetRequiredService<ILogger<BookingProcessingBackgroundService>>();
 
-            var groupId = config.GetRequiredSection("BookingConfirmationGroupId").Value ?? throw new InvalidOperationException("GroupId configuration is missing.");
+            var groupId = config.GetRequiredSection("BookingProcessRequestGroupId").Value ?? 
+                throw new InvalidOperationException("GroupId configuration is missing.");
 
-            return new BookingConfirmationBackgroundService(
+            return new BookingProcessingBackgroundService(
                 scopeFactory,
                 producer,
                 logger,
@@ -51,6 +62,7 @@ public static partial class DependencyInjectionExtensions
                 groupId
             );
         });
+
 
         return services;
     }

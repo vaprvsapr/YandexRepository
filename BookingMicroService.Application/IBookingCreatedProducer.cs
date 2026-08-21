@@ -4,5 +4,5 @@ namespace BookingMicroService.Application;
 
 public interface IBookingCreatedProducer
 {
-    Task PublishAsync(BookingCreated bookingCreated);
+    Task PublishAsync(BookingProcessRequest bookingCreated);
 }

@@ -31,7 +31,7 @@ public class BookingConfirmationResponseBackgroundService : BackgroundService
         };
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
-        _consumer.Subscribe(Topics.BookingCreatedResponseTopic);
+        _consumer.Subscribe(Topics.BookingProcessResponse);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class BookingConfirmationResponseBackgroundService : BackgroundService
 
                 var consumeResult = _consumer.Consume(stoppingToken);
 
-                var bookingCreatedResponse = System.Text.Json.JsonSerializer.Deserialize<BookingCreatedResponse>(consumeResult.Message.Value);
+                var bookingCreatedResponse = System.Text.Json.JsonSerializer.Deserialize<BookingProcessResponse>(consumeResult.Message.Value);
 
                 if (bookingCreatedResponse == null)
                 {
@@ -64,18 +64,26 @@ public class BookingConfirmationResponseBackgroundService : BackgroundService
                 var booking = await bookingRepository.GetByIdAsync(bookingCreatedResponse.BookingId, stoppingToken) ??
                     throw new KeyNotFoundException($"Бронирование с ID {bookingCreatedResponse.BookingId} не найдено в репозитории.");
 
-                if (bookingCreatedResponse.Confirmed)
+                if (bookingCreatedResponse.Result == BookingProcessResult.Confirmed)
                 {
                     await bookingRepository.ConfirmAsync(booking, stoppingToken);
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("Бронирование с ID {bookingId} подтверждено.", bookingCreatedResponse.BookingId);
+
+                    continue;
                 }
-                else
+
+                if (bookingCreatedResponse.Result == BookingProcessResult.Cancelled)
                 {
-                    await bookingRepository.RejectAsync(booking, stoppingToken);
+                    await bookingRepository.CancelAsync(booking, stoppingToken);
                     if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation("Бронирование с ID {bookingId} отклонено.", bookingCreatedResponse.BookingId);
+                        _logger.LogInformation("Бронирование с ID {bookingId} отменено.", bookingCreatedResponse.BookingId);
+
+                    continue;
                 }
+                await bookingRepository.RejectAsync(booking, stoppingToken);
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("Бронирование с ID {bookingId} отклонено.", bookingCreatedResponse.BookingId);
             }
         }
         catch (ConsumeException ex)
