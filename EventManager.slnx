@@ -6,7 +6,7 @@
     <Project Path="BookingMicroService.Presentation/BookingMicroService.Presentation.csproj" Id="6cc2912d-a2a4-4892-830a-046b3e631d53" />
   </Folder>
   <Folder Name="/Common/">
-    <Project Path="Contracts/Contracts.csproj" Id="58d5485b-7909-4dd9-8e4f-95a332d42443" />
+    <Project Path="Contracts/Common.csproj" Id="58d5485b-7909-4dd9-8e4f-95a332d42443" />
   </Folder>
   <Folder Name="/EventMicroService/">
     <Project Path="EventMicroService.Application/EventMicroService.Application.csproj" Id="1d21c5df-0ea5-4799-a030-ff8955577d4b" />

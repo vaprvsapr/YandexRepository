@@ -7,15 +7,15 @@ using Confluent.Kafka;
 
 namespace BookingMicroService.Infrastructure;
 
-public class BookingConfirmationResponseBackgroundService : BackgroundService
+public class BookingProcessResponseBackgroundService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<BookingConfirmationResponseBackgroundService> _logger;
+    private readonly ILogger<BookingProcessResponseBackgroundService> _logger;
     private readonly IConsumer<string, string> _consumer;
 
-    public BookingConfirmationResponseBackgroundService(
+    public BookingProcessResponseBackgroundService(
         IServiceScopeFactory serviceScopeFactory,
-        ILogger<BookingConfirmationResponseBackgroundService> logger,
+        ILogger<BookingProcessResponseBackgroundService> logger,
         string bootstrapServers, string groupId)
     {
         _serviceScopeFactory = serviceScopeFactory;

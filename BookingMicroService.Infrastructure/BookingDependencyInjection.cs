@@ -33,7 +33,7 @@ public static partial class DependencyInjectionExtensions
         var bootstrapServers = config.GetValue<string>("BootstrapServers") ??
             throw new InvalidOperationException("BootstrapServers configuration is missing.");
 
-        services.AddSingleton<IBookingCreatedProducer>(new BookingCreatedProducer(bootstrapServers));
+        services.AddSingleton<IBookingCreatedProducer>(new BookingProcessRequestProducer(bootstrapServers));
 
         services.AddSingleton(sp =>
         {
@@ -47,12 +47,12 @@ public static partial class DependencyInjectionExtensions
         services.AddSingleton<IHostedService>(sp =>
         {
             var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
-            var logger = sp.GetRequiredService<ILogger<BookingConfirmationResponseBackgroundService>>();
+            var logger = sp.GetRequiredService<ILogger<BookingProcessResponseBackgroundService>>();
 
             var groupId = config.GetRequiredSection("BookingProcessResponseGroupId").Value
                 ?? throw new InvalidOperationException("GroupId configuration is missing.");
 
-            return new BookingConfirmationResponseBackgroundService(
+            return new BookingProcessResponseBackgroundService(
                 scopeFactory,
                 logger,
                 bootstrapServers,

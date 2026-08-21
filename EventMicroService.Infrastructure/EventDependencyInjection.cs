@@ -25,6 +25,7 @@ public static partial class DependencyInjectionExtensions
 
         // Сервис событий и его репозиторий
         services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IEventBookingRepository, EventBookingRepository>();
         services.AddScoped<IEventService, EventService>();
 
         var config = configuration.GetSection("KafkaSettings");
@@ -49,12 +50,12 @@ public static partial class DependencyInjectionExtensions
         {
             var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
             var producer = sp.GetRequiredService<BookingProcessResponseProducer>();
-            var logger = sp.GetRequiredService<ILogger<BookingProcessingBackgroundService>>();
+            var logger = sp.GetRequiredService<ILogger<BookingProcessRequestBackgroundService>>();
 
             var groupId = config.GetRequiredSection("BookingProcessRequestGroupId").Value ?? 
                 throw new InvalidOperationException("GroupId configuration is missing.");
 
-            return new BookingProcessingBackgroundService(
+            return new BookingProcessRequestBackgroundService(
                 scopeFactory,
                 producer,
                 logger,

@@ -19,7 +19,7 @@
 	<ItemGroup>
     <ProjectReference Include="..\BookingMicroService.Application\BookingMicroService.Application.csproj" />
     <ProjectReference Include="..\BookingMicroService.Domain\BookingMicroService.Domain.csproj" />
-    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Contracts\Common.csproj" />
   </ItemGroup>
 
 

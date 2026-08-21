@@ -8,17 +8,17 @@ using Confluent.Kafka;
 
 namespace EventMicroService.Infrastructure;
 
-public class BookingProcessingBackgroundService : BackgroundService
+public class BookingProcessRequestBackgroundService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly BookingProcessResponseProducer _producer;
-    private readonly ILogger<BookingProcessingBackgroundService> _logger;
+    private readonly ILogger<BookingProcessRequestBackgroundService> _logger;
     private readonly IConsumer<string, string> _consumer;
 
-    public BookingProcessingBackgroundService(
+    public BookingProcessRequestBackgroundService(
         IServiceScopeFactory serviceScopeFactory, 
         BookingProcessResponseProducer producer, 
-        ILogger<BookingProcessingBackgroundService> logger, 
+        ILogger<BookingProcessRequestBackgroundService> logger, 
         string bootstrapServers, string groupId)
     {
         _serviceScopeFactory = serviceScopeFactory;

@@ -2,6 +2,7 @@ using BookingMicroService.Infrastructure;
 using BookingMicroService.Presentation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Common;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,7 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Пайплайн обработки запросов, включая глобальный обработчик исключений
-//app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();

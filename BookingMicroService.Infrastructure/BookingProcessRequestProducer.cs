@@ -5,11 +5,11 @@ using System.Text.Json;
 
 namespace BookingMicroService.Infrastructure;
 
-public class BookingCreatedProducer : IBookingCreatedProducer, IDisposable
+public class BookingProcessRequestProducer : IBookingCreatedProducer, IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly string _topic = Topics.BookingProcessRequest;
-    public BookingCreatedProducer(string bootstrapServers)
+    public BookingProcessRequestProducer(string bootstrapServers)
     {
         var config = new ProducerConfig
         {
