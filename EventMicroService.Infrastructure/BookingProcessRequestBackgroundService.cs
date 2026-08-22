@@ -31,7 +31,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
             GroupId = groupId,
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
-            //EnableAutoOffsetStore = false
+            EnableAutoOffsetStore = false
         };
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -56,6 +56,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                 //var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
 
                 var consumeResult = _consumer.Consume(stoppingToken);
+                
 
                 var bookingProcessRequest = System.Text.Json.JsonSerializer.Deserialize<BookingProcessRequest>(consumeResult.Message.Value);
 
@@ -80,24 +81,27 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                 {
                     _logger.LogWarning("Событие с ID {eventId} не найдено для бронирования с ID {bookingId}.", bookingProcessRequest.EventId, bookingProcessRequest.EventId);
                     await _producer.PublishAsync(bookingProcessResponse);
+
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
                 if (bookingProcessRequest.Command == BookingProcessCommand.Cancel)
                 {
                     var existingBooking = await eventBookingRepository.GetByBookingIdAsync(bookingProcessRequest.BookingId, stoppingToken);
-                    if (existingBooking == null)
-                        continue;
+                    if (existingBooking != null)
+                    {
+                        await eventBookingRepository.DeleteAsync(existingBooking, stoppingToken);
+                        existingEvent.ReleaseSeats();
+                        await eventRepository.UpdateAsync(existingEvent, stoppingToken);
 
-                    await eventBookingRepository.DeleteAsync(existingBooking, stoppingToken);
-                    existingEvent.ReleaseSeats();
-                    await eventRepository.UpdateAsync(existingEvent, stoppingToken);
-
-                    if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.", 
-                            bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
-                    bookingProcessResponse.Result = BookingProcessResult.Cancelled;
-                    await _producer.PublishAsync(bookingProcessResponse);
+                        if (_logger.IsEnabled(LogLevel.Information))
+                            _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.", 
+                                bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
+                        bookingProcessResponse.Result = BookingProcessResult.Cancelled;
+                        await _producer.PublishAsync(bookingProcessResponse);
+                    }
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
@@ -106,6 +110,8 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("Нет доступных мест для события с ID {eventId} для бронирования с ID {bookingId}.", bookingProcessRequest.EventId, bookingProcessRequest.EventId);
                     await _producer.PublishAsync(bookingProcessResponse);
+
+                    _consumer.Commit();
                     continue;
                 }
 
@@ -114,6 +120,8 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("Событие с ID {eventId} уже началось для бронирования с ID {bookingId}.", bookingProcessRequest.EventId, bookingProcessRequest.EventId);
                     await _producer.PublishAsync(bookingProcessResponse);
+
+                    _consumer.Commit();
                     continue;
                 }
 
@@ -121,23 +129,26 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                 var eventBooking = await eventBookingRepository.GetEventBookingsAsync(
                     bookingProcessRequest.EventId, bookingProcessRequest.BookingId, stoppingToken);
                 // Если бронирование уже существует, пропускаем его
-                if (eventBooking != null)
-                    continue;
-                eventBooking = new EventBooking
+                if (eventBooking == null)
                 {
-                    EventId = bookingProcessRequest.EventId,
-                    BookingId = bookingProcessRequest.BookingId
-                };
-                // Если бронирование не существует, добавляем его в таблицу для отслеживания
-                await eventBookingRepository.CreateAsync(eventBooking, stoppingToken);
+                    eventBooking = new EventBooking
+                    {
+                        EventId = bookingProcessRequest.EventId,
+                        BookingId = bookingProcessRequest.BookingId
+                    };
+                    // Если бронирование не существует, добавляем его в таблицу для отслеживания
+                    await eventBookingRepository.CreateAsync(eventBooking, stoppingToken);
 
-                existingEvent.TryReserveSeats();
-                await eventRepository.UpdateAsync(existingEvent, stoppingToken);
+                    existingEvent.TryReserveSeats();
+                    await eventRepository.UpdateAsync(existingEvent, stoppingToken);
 
-                if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation("Бронирование с ID {bookingId} подтверждено для события с ID {eventId}.", bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
-                bookingProcessResponse.Result = BookingProcessResult.Confirmed;
-                await _producer.PublishAsync(bookingProcessResponse);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation("Бронирование с ID {bookingId} подтверждено для события с ID {eventId}.", bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
+                    bookingProcessResponse.Result = BookingProcessResult.Confirmed;
+                    await _producer.PublishAsync(bookingProcessResponse);
+                }
+                _consumer.Commit(consumeResult);
+
             }
         }
         catch (ConsumeException ex)

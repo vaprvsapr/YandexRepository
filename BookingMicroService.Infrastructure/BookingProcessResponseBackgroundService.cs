@@ -27,7 +27,7 @@ public class BookingProcessResponseBackgroundService : BackgroundService
             GroupId = groupId,
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
-            //EnableAutoOffsetStore = false
+            EnableAutoOffsetStore = false
         };
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -58,6 +58,8 @@ public class BookingProcessResponseBackgroundService : BackgroundService
                 if (bookingCreatedResponse == null)
                 {
                     _logger.LogWarning("Получено пустое сообщение бронирования из Kafka.");
+
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
@@ -70,6 +72,7 @@ public class BookingProcessResponseBackgroundService : BackgroundService
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("Бронирование с ID {bookingId} подтверждено.", bookingCreatedResponse.BookingId);
 
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
@@ -79,11 +82,14 @@ public class BookingProcessResponseBackgroundService : BackgroundService
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("Бронирование с ID {bookingId} отменено.", bookingCreatedResponse.BookingId);
 
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
+
                 await bookingRepository.RejectAsync(booking, stoppingToken);
                 if (_logger.IsEnabled(LogLevel.Information))
                     _logger.LogInformation("Бронирование с ID {bookingId} отклонено.", bookingCreatedResponse.BookingId);
+                _consumer.Commit(consumeResult);
             }
         }
         catch (ConsumeException ex)

@@ -1,6 +1,6 @@
 ﻿using Confluent.Kafka;
 using Confluent.Kafka.Admin;    
-using Microsoft.Extensions.Configuration;
+
 using Microsoft.Extensions.Logging;
 
 namespace Contracts;
