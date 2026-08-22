@@ -38,12 +38,10 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 
         builder.Property(b => b.AvailableSeats)
             .HasColumnName("available_seats")
-            .HasMaxLength(10000)
             .IsRequired();
 
         builder.Property(b => b.TotalSeats)
             .HasColumnName("total_seats")
-            .HasMaxLength(10000)
             .IsRequired();
 
         builder.Property(b => b.Title)
