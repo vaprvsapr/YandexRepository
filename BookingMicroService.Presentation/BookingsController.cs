@@ -40,7 +40,7 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
     {
         var userId = GetUserIdFromClaims();
         var createdBooking = await _bookingService.CreateAsync(eventId, userId);
-        return Accepted(createdBooking);
+        return AcceptedAtAction(nameof(GetBookingById), new { id = createdBooking.Id }, createdBooking);
     }
 
     /// <summary>
