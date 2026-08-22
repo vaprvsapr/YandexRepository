@@ -9,7 +9,7 @@ public interface IEventBookingRepository
 {
     public Task<EventBooking?> GetByBookingIdAsync(Guid bookingId, CancellationToken ct = default);
 
-    public Task<List<EventBooking>> GetEventBookingsAsync(Guid eventId, CancellationToken ct = default);
+    public Task<EventBooking?> GetEventBookingsAsync(Guid eventId, Guid bookingId, CancellationToken ct = default);
 
     public Task DeleteAsync(EventBooking eventBooking, CancellationToken ct = default);
 

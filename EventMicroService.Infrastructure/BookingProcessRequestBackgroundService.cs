@@ -85,15 +85,17 @@ public class BookingProcessRequestBackgroundService : BackgroundService
 
                 if (bookingProcessRequest.Command == BookingProcessCommand.Cancel)
                 {
+                    var existingBooking = await eventBookingRepository.GetByBookingIdAsync(bookingProcessRequest.BookingId, stoppingToken);
+                    if (existingBooking == null)
+                        continue;
+
+                    await eventBookingRepository.DeleteAsync(existingBooking, stoppingToken);
                     existingEvent.ReleaseSeats();
                     await eventRepository.UpdateAsync(existingEvent, stoppingToken);
 
-                    var existingBooking = await eventBookingRepository.GetByBookingIdAsync(bookingProcessRequest.BookingId, stoppingToken);
-                    if (existingBooking != null)
-                        await eventBookingRepository.DeleteAsync(existingBooking, stoppingToken);
-
                     if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.", bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
+                        _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.", 
+                            bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
                     bookingProcessResponse.Result = BookingProcessResult.Cancelled;
                     await _producer.PublishAsync(bookingProcessResponse);
                     continue;
@@ -115,11 +117,22 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                     continue;
                 }
 
+                // Проверяем, существует ли уже бронирование для данного события и идентификатора бронирования
+                var eventBooking = await eventBookingRepository.GetEventBookingsAsync(
+                    bookingProcessRequest.EventId, bookingProcessRequest.BookingId, stoppingToken);
+                // Если бронирование уже существует, пропускаем его
+                if (eventBooking != null)
+                    continue;
+                eventBooking = new EventBooking
+                {
+                    EventId = bookingProcessRequest.EventId,
+                    BookingId = bookingProcessRequest.BookingId
+                };
+                // Если бронирование не существует, добавляем его в таблицу для отслеживания
+                await eventBookingRepository.CreateAsync(eventBooking, stoppingToken);
+
                 existingEvent.TryReserveSeats();
                 await eventRepository.UpdateAsync(existingEvent, stoppingToken);
-
-                var eventBooking = new EventBooking { EventId = bookingProcessRequest.EventId, BookingId = bookingProcessRequest.BookingId };
-                await eventBookingRepository.CreateAsync(eventBooking, stoppingToken);
 
                 if (_logger.IsEnabled(LogLevel.Information))
                     _logger.LogInformation("Бронирование с ID {bookingId} подтверждено для события с ID {eventId}.", bookingProcessRequest.BookingId, bookingProcessRequest.EventId);

@@ -23,11 +23,12 @@ public class EventBookingRepository(EventDbContext context) : IEventBookingRepos
     }
 
     /// <inheritdoc/>
-    public async Task<List<EventBooking>> GetEventBookingsAsync(Guid eventId, CancellationToken ct = default)
+    public async Task<EventBooking?> GetEventBookingsAsync(Guid eventId, Guid bookingId, CancellationToken ct = default)
     {
         return await _context.EventBookings
             .Where(eb => eb.EventId == eventId)
-            .ToListAsync(ct);
+            .Where(eb => eb.BookingId == bookingId)
+            .FirstOrDefaultAsync(ct);
     }
 
     /// <inheritdoc/>
