@@ -48,7 +48,7 @@ public class BookingProcessResponseBackgroundService : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var scope = _serviceScopeFactory.CreateScope();
+                using var scope = _serviceScopeFactory.CreateScope();
                 var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
 
                 var consumeResult = _consumer.Consume(stoppingToken);

@@ -52,9 +52,6 @@ public class BookingProcessRequestBackgroundService : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                //var scope = _serviceScopeFactory.CreateScope();
-                //var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
-
                 var consumeResult = _consumer.Consume(stoppingToken);
                 
 
@@ -66,7 +63,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                     continue;
                 }
 
-                var scope = _serviceScopeFactory.CreateScope();
+                using var scope = _serviceScopeFactory.CreateScope();
                 var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
                 var eventBookingRepository = scope.ServiceProvider.GetRequiredService<IEventBookingRepository>();
                 var existingEvent = await eventRepository.GetByIdAsync(bookingProcessRequest.EventId, stoppingToken);
