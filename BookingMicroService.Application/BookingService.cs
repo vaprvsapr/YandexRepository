@@ -49,6 +49,8 @@ public class BookingService(
             throw new KeyNotFoundException($"Бронирование с Id:{bookingId} не найдено.");
         if (existingBooking.Status == BookingStatus.Cancelled)
             throw new InvalidOperationException($"Бронирование с Id:{bookingId} уже отменено.");
+        if (existingBooking.UserId != userId)
+            throw new AuthenticationException($"Пользователь с Id:{userId} не имеет прав на отмену бронирования с Id:{bookingId}.");
 
         var eventId = existingBooking.EventId;
 

@@ -73,6 +73,7 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
 
         InvalidCredentialException => StatusCodes.Status403Forbidden,
         UnauthorizedAccessException => StatusCodes.Status403Forbidden,
+        AuthenticationException => StatusCodes.Status403Forbidden,
 
         KeyNotFoundException => StatusCodes.Status404NotFound,
 
