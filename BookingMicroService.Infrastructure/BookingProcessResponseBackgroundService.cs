@@ -44,21 +44,33 @@ public class BookingProcessResponseBackgroundService : BackgroundService
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingConfirmationBackgroundService started at: {time}", DateTime.Now);
 
-        try
+
+        while (!stoppingToken.IsCancellationRequested)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
                 using var scope = _serviceScopeFactory.CreateScope();
                 var bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
 
                 var consumeResult = _consumer.Consume(stoppingToken);
 
-                var bookingCreatedResponse = System.Text.Json.JsonSerializer.Deserialize<BookingProcessResponse>(consumeResult.Message.Value);
+                BookingProcessResponse? bookingCreatedResponse;
+
+                // Попытка десериализации сообщения из Kafka в объект BookingProcessResponse
+                try
+                {
+                    bookingCreatedResponse = System.Text.Json.JsonSerializer.Deserialize<BookingProcessResponse>(consumeResult.Message.Value);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    _logger.LogError(ex, "Ошибка десериализации сообщения из Kafka: {message}", ex.Message);
+                    _consumer.Commit(consumeResult);
+                    continue;
+                }
 
                 if (bookingCreatedResponse == null)
                 {
                     _logger.LogWarning("Получено пустое сообщение бронирования из Kafka.");
-
                     _consumer.Commit(consumeResult);
                     continue;
                 }
@@ -91,21 +103,17 @@ public class BookingProcessResponseBackgroundService : BackgroundService
                     _logger.LogInformation("Бронирование с ID {bookingId} отклонено.", bookingCreatedResponse.BookingId);
                 _consumer.Commit(consumeResult);
             }
+            catch (ConsumeException ex)
+            {
+                _logger.LogError(ex, "Ошибка при потреблении сообщения из Kafka: {message}", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Произошла ошибка в BookingConfirmationBackgroundService: {message}", ex.Message);
+            }
         }
-        catch (ConsumeException ex)
-        {
-            _logger.LogError(ex, "Ошибка при потреблении сообщения из Kafka: {message}", ex.Message);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Произошла ошибка в BookingConfirmationBackgroundService: {message}", ex.Message);
-        }
-        finally
-        {
-            _consumer.Close();
-            _consumer.Dispose();
-        }
-
+        _consumer.Close();
+        _consumer.Dispose();
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingConfirmationBackgroundService остановлен: {time}", DateTime.Now);

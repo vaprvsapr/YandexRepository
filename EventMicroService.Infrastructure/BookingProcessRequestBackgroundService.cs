@@ -48,21 +48,34 @@ public class BookingProcessRequestBackgroundService : BackgroundService
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingConfirmationBackgroundService started at: {time}", DateTime.Now);
 
-        try
+
+        while (!stoppingToken.IsCancellationRequested)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
                 var consumeResult = _consumer.Consume(stoppingToken);
-                
 
-                var bookingProcessRequest = System.Text.Json.JsonSerializer.Deserialize<BookingProcessRequest>(consumeResult.Message.Value);
+                // Считываем сообщение из Kafka и десериализуем его в объект BookingProcessRequest
+                BookingProcessRequest? bookingProcessRequest;
+                try
+                {
+                    bookingProcessRequest = System.Text.Json.JsonSerializer.Deserialize<BookingProcessRequest>(consumeResult.Message.Value);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    _logger.LogError(ex, "Ошибка десериализации сообщения бронирования из Kafka: {message}", ex.Message);
+                    _consumer.Commit(consumeResult);
+                    continue;
+                }
 
                 if (bookingProcessRequest == null)
                 {
                     _logger.LogWarning("Получено пустое сообщение бронирования из Kafka.");
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
+                // Проводим проверки и обработку бронирования в рамках отдельного скоупа зависимостей
                 using var scope = _serviceScopeFactory.CreateScope();
                 var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
                 var eventBookingRepository = scope.ServiceProvider.GetRequiredService<IEventBookingRepository>();
@@ -93,7 +106,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                         await eventRepository.UpdateAsync(existingEvent, stoppingToken);
 
                         if (_logger.IsEnabled(LogLevel.Information))
-                            _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.", 
+                            _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.",
                                 bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
                         bookingProcessResponse.Result = BookingProcessResult.Cancelled;
                         await _producer.PublishAsync(bookingProcessResponse);
@@ -147,21 +160,17 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                 _consumer.Commit(consumeResult);
 
             }
+            catch (ConsumeException ex)
+            {
+                _logger.LogError(ex, "Ошибка при потреблении сообщения из Kafka: {message}", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Произошла ошибка в BookingConfirmationBackgroundService: {message}", ex.Message);
+            }
         }
-        catch (ConsumeException ex)
-        {
-            _logger.LogError(ex, "Ошибка при потреблении сообщения из Kafka: {message}", ex.Message);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Произошла ошибка в BookingConfirmationBackgroundService: {message}", ex.Message);
-        }
-        finally
-        {
-            _consumer.Close();
-            _consumer.Dispose();
-        }
-
+        _consumer.Close();
+        _consumer.Dispose();
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingConfirmationBackgroundService остановлен: {time}", DateTime.Now);
