@@ -32,8 +32,8 @@ public class TokenGeneratingService(IConfiguration configuration) : ITokenGenera
             ["role"] = role.ToString()
         };
 
-        var jwtKey = _configuration["JWT:SekretKey"] ?? 
-            throw new SecurityTokenEncryptionKeyNotFoundException("JWT:SekretKey is missing");
+        var jwtKey = _configuration["JWT:SecretKey"] ?? 
+            throw new SecurityTokenEncryptionKeyNotFoundException("JWT:SecretKey is missing");
         var issuer = _configuration["JWT:Issuer"];
         var audience = _configuration["JWT:Audience"];
         var lifetime = TimeSpan.Parse(_configuration["JWT:TokenLifetime"] ?? "00:15:00");
