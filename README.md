@@ -12,8 +12,14 @@ RESTful API для управления событиями, написанное
 
 ## Запуск проекта
 
-В терминале выполните команду "docker compose up -d", чтобы поднять контейнер с PostgreSQL, Kafka.
+В терминале выполните команду "docker compose up -d", чтобы поднять контейнер с PostgreSQL, Kafka и микросервисами.
 При запуске проекта схема БД создается автоматически с помощью Migrate().
+
+## Проверка работы через Swagger UI
+
+Swagger UI микросервиса BookingMicroService доступен по адресу: `https://localhost:5001/swagger`.
+Swagger UI микросервиса EventMicroService доступен по адресу: `https://localhost:5002/swagger`.
+Swagger UI микросервиса UserMicroService доступен по адресу: `https://localhost:5003/swagger`.
 
 ### Через Visual Studio
 
