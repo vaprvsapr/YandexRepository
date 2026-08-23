@@ -1,4 +1,4 @@
-﻿using Contracts;
+﻿using Common;
 using BookingMicroService.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

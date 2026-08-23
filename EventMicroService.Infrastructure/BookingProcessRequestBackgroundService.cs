@@ -1,4 +1,4 @@
-﻿using Contracts;
+﻿using Common;
 using EventMicroService.Domain;
 using EventMicroService.Application;
 using Microsoft.Extensions.DependencyInjection;

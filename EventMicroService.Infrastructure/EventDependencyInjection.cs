@@ -1,4 +1,4 @@
-﻿using Contracts;
+﻿using Common;
 using EventMicroService.Application;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

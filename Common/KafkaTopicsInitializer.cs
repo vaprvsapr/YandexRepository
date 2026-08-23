@@ -3,7 +3,7 @@ using Confluent.Kafka.Admin;
 
 using Microsoft.Extensions.Logging;
 
-namespace Contracts;
+namespace Common;
 
 public class KafkaTopicsInitializer
 {

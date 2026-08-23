@@ -1,6 +1,6 @@
 ﻿using BookingMicroService.Application;
 using Confluent.Kafka;
-using Contracts;
+using Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

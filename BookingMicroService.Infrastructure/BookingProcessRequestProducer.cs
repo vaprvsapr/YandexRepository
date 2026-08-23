@@ -1,6 +1,6 @@
 ﻿using BookingMicroService.Application;
 using Confluent.Kafka;
-using Contracts;
+using Common;
 using System.Text.Json;
 
 namespace BookingMicroService.Infrastructure;
@@ -22,7 +22,7 @@ public class BookingProcessRequestProducer : IBookingCreatedProducer, IDisposabl
     }
     public async Task PublishAsync(BookingProcessRequest bookingCreated)
     {
-        var result = await _producer.ProduceAsync(_topic, new Message<string, string>
+        await _producer.ProduceAsync(_topic, new Message<string, string>
         {
             Key = bookingCreated.EventId.ToString(),
             Value = JsonSerializer.Serialize(bookingCreated)
@@ -31,6 +31,6 @@ public class BookingProcessRequestProducer : IBookingCreatedProducer, IDisposabl
     public void Dispose()
     {
         _producer.Flush(TimeSpan.FromSeconds(5));
-        _producer.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

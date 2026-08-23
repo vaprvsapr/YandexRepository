@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using Contracts;
+using Common;
 using System.Text.Json;
 
 namespace EventMicroService.Infrastructure;
@@ -21,7 +21,7 @@ public class BookingProcessResponseProducer
     }
     public async Task PublishAsync(BookingProcessResponse bookingProcessResponse)
     {
-        var result = await _producer.ProduceAsync(_topic, new Message<string, string>
+        await _producer.ProduceAsync(_topic, new Message<string, string>
         {
             Key = bookingProcessResponse.BookingId.ToString(),
             Value = JsonSerializer.Serialize(bookingProcessResponse)

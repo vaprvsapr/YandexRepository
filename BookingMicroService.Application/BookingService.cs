@@ -1,5 +1,5 @@
 ﻿using BookingMicroService.Domain;
-using Contracts;
+using Common;
 using Microsoft.Extensions.Logging;
 using System.Security.Authentication;
 
@@ -42,7 +42,7 @@ public class BookingService(
         return BookingMapper.ToBookingDto(newBooking);
     }
 
-    // <inheritdoc/>
+    /// <inheritdoc/>
     public async Task CancelByIdAsync(Guid bookingId, Guid userId)
     {
         var existingBooking = await GetBookingByIdAsync(bookingId) ??

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Contracts;
+namespace Common;
 
 /// <summary>
 /// Базовый контроллер для взаимодействия с пользователем, 

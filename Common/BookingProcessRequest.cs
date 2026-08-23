@@ -1,4 +1,4 @@
-﻿namespace Contracts;
+﻿namespace Common;
 
 public class BookingProcessRequest
 {
