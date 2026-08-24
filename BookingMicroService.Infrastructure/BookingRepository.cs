@@ -50,6 +50,7 @@ public class BookingRepository(BookingDbContext context) : IBookingRepository
     public async Task RejectAsync(Booking booking, CancellationToken ct = default)
     {
         booking.Reject();
+        _context.Update(booking);
         await _context.SaveChangesAsync(ct);
     }
 
@@ -57,6 +58,7 @@ public class BookingRepository(BookingDbContext context) : IBookingRepository
     public async Task CancelAsync(Booking booking, CancellationToken ct = default)
     {
         booking.Cancel();
+        _context.Update(booking);
         await _context.SaveChangesAsync(ct);
     }
 }
