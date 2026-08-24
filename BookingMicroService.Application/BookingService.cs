@@ -10,11 +10,11 @@ namespace BookingMicroService.Application;
 /// </summary>
 public class BookingService(
     IBookingRepository bookingRepository,
-    IBookingCreatedProducer bookingCreatedProducer,
+    IBookingProcessRequestProducer bookingCreatedProducer,
     ILogger<BookingService> logger) : IBookingService
 {
     private readonly IBookingRepository _bookingRepository = bookingRepository;
-    private readonly IBookingCreatedProducer _bookingCreatedProducer = bookingCreatedProducer;
+    private readonly IBookingProcessRequestProducer _bookingCreatedProducer = bookingCreatedProducer;
     private readonly ILogger<BookingService> _logger = logger;
 
     /// <inheritdoc/>

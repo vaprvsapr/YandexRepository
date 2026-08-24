@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace BookingMicroService.Infrastructure;
 
-public class BookingProcessRequestProducer : IBookingCreatedProducer, IDisposable
+public class BookingProcessRequestProducer : IBookingProcessRequestProducer, IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly string _topic = Topics.BookingProcessRequest;

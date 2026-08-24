@@ -2,7 +2,7 @@
 
 namespace BookingMicroService.Application;
 
-public interface IBookingCreatedProducer
+public interface IBookingProcessRequestProducer
 {
     void Dispose();
     Task PublishAsync(BookingProcessRequest bookingCreated);

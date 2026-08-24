@@ -33,7 +33,7 @@ public static partial class DependencyInjectionExtensions
         var bootstrapServers = config.GetValue<string>("BootstrapServers") ??
             throw new InvalidOperationException("BootstrapServers configuration is missing.");
 
-        services.AddSingleton<IBookingCreatedProducer>(new BookingProcessRequestProducer(bootstrapServers));
+        services.AddSingleton<IBookingProcessRequestProducer>(new BookingProcessRequestProducer(bootstrapServers));
 
         services.AddSingleton(sp =>
         {

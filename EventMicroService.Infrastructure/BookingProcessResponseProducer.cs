@@ -1,10 +1,11 @@
 ﻿using Confluent.Kafka;
 using Common;
 using System.Text.Json;
+using EventMicroService.Application;
 
 namespace EventMicroService.Infrastructure;
 
-public class BookingProcessResponseProducer
+public class BookingProcessResponseProducer: IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly string _topic = Topics.BookingProcessResponse;
