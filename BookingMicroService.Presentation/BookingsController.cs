@@ -82,12 +82,12 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
     /// </summary>
     /// <param name="bookingId">Идентификатор бронирования.</param>
     /// <returns>Обновленное событие.</returns>
-    /// <response code="204">Бронирование успешно отменено.</response>
+    /// <response code="202">Принята заявка на отмену бронирования.</response>
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="403">Пользователь не имеет прав доступа.</response>
     /// <response code="404">Бронирование не найдено.</response>
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -97,6 +97,6 @@ public class BookingsController(IBookingService bookingService) : UserInteractin
         var userId = GetUserIdFromClaims();
 
         await _bookingService.CancelByIdAsync(bookingId, userId);
-        return NoContent();
+        return AcceptedAtAction(nameof(GetBookingById), new { bookingId });
     }
 }
