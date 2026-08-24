@@ -5,13 +5,8 @@ namespace BookingMicroService.Application;
 /// <summary>
 /// Интерфейс для публикации запросов на обработку бронирования в систему.
 /// </summary>
-public interface IBookingProcessRequestProducer
+public interface IBookingProcessRequestProducer : IDisposable
 {
-    /// <summary>
-    /// Деструктор для освобождения ресурсов.
-    /// </summary>
-    void Dispose();
-
     /// <summary>
     /// Метод публикации запросов.
     /// </summary>

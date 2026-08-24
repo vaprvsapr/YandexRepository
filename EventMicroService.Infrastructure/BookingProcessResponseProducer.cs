@@ -5,7 +5,7 @@ using EventMicroService.Application;
 
 namespace EventMicroService.Infrastructure;
 
-public class BookingProcessResponseProducer: IDisposable
+public class BookingProcessResponseProducer : IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly string _topic = Topics.BookingProcessResponse;
