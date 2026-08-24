@@ -130,7 +130,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                         _logger.LogInformation("Нет доступных мест для события с ID {eventId} для бронирования с ID {bookingId}.", bookingProcessRequest.EventId, bookingProcessRequest.EventId);
                     await _producer.PublishAsync(bookingProcessResponse);
 
-                    _consumer.Commit();
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
@@ -140,7 +140,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                         _logger.LogInformation("Событие с ID {eventId} уже началось для бронирования с ID {bookingId}.", bookingProcessRequest.EventId, bookingProcessRequest.EventId);
                     await _producer.PublishAsync(bookingProcessResponse);
 
-                    _consumer.Commit();
+                    _consumer.Commit(consumeResult);
                     continue;
                 }
 
