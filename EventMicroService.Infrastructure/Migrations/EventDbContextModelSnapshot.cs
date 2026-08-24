@@ -29,7 +29,6 @@ namespace EventMicroService.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<int>("AvailableSeats")
-                        .HasMaxLength(10000)
                         .HasColumnType("integer")
                         .HasColumnName("available_seats");
 
@@ -54,7 +53,6 @@ namespace EventMicroService.Infrastructure.Migrations
                         .HasColumnName("title");
 
                     b.Property<int>("TotalSeats")
-                        .HasMaxLength(10000)
                         .HasColumnType("integer")
                         .HasColumnName("total_seats");
 
@@ -82,13 +80,11 @@ namespace EventMicroService.Infrastructure.Migrations
 
             modelBuilder.Entity("EventMicroService.Domain.EventBooking", b =>
                 {
-                    b.HasOne("EventMicroService.Domain.Event", "Event")
+                    b.HasOne("EventMicroService.Domain.Event", null)
                         .WithMany("Bookings")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("EventMicroService.Domain.Event", b =>

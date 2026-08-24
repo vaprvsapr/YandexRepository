@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventMicroService.Infrastructure.Migrations
 {
     [DbContext(typeof(EventDbContext))]
-    [Migration("20260819070708_Initial")]
+    [Migration("20260824122938_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -32,7 +32,6 @@ namespace EventMicroService.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<int>("AvailableSeats")
-                        .HasMaxLength(10000)
                         .HasColumnType("integer")
                         .HasColumnName("available_seats");
 
@@ -57,13 +56,43 @@ namespace EventMicroService.Infrastructure.Migrations
                         .HasColumnName("title");
 
                     b.Property<int>("TotalSeats")
-                        .HasMaxLength(10000)
                         .HasColumnType("integer")
                         .HasColumnName("total_seats");
 
                     b.HasKey("Id");
 
                     b.ToTable("events", (string)null);
+                });
+
+            modelBuilder.Entity("EventMicroService.Domain.EventBooking", b =>
+                {
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.HasKey("BookingId");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("events_bookings", (string)null);
+                });
+
+            modelBuilder.Entity("EventMicroService.Domain.EventBooking", b =>
+                {
+                    b.HasOne("EventMicroService.Domain.Event", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EventMicroService.Domain.Event", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }
