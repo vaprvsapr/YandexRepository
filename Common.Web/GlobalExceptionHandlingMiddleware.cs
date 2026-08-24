@@ -4,7 +4,7 @@ using System.Security.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 
-namespace Common;
+namespace Common.Web;
 
 /// <summary>
 /// Глобальный middleware для обработки необработанных исключений в ASP.NET Core приложении. 

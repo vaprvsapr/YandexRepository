@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Common;
+namespace Common.Web;
 
 /// <summary>
 /// Базовый контроллер для взаимодействия с пользователем, 

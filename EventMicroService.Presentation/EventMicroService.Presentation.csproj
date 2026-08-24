@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common.Web\Common.Web.csproj" />
     <ProjectReference Include="..\EventMicroService.Application\EventMicroService.Application.csproj" />
     <ProjectReference Include="..\EventMicroService.Domain\EventMicroService.Domain.csproj" />
     <ProjectReference Include="..\EventMicroService.Infrastructure\EventMicroService.Infrastructure.csproj" />

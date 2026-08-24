@@ -31,7 +31,7 @@ public class BookingProcessResponseProducer: IDisposable
     public void Dispose()
     {
         _producer.Flush(TimeSpan.FromSeconds(5));
-        _producer.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
 

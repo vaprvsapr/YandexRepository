@@ -2,7 +2,7 @@ using BookingMicroService.Infrastructure;
 using BookingMicroService.Presentation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Common;
+using Common.Web;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

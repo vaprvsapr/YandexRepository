@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Web;
 using EventMicroService.Application;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

@@ -1,6 +1,5 @@
 ﻿using BookingMicroService.Application;
-using Common;
-
+using Common.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
