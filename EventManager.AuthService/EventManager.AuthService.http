@@ -1,6 +1,0 @@
-@EventManager.AuthService_HostAddress = http://localhost:5109
-
-GET {{EventManager.AuthService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
