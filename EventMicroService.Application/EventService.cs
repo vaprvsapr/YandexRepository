@@ -66,10 +66,7 @@ public class EventService(
             events = events.Where(e => e.EndAt <= getQuery.To.Value.ToUniversalTime());
 
         if (!string.IsNullOrEmpty(getQuery.Title))
-            events = events
-                .AsEnumerable()
-                .Where(e => e.Title.Contains(getQuery.Title, StringComparison.OrdinalIgnoreCase))
-                .AsQueryable();
+            events = events.Where(e => e.Title.ToLower().Contains(getQuery.Title.ToLower()));
 
         return new PaginatedResultDto()
         {
