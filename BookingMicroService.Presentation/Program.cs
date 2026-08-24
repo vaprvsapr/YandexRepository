@@ -61,6 +61,8 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHttpsRedirection();
+// Для нормальной работы в контейнере Docker, где может не быть HTTPS, условно отключаем перенаправление на HTTPS в режиме разработки
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
