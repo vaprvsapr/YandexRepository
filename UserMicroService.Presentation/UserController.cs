@@ -3,7 +3,7 @@ using UserMicroService.Domain;
 using UserMicroService.Application;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Common;
+using Common.Web;
 
 namespace UserMicroService.Presentation;
 

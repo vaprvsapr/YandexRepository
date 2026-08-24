@@ -3,7 +3,7 @@ using UserMicroService.Presentation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Common;
+using Common.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
