@@ -32,7 +32,7 @@ public class TokenGeneratingService(IConfiguration configuration) : ITokenGenera
             ["role"] = role.ToString()
         };
 
-        var jwtKey = _configuration["JWT:SecretKey"] ?? 
+        var jwtKey = _configuration["JWT:SecretKey"] ??
             throw new SecurityTokenEncryptionKeyNotFoundException("JWT:SecretKey is missing");
         var issuer = _configuration["JWT:Issuer"];
         var audience = _configuration["JWT:Audience"];

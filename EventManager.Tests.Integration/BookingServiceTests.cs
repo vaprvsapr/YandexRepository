@@ -94,7 +94,7 @@ public class BookingServiceTests(PostgresFixture postgresFixture) : PostgresTest
             await bookingService.CreateAsync(futureEvent.Id, user.Id);
         }
         // Act & Assert
-        Assert.Throws<ExceedingActiveBookingLimitException>(() => 
+        Assert.Throws<ExceedingActiveBookingLimitException>(() =>
         bookingService.CreateAsync(futureEvent.Id, user.Id).GetAwaiter().GetResult());
         Assert.Equal(0, (await eventRepository.GetByIdAsync(futureEvent.Id))?.AvailableSeats);
     }

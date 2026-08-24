@@ -56,7 +56,7 @@ public class BookingService(
             await _eventRepository.UpdateAsync(existingEvent);
 
             newBooking = new()
-            { 
+            {
                 Id = Guid.NewGuid(),
                 EventId = eventId,
                 UserId = userId,
@@ -151,7 +151,7 @@ public class BookingService(
     private async Task ValidateUserCredentials(UserInfoDto userInfoDto)
     {
         var existingUser = await GetUserByIdAsync(userInfoDto.Id);
-        if (existingUser.Role != Enum.Parse<UserRole>(userInfoDto.Role) || 
+        if (existingUser.Role != Enum.Parse<UserRole>(userInfoDto.Role) ||
             existingUser.Login != userInfoDto.Login)
             throw new InvalidCredentialException("Неверные учетные данные пользователя.");
     }

@@ -31,8 +31,8 @@ public class UserController(IUserService userService) : UserInteractingControlle
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserInfoDto>> Register(
-        [FromQuery] string login, 
-        [FromQuery] string password, 
+        [FromQuery] string login,
+        [FromQuery] string password,
         [FromQuery] UserRole role = UserRole.User)
     {
         await _userService.Register(login, password, role);
@@ -52,7 +52,7 @@ public class UserController(IUserService userService) : UserInteractingControlle
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<string>> LogIn(
-        [FromQuery] string login, 
+        [FromQuery] string login,
         [FromQuery] string password)
     {
         var token = await _userService.LogIn(login, password);
@@ -74,7 +74,7 @@ public class UserController(IUserService userService) : UserInteractingControlle
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteUser([FromQuery] string login)
     {
-        if(!GetUserRoleFromClaims().Equals(UserRole.Admin) && !GetUserLoginFromClaims().Equals(login))
+        if (!GetUserRoleFromClaims().Equals(UserRole.Admin) && !GetUserLoginFromClaims().Equals(login))
             return Forbid("Недостаточно прав для удаления пользователя.");
 
         await _userService.Delete(login);

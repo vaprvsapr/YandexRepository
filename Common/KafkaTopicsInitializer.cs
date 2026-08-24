@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using Confluent.Kafka.Admin;    
+using Confluent.Kafka.Admin;
 
 using Microsoft.Extensions.Logging;
 

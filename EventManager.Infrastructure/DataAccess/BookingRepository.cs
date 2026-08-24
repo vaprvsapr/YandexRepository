@@ -29,7 +29,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     /// <inheritdoc/>
     public async Task<Booking?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Bookings.FindAsync([ id ], cancellationToken: ct);
+        return await _context.Bookings.FindAsync([id], cancellationToken: ct);
     }
 
     /// <inheritdoc/>

@@ -16,9 +16,9 @@ public class BookingProcessRequestBackgroundService : BackgroundService
     private readonly IConsumer<string, string> _consumer;
 
     public BookingProcessRequestBackgroundService(
-        IServiceScopeFactory serviceScopeFactory, 
-        BookingProcessResponseProducer producer, 
-        ILogger<BookingProcessRequestBackgroundService> logger, 
+        IServiceScopeFactory serviceScopeFactory,
+        BookingProcessResponseProducer producer,
+        ILogger<BookingProcessRequestBackgroundService> logger,
         string bootstrapServers, string groupId)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -116,7 +116,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                     {
                         await _producer.PublishAsync(bookingProcessResponse);
 
-                        if(_logger.IsEnabled(LogLevel.Information))
+                        if (_logger.IsEnabled(LogLevel.Information))
                             _logger.LogInformation("Бронирование с ID {bookingId} не найдено для отмены для события с ID {eventId}.",
                                 bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
                     }

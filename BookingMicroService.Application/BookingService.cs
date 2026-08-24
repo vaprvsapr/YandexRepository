@@ -19,7 +19,7 @@ public class BookingService(
 
     /// <inheritdoc/>
     public async Task<BookingDto> CreateAsync(Guid eventId, Guid userId)
-    { 
+    {
         var newBooking = new Booking
         {
             Id = Guid.NewGuid(),

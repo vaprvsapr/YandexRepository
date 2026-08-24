@@ -35,7 +35,7 @@ public class EventRepository(AppDbContext context) : IEventRepository
     /// <inheritdoc/>
     public async Task<Event?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Events.FindAsync([ id ], cancellationToken: ct);
+        return await _context.Events.FindAsync([id], cancellationToken: ct);
     }
 
     /// <inheritdoc/>

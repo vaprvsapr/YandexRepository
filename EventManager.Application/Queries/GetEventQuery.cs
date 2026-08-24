@@ -16,8 +16,8 @@ public class GetEventQuery
     /// <summary>
     /// Время начала фильтрации.
     /// </summary>
-    public DateTime? From 
-    { 
+    public DateTime? From
+    {
         get { return _from; }
         init
         {
@@ -32,8 +32,8 @@ public class GetEventQuery
     /// <summary>
     /// Время окончания фильтрации.
     /// </summary>
-    public DateTime? To 
-    { 
+    public DateTime? To
+    {
         get { return _to; }
         init
         {

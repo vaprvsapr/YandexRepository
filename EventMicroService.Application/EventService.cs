@@ -12,7 +12,7 @@ namespace EventMicroService.Application;
 /// <param name="eventRepository"></param>
 /// <param name="logger"></param>
 public class EventService(
-    IEventRepository eventRepository, 
+    IEventRepository eventRepository,
     ILogger<EventService> logger) : IEventService
 {
     private readonly ILogger<EventService> _logger = logger;
@@ -25,8 +25,8 @@ public class EventService(
         if (existingEvent != null)
             throw new InvalidOperationException($"Событие с ID:{eventCreateDto.Id} уже существует.");
 
-        var newEvent = new Event 
-        { 
+        var newEvent = new Event
+        {
             Id = eventCreateDto.Id,
             Title = eventCreateDto.Title,
             Description = eventCreateDto.Description,

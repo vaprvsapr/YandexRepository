@@ -110,8 +110,8 @@ public class UserRepositoryTests(PostgresFixture postgresFixture) : PostgresTest
         var repository = new UserRepository(actContext);
 
         // Act 
-        var foundUser = await repository.GetByLoginAsync("non_existent_login"); 
-        
+        var foundUser = await repository.GetByLoginAsync("non_existent_login");
+
         // Assert
         Assert.Null(foundUser);
     }

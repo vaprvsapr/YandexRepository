@@ -31,7 +31,7 @@ public class UserRepository(UserDbContext context) : IUserRepository
     {
         return await _context.Users.ToListAsync();
     }
-    
+
     /// <inheritdoc/>
     public async Task<User?> GetByIdAsync(Guid id)
     {

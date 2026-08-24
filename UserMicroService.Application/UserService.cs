@@ -16,7 +16,7 @@ public class UserService(IUserRepository userRepository, ITokenGeneratingService
     public async Task<UserInfoDto> Register(string login, string password, UserRole role)
     {
         var existingUser = await _userRepository.GetByLoginAsync(login);
-        if (existingUser != null) 
+        if (existingUser != null)
             throw new InvalidOperationException($"Пользователь с логином {login} уже существует.");
 
         var newUser = new User
@@ -45,7 +45,7 @@ public class UserService(IUserRepository userRepository, ITokenGeneratingService
     /// <inheritdoc/>
     public async Task Delete(string login)
     {
-        var existingUser = await _userRepository.GetByLoginAsync(login) ?? 
+        var existingUser = await _userRepository.GetByLoginAsync(login) ??
             throw new KeyNotFoundException($"Пользователь с логином {login} не найден.");
         await _userRepository.DeleteAsync(existingUser);
     }

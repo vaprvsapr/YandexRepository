@@ -24,7 +24,7 @@ public class Event
     /// Время начала события.
     /// </summary>
     public required DateTime? StartAt { get; set; }
-    
+
     /// <summary>
     /// Время окончания события.
     /// </summary>
@@ -36,7 +36,7 @@ public class Event
     /// <summary>
     /// Количество мест на событие, обязательное поле.
     /// </summary>
-    public required int TotalSeats 
+    public required int TotalSeats
     {
         get => _totalSeats;
         set

@@ -58,7 +58,7 @@ public class BookingProcessingService(
             }
             else
                 await Task.Delay(_delay, stoppingToken);
-            }
+        }
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingProcessingService остановлен: {time}", DateTime.Now);

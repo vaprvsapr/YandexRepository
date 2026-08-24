@@ -49,7 +49,7 @@ public class PaginationTests(PostgresFixture postgresFixture) : PostgresTest(pos
         var page = await eventsService.GetAllEvents(query);
         // Assert
         var expectedCount = pageNumber * query.PageSize > numberOfEvents
-            ? int.Max(0, numberOfEvents - (pageNumber-1) * query.PageSize) 
+            ? int.Max(0, numberOfEvents - (pageNumber - 1) * query.PageSize)
             : query.PageSize;
         Assert.Equal(expectedCount, page.Events.Count());
     }
@@ -83,8 +83,8 @@ public class PaginationTests(PostgresFixture postgresFixture) : PostgresTest(pos
         for (int page = 1; page <= numberOfPages; page++)
         {
             var result = await eventsService.GetAllEvents(new GetEventQuery() { Page = page, PageSize = pageSize });
-            var expectedCount = page < numberOfPages 
-                ? pageSize 
+            var expectedCount = page < numberOfPages
+                ? pageSize
                 : numberOfEvents - (page - 1) * pageSize;
             Assert.Equal(expectedCount, result.Events.Count());
         }

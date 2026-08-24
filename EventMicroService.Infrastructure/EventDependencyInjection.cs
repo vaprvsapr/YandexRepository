@@ -52,7 +52,7 @@ public static partial class DependencyInjectionExtensions
             var producer = sp.GetRequiredService<BookingProcessResponseProducer>();
             var logger = sp.GetRequiredService<ILogger<BookingProcessRequestBackgroundService>>();
 
-            var groupId = config.GetRequiredSection("BookingProcessRequestGroupId").Value ?? 
+            var groupId = config.GetRequiredSection("BookingProcessRequestGroupId").Value ??
                 throw new InvalidOperationException("GroupId configuration is missing.");
 
             return new BookingProcessRequestBackgroundService(
