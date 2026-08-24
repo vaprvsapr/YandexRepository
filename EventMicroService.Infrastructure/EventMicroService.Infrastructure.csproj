@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common.Web\Common.Web.csproj" />
-    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Common\Common.Contracts.csproj" />
     <ProjectReference Include="..\EventMicroService.Application\EventMicroService.Application.csproj" />
     <ProjectReference Include="..\EventMicroService.Domain\EventMicroService.Domain.csproj" />
   </ItemGroup>

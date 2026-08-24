@@ -7,7 +7,7 @@
   </Folder>
   <Folder Name="/Common/">
     <Project Path="Common.Web/Common.Web.csproj" Id="c24daa4e-67e5-4d11-825a-fcc2c07eaad8" />
-    <Project Path="Common/Common.csproj" />
+    <Project Path="Common/Common.Contracts.csproj" />
   </Folder>
   <Folder Name="/EventMicroService/">
     <Project Path="EventMicroService.Application/EventMicroService.Application.csproj" Id="1d21c5df-0ea5-4799-a030-ff8955577d4b" />
