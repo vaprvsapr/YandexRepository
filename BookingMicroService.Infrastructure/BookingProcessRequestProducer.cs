@@ -1,6 +1,6 @@
 ﻿using BookingMicroService.Application;
 using Confluent.Kafka;
-using Common;
+using Common.Contracts;
 using System.Text.Json;
 
 namespace BookingMicroService.Infrastructure;
@@ -31,6 +31,7 @@ public class BookingProcessRequestProducer : IBookingProcessRequestProducer, IDi
     public void Dispose()
     {
         _producer.Flush(TimeSpan.FromSeconds(5));
+        _producer.Dispose();
         GC.SuppressFinalize(this);
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Common.Web;
-using Common;
+using Common.Contracts;
 using Microsoft.Extensions.Hosting;
 
 namespace BookingMicroService.Infrastructure;

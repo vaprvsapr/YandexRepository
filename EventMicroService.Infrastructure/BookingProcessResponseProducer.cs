@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using Common;
+using Common.Contracts;
 using System.Text.Json;
 using EventMicroService.Application;
 
@@ -31,6 +31,7 @@ public class BookingProcessResponseProducer: IDisposable
     public void Dispose()
     {
         _producer.Flush(TimeSpan.FromSeconds(5));
+        _producer.Dispose();
         GC.SuppressFinalize(this);
     }
 }

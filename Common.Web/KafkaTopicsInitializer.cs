@@ -32,26 +32,26 @@ public class KafkaTopicsInitializer
             if (exists)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation($"[Kafka] Topic '{topicName}' already exists.");
+                    _logger.LogInformation("[Kafka] Topic '{topicName}' already exists.", topicName);
                 return;
             }
 
-            await _adminClient.CreateTopicsAsync(new[]
-            {
+            await _adminClient.CreateTopicsAsync(
+            [
                 new TopicSpecification
                 {
                     Name = topicName,
                     NumPartitions = partitions,
                     ReplicationFactor = replicationFactor
                 }
-            });
+            ]);
 
             if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation($"[Kafka] Topic '{topicName}' created.");
+                _logger.LogInformation("[Kafka] Topic '{topicName}' created.", topicName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"[Kafka] Failed to create topic '{topicName}': {ex.Message}");
+            _logger.LogError(ex, "[Kafka] Failed to create topic '{topicName}': {ex.Message}", topicName, ex.Message);
         }
     }
 }

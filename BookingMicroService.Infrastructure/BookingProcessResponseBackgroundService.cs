@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Contracts;
 using BookingMicroService.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -112,10 +112,15 @@ public class BookingProcessResponseBackgroundService : BackgroundService
                 _logger.LogError(ex, "Произошла ошибка в BookingConfirmationBackgroundService: {message}", ex.Message);
             }
         }
-        _consumer.Close();
-        _consumer.Dispose();
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("BookingConfirmationBackgroundService остановлен: {time}", DateTime.Now);
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _consumer.Close();
+        _consumer.Dispose();
+        await base.StopAsync(cancellationToken);
     }
 }

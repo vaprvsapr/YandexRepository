@@ -1,5 +1,5 @@
 ﻿using BookingMicroService.Domain;
-using Common;
+using Common.Contracts;
 using Microsoft.Extensions.Logging;
 using System.Security.Authentication;
 
