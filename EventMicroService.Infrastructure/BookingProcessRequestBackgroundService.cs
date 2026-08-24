@@ -84,7 +84,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                 var bookingProcessResponse = new BookingProcessResponse
                 {
                     BookingId = bookingProcessRequest.BookingId,
-                    Result = BookingProcessResult.Failed
+                    Result = BookingProcessResult.Error
                 };
 
                 if (existingEvent == null)
@@ -105,11 +105,20 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                         existingEvent.ReleaseSeats();
                         await eventRepository.UpdateAsync(existingEvent, stoppingToken);
 
+                        bookingProcessResponse.Result = BookingProcessResult.Cancelled;
+                        await _producer.PublishAsync(bookingProcessResponse);
+
                         if (_logger.IsEnabled(LogLevel.Information))
                             _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.",
                                 bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
-                        bookingProcessResponse.Result = BookingProcessResult.Cancelled;
+                    }
+                    else
+                    {
                         await _producer.PublishAsync(bookingProcessResponse);
+
+                        if(_logger.IsEnabled(LogLevel.Information))
+                            _logger.LogInformation("Бронирование с ID {bookingId} не найдено для отмены для события с ID {eventId}.",
+                                bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
                     }
                     _consumer.Commit(consumeResult);
                     continue;

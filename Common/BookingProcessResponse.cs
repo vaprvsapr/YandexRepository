@@ -10,5 +10,5 @@ public enum BookingProcessResult
 {
     Confirmed,
     Cancelled,
-    Failed
+    Error
 }
