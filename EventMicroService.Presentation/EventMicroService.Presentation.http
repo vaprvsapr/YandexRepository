@@ -1,0 +1,6 @@
+@EventMicroService.Presentation_HostAddress = http://localhost:5001
+
+GET {{EventMicroService.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

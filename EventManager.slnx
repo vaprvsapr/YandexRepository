@@ -1,11 +1,30 @@
 <Solution>
+  <Folder Name="/BookingMicroService/">
+    <Project Path="BookingMicroService.Application/BookingMicroService.Application.csproj" Id="24ef21db-2048-40f6-8fa2-3e0bb7581648" />
+    <Project Path="BookingMicroService.Domain/BookingMicroService.Domain.csproj" Id="e7759843-1424-4a04-9dce-c2ec8d769206" />
+    <Project Path="BookingMicroService.Infrastructure/BookingMicroService.Infrastructure.csproj" Id="1914c2c4-7780-40ca-a3ed-296282fe5e78" />
+    <Project Path="BookingMicroService.Presentation/BookingMicroService.Presentation.csproj" Id="6cc2912d-a2a4-4892-830a-046b3e631d53" />
+  </Folder>
+  <Folder Name="/Common/">
+    <Project Path="Common.Web/Common.Web.csproj" Id="c24daa4e-67e5-4d11-825a-fcc2c07eaad8" />
+    <Project Path="Common/Common.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/EventMicroService/">
+    <Project Path="EventMicroService.Application/EventMicroService.Application.csproj" Id="1d21c5df-0ea5-4799-a030-ff8955577d4b" />
+    <Project Path="EventMicroService.Domain/EventMicroService.Domain.csproj" Id="1d28cfff-d276-4cb7-bee2-9308456dfa7b" />
+    <Project Path="EventMicroService.Infrastructure/EventMicroService.Infrastructure.csproj" Id="d6a2469c-81cd-4223-af9f-b94e4b8ca726" />
+    <Project Path="EventMicroService.Presentation/EventMicroService.Presentation.csproj" Id="3108abc8-220e-4647-8bee-b45ef4d9f996" />
+  </Folder>
+  <Folder Name="/UserMicroService/">
+    <Project Path="UserMicroService.Application/UserMicroService.Application.csproj" />
+    <Project Path="UserMicroService.Domain/UserMicroService.Domain.csproj" />
+    <Project Path="UserMicroService.Infrastructure/UserMicroService.Infrastructure.csproj" />
+    <Project Path="UserMicroService.Presentation/UserMicroService.Presentation.csproj" Id="b16442b3-bc4a-4c7a-8ca7-626d7dad2c44" />
+  </Folder>
   <Folder Name="/Элементы решения/">
+    <File Path="docker-compose.yml" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="EventManager.Application/EventManager.Application.csproj" Id="d3074723-0bd2-4318-bcd1-4ef199b2f75f" />
-  <Project Path="EventManager.Domain/EventManager.Domain.csproj" Id="2302be5d-c2c5-4683-9e86-1421669f650a" />
-  <Project Path="EventManager.Infrastructure/EventManager.Infrastructure.csproj" Id="5cf2e94e-7ffa-42a8-b63a-0b9287de4231" />
   <Project Path="EventManager.Tests.Integration/EventManager.Tests.Integration.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
-  <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" Id="87a35e7d-e3d5-4fc4-9f9a-9e48628393aa" />
   <Project Path="EventManager.Tests.Unit/EventManager.Tests.Unit.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
 </Solution>
