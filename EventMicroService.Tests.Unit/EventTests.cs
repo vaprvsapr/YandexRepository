@@ -1,8 +1,8 @@
-﻿using EventManager.Application.Dto;
-using EventManager.Domain.Models;
+﻿using EventMicroService.Application;
+using EventMicroService.Domain;
 using System.ComponentModel.DataAnnotations;
 
-namespace EventManager.Tests.Unit;
+namespace EventMicroService.Tests.Unit;
 
 public class EventTests
 {
@@ -73,5 +73,4 @@ public class EventTests
         Assert.Throws<InvalidOperationException>(() => eventEntity.ReleaseSeats(2));
     }
 }
-
 
