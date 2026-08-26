@@ -5,18 +5,11 @@ using System.Text.Json;
 
 namespace EventMicroService.Infrastructure;
 
-public class CacheRepository : ICacheRepository
+public class CacheRepository(IConnectionMultiplexer connectionMultiplexer) : ICacheRepository
 {
-    private readonly IEventRepository _eventRepository;
-    private readonly IDatabase _redis;
+    private readonly IDatabase _redis = connectionMultiplexer.GetDatabase();
     private static readonly TimeSpan _ttl = TimeSpan.FromSeconds(10);
 
-
-    public CacheRepository(IConnectionMultiplexer connectionMultiplexer, IEventRepository eventRepository)
-    {
-        _redis = connectionMultiplexer.GetDatabase();
-        _eventRepository = eventRepository;
-    }
     public async Task<Event?> GetByIdAsync(Guid id)
     {
         var key = $"event:{id}";
