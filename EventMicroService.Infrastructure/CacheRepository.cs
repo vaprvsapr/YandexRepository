@@ -1,7 +1,6 @@
 ﻿using EventMicroService.Application;
 using EventMicroService.Domain;
 using StackExchange.Redis;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 
 namespace EventMicroService.Infrastructure;
@@ -49,6 +48,7 @@ public class CacheRepository : ICacheRepository
     public async Task SaveTop10Async(List<Event> top10Events)
     {
         var key = "events:top10";
+
         var serialized = JsonSerializer.Serialize(top10Events);
         await _redis.StringSetAsync(key, serialized, _ttl);
     }
@@ -56,6 +56,7 @@ public class CacheRepository : ICacheRepository
     public async Task DeleteByIdAsync(Guid id)
     {
         var key = $"event:{id}";
+
         await _redis.KeyDeleteAsync(key);
     }
 }

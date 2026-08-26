@@ -50,6 +50,7 @@ public class EventService(
         var existingEvent = await GetEventByIdAsync(id);
 
         await _eventRepository.DeleteAsync(existingEvent);
+        await _cacheRepository.DeleteByIdAsync(id);
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event with ID:{id} was deleted.", id);
@@ -105,7 +106,19 @@ public class EventService(
     /// <inheritdoc/>
     public async Task<EventInfoDto> GetEvent(Guid id)
     {
-        return EventMapper.ToEventInfoDto(await GetEventByIdAsync(id));
+        var cached = await _cacheRepository.GetByIdAsync(id);
+        if (cached != null)
+        {
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Event with ID:{id} was obtained from cache.", id);
+            return EventMapper.ToEventInfoDto(cached);
+        }
+
+        var @event = await GetEventByIdAsync(id);
+        await _cacheRepository.SaveEventAsync(@event);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Event with ID:{id} was obtained from database and saved to cache.", id);
+        return EventMapper.ToEventInfoDto(@event);
     }
 
     /// <inheritdoc/>
@@ -122,23 +135,14 @@ public class EventService(
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event with ID:{id} was updated.", id);
 
+        await _cacheRepository.DeleteByIdAsync(id); // Удаляем из кэша, чтобы при следующем запросе получить обновленные данные
+
         return await GetEvent(id);
     }
 
     private async Task<Event> GetEventByIdAsync(Guid id)
     {
-        var cached = await _cacheRepository.GetByIdAsync(id);
-        if (cached != null)
-        {
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("Event with ID:{id} was obtained from cache.", id);
-            return cached;
-        }
-
-        var @event = await _eventRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Событие с ID:{id} не найдено.");
-        await _cacheRepository.SaveEventAsync(@event);
-        if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("Event with ID:{id} was obtained from database and saved to cache.", id);
-        return @event;
+        return await _eventRepository.GetByIdAsync(id) ?? 
+            throw new KeyNotFoundException($"Событие с ID:{id} не найдено.");
     }
 }
