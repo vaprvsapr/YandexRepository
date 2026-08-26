@@ -13,16 +13,16 @@ public class EventServiceTests
     private readonly List<Event> _events =
     [
         new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af01"), Title = "First", StartAt = new DateTime().AddDays(0).ToUniversalTime(), EndAt = new DateTime().AddDays(1).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af02"), Title = "Second", StartAt = new DateTime().AddDays(1).ToUniversalTime(), EndAt = new DateTime().AddDays(2).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af03"), Title = "Third", StartAt = new DateTime().AddDays(2).ToUniversalTime(), EndAt = new DateTime().AddDays(3).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af04"), Title = "Fourth", StartAt = new DateTime().AddDays(3).ToUniversalTime(), EndAt = new DateTime().AddDays(4).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af05"), Title = "Fifth", StartAt = new DateTime().AddDays(4).ToUniversalTime(), EndAt = new DateTime().AddDays(5).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af06"), Title = "Sixth", StartAt = new DateTime().AddDays(5).ToUniversalTime(), EndAt = new DateTime().AddDays(6).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af07"), Title = "Seventh", StartAt = new DateTime().AddDays(6).ToUniversalTime(), EndAt = new DateTime().AddDays(7).ToUniversalTime(), TotalSeats = 10},
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af08"), Title = "Eighth", StartAt = new DateTime().AddDays(7).ToUniversalTime(), EndAt = new DateTime().AddDays(8).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af09"), Title = "Ninth", StartAt = new DateTime().AddDays(8).ToUniversalTime(), EndAt = new DateTime().AddDays(9).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af10"), Title = "Tenth", StartAt = new DateTime().AddDays(9).ToUniversalTime(), EndAt = new DateTime().AddDays(10).ToUniversalTime(), TotalSeats = 10 },
-    new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af11"), Title = "Eleventh", StartAt = new DateTime().AddDays(10).ToUniversalTime(), EndAt = new DateTime().AddDays(11).ToUniversalTime(), TotalSeats = 10 }
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af02"), Title = "Second", StartAt = new DateTime().AddDays(1).ToUniversalTime(), EndAt = new DateTime().AddDays(2).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af03"), Title = "Third", StartAt = new DateTime().AddDays(2).ToUniversalTime(), EndAt = new DateTime().AddDays(3).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af04"), Title = "Fourth", StartAt = new DateTime().AddDays(3).ToUniversalTime(), EndAt = new DateTime().AddDays(4).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af05"), Title = "Fifth", StartAt = new DateTime().AddDays(4).ToUniversalTime(), EndAt = new DateTime().AddDays(5).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af06"), Title = "Sixth", StartAt = new DateTime().AddDays(5).ToUniversalTime(), EndAt = new DateTime().AddDays(6).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af07"), Title = "Seventh", StartAt = new DateTime().AddDays(6).ToUniversalTime(), EndAt = new DateTime().AddDays(7).ToUniversalTime(), TotalSeats = 10},
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af08"), Title = "Eighth", StartAt = new DateTime().AddDays(7).ToUniversalTime(), EndAt = new DateTime().AddDays(8).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af09"), Title = "Ninth", StartAt = new DateTime().AddDays(8).ToUniversalTime(), EndAt = new DateTime().AddDays(9).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af10"), Title = "Tenth", StartAt = new DateTime().AddDays(9).ToUniversalTime(), EndAt = new DateTime().AddDays(10).ToUniversalTime(), TotalSeats = 10 },
+        new Event { Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66af11"), Title = "Eleventh", StartAt = new DateTime().AddDays(10).ToUniversalTime(), EndAt = new DateTime().AddDays(11).ToUniversalTime(), TotalSeats = 10 }
     ];
 
     [Fact]
@@ -316,6 +316,28 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
+    public async Task UpdateEvent_InvalidatesCache()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockEventRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        await eventService.UpdateEvent(_events[0].Id,
+            new EventUpdateDto
+            {
+                Title = "Updated Event",
+                StartAt = new DateTime(0),
+                EndAt = new DateTime(1)
+            });
+        // Assert
+        mockCacheRepository.Verify(c => c.DeleteByIdAsync(_events[0].Id), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
     public async Task DeleteEvent_ExistingId_ReturnsTrue()
     {
         // Arrange
@@ -359,5 +381,60 @@ public class EventServiceTests
         // Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await eventService.DeleteEvent(Guid.NewGuid()));
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task DeleteEvent_InvalidatesCache()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockEventRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        await eventService.DeleteEvent(_events[0].Id);
+        // Assert
+        mockCacheRepository.Verify(c => c.DeleteByIdAsync(_events[0].Id), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task GetEvent_CacheHit_ReturnsEventFromCache()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockCacheRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        var result = await eventService.GetEvent(_events[0].Id);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(_events[0].Id, result.Id);
+        mockCacheRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Once);
+        mockEventRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Never);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task GetEvent_CacheMiss_ReturnsEventFromRepository()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockCacheRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync((Event?)null);
+        mockEventRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        var result = await eventService.GetEvent(_events[0].Id);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(_events[0].Id, result.Id);
+        mockCacheRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Once);
+        mockEventRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Once);
     }
 }
