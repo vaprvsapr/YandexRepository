@@ -26,6 +26,4 @@
     <File Path="docker-compose.yml" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="EventManager.Tests.Integration/EventManager.Tests.Integration.csproj" Id="1f63cc53-144b-4619-92a9-1aec51b6afdd" />
-  <Project Path="EventManager.Tests.Unit/EventManager.Tests.Unit.csproj" Id="a73a024a-5bed-4e0c-af4d-36bab5bbad43" />
 </Solution>
