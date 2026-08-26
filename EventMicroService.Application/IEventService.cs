@@ -16,7 +16,12 @@ public interface IEventService
     /// Возвращает коллекцию всех доступных событий.
     /// </summary>
     /// <returns>Коллекция объектов <see cref="EventInfoDto"/>. Если события отсутствуют, возвращается пустая коллекция.</returns>
-    public Task<PaginatedResultDto> GetAllEvents(GetEventQuery query);
+    public PaginatedResultDto GetAllEvents(GetEventQuery query);
+
+    /// <summary>
+    /// Возвращает топ-10 самых популярных событий.
+    /// </summary>
+    public Task<List<EventInfoDto>> GetTop10Events();
 
     /// <summary>
     /// Создает новое событие на основе предоставленных данных.
