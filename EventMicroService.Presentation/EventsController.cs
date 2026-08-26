@@ -61,7 +61,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [Produces("application/json")]
-    [HttpGet("top10")]
+    [HttpGet("top")]
     public async Task<ActionResult<List<EventInfoDto>?>> GetTop10Events()
     {
         var top10Events =  await _eventService.GetTop10Events();
