@@ -14,6 +14,7 @@
     <Project Path="EventMicroService.Domain/EventMicroService.Domain.csproj" Id="1d28cfff-d276-4cb7-bee2-9308456dfa7b" />
     <Project Path="EventMicroService.Infrastructure/EventMicroService.Infrastructure.csproj" Id="d6a2469c-81cd-4223-af9f-b94e4b8ca726" />
     <Project Path="EventMicroService.Presentation/EventMicroService.Presentation.csproj" Id="3108abc8-220e-4647-8bee-b45ef4d9f996" />
+    <Project Path="EventMicroService.Tests.Unit/EventMicroService.Tests.Unit.csproj" Id="d85c5c59-c1c8-4975-9e98-b3b9a2bec127" />
   </Folder>
   <Folder Name="/UserMicroService/">
     <Project Path="UserMicroService.Application/UserMicroService.Application.csproj" />
