@@ -7,7 +7,7 @@ public interface ICacheRepository
 
     Task SaveEventAsync(Event @event);
     Task<List<Event>?> GetTop10Async();
-    Task SaveTop10Async(List<Event>);
+    Task SaveTop10Async(List<Event> top10Events);
 
     Task DeleteByIdAsync(Guid id);
 }

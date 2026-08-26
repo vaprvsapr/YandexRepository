@@ -46,10 +46,10 @@ public class CacheRepository : ICacheRepository
         return null;
     }
 
-    public async Task SaveTop10Async(List<Event> events)
+    public async Task SaveTop10Async(List<Event> top10Events)
     {
         var key = "events:top10";
-        var serialized = JsonSerializer.Serialize(events);
+        var serialized = JsonSerializer.Serialize(top10Events);
         await _redis.StringSetAsync(key, serialized, _ttl);
     }
 

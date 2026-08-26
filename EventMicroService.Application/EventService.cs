@@ -96,8 +96,9 @@ public class EventService(
         List<Event> top10Events = [.. _eventRepository.GetAll()
             .OrderByDescending(e => (e.TotalSeats - e.AvailableSeats) / (double)e.TotalSeats)
             .Take(10)];
-
         await _cacheRepository.SaveTop10Async(top10Events);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Top 10 events were obtained from database and saved to cache.");
         return [.. top10Events.Select(EventMapper.ToEventInfoDto)];
     }
 

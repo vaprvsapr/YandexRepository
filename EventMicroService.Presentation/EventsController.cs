@@ -31,7 +31,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<PaginatedResultDto>> GetAllEvents([FromQuery] GetEventQuery query)
     {
-        var events = await _eventService.GetAllEvents(query);
+        var events = _eventService.GetAllEvents(query);
         return Ok(events);
     }
 
@@ -51,6 +51,21 @@ public class EventsController(IEventService eventService) : ControllerBase
     {
         var eventById = await _eventService.GetEvent(id);
         return Ok(eventById);
+    }
+
+
+    /// <summary>
+    /// Возвращает топ-10 событий по проценту забронированных мест.
+    /// </summary>
+    /// <response code="200">Возвращается успешный ответ с коллекцией топ-10 событий и HTTP статус-кодом 200 OK.</response>
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [Produces("application/json")]
+    [HttpGet("top10")]
+    public async Task<ActionResult<List<EventInfoDto>?>> GetTop10Events()
+    {
+        var top10Events =  await _eventService.GetTop10Events();
+        return Ok(top10Events);
     }
 
     /// <summary>
