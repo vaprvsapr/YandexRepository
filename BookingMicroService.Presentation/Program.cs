@@ -8,6 +8,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddBookingInfrastructure(builder.Configuration);
+builder.Services.AddObservability(builder.Configuration);
 builder.Services.AddControllers();
 
 // Добавление сервисов для визуализации и документации API только в режиме разработки
@@ -57,6 +58,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapPrometheusScrapingEndpoint(); // доступен по /metrics
 // Пайплайн обработки запросов, включая глобальный обработчик исключений
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseAuthentication();
