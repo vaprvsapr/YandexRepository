@@ -25,6 +25,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
         _producer = producer;
         _logger = logger;
 
+
         var config = new ConsumerConfig
         {
             BootstrapServers = bootstrapServers,
@@ -79,6 +80,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                 using var scope = _serviceScopeFactory.CreateScope();
                 var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
                 var eventBookingRepository = scope.ServiceProvider.GetRequiredService<IEventBookingRepository>();
+                var cacheRepository = scope.ServiceProvider.GetRequiredService<ICacheRepository>();
                 var existingEvent = await eventRepository.GetByIdAsync(bookingProcessRequest.EventId, stoppingToken);
 
                 var bookingProcessResponse = new BookingProcessResponse
@@ -111,6 +113,8 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                         if (_logger.IsEnabled(LogLevel.Information))
                             _logger.LogInformation("Бронирование с ID {bookingId} отменено для события с ID {eventId}.",
                                 bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
+
+                        await cacheRepository.DeleteByIdAsync(bookingProcessRequest.EventId);
                     }
                     else
                     {
@@ -165,6 +169,7 @@ public class BookingProcessRequestBackgroundService : BackgroundService
                         _logger.LogInformation("Бронирование с ID {bookingId} подтверждено для события с ID {eventId}.", bookingProcessRequest.BookingId, bookingProcessRequest.EventId);
                     bookingProcessResponse.Result = BookingProcessResult.Confirmed;
                     await _producer.PublishAsync(bookingProcessResponse);
+                    await cacheRepository.DeleteByIdAsync(bookingProcessRequest.EventId);
                 }
                 _consumer.Commit(consumeResult);
 

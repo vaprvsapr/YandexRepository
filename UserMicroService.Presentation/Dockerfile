@@ -12,7 +12,8 @@ WORKDIR /src
 COPY ["UserMicroService.Presentation/UserMicroService.Presentation.csproj", "UserMicroService.Presentation/"]
 COPY ["UserMicroService.Application/UserMicroService.Application.csproj", "UserMicroService.Application/"]
 COPY ["UserMicroService.Domain/UserMicroService.Domain.csproj", "UserMicroService.Domain/"]
-COPY ["Common/Common.csproj", "Common/"]
+COPY ["Common/Common.Contracts.csproj", "Common.Contracts/"]
+COPY ["Common.Web/Common.Web.csproj", "Common.Web/"]
 COPY ["UserMicroService.Infrastructure/UserMicroService.Infrastructure.csproj", "UserMicroService.Infrastructure/"]
 
 RUN dotnet restore "UserMicroService.Presentation/UserMicroService.Presentation.csproj"

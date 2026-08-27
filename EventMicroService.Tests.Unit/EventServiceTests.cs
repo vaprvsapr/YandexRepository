@@ -1,15 +1,12 @@
-﻿using EventManager.Application.Dto;
-using EventManager.Application.Queries;
-using EventManager.Application.Repositories;
-using EventManager.Application.Services;
-using EventManager.Domain.Models;
-using EventManager.Infrastructure.DataAccess;
+﻿using EventMicroService.Domain;
+using EventMicroService.Application;
+using EventMicroService.Infrastructure;
+using Moq;
+using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Moq;
 
-namespace EventManager.Tests.Unit;
+namespace EventMicroService.Tests.Unit;
 
 public class EventServiceTests
 {
@@ -44,15 +41,16 @@ public class EventServiceTests
         };
 
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
 
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         // Act
         var createdEvent = await eventService.CreateEvent(newEvent);
 
@@ -69,19 +67,20 @@ public class EventServiceTests
         GetEventQuery query = new();
 
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
         // Act
-        var result = await eventService.GetAllEvents(query);
+        var result = eventService.GetAllEvents(query);
 
         // Assert
         Assert.Equal(_events.Count, result.TotalCount);
@@ -95,19 +94,20 @@ public class EventServiceTests
         GetEventQuery query = new() { Title = "th" };
 
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
         // Act
-        var result = await eventService.GetAllEvents(query);
+        var result = eventService.GetAllEvents(query);
 
         // Assert
         Assert.Equal(9, result.TotalCount);
@@ -123,21 +123,22 @@ public class EventServiceTests
         GetEventQuery fromToQuery = new() { From = new DateTime().AddDays(4).ToUniversalTime(), To = new DateTime().AddDays(6).ToUniversalTime() };
 
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
         // Act
-        var fromQueryResult = await eventService.GetAllEvents(fromQuery);
-        var toQueryResult = await eventService.GetAllEvents(toQuery);
-        var fromToQueryResult = await eventService.GetAllEvents(fromToQuery);
+        var fromQueryResult = eventService.GetAllEvents(fromQuery);
+        var toQueryResult = eventService.GetAllEvents(toQuery);
+        var fromToQueryResult = eventService.GetAllEvents(fromToQuery);
 
         // Assert
         Assert.Equal(6, fromQueryResult.TotalCount);
@@ -158,19 +159,20 @@ public class EventServiceTests
         };
 
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
 
         // Act
-        var result = await eventService.GetAllEvents(query);
+        var result = eventService.GetAllEvents(query);
 
         // Assert
         Assert.Equal(3, result.TotalCount);
@@ -184,18 +186,19 @@ public class EventServiceTests
         GetEventQuery query = new() { Page = 4, PageSize = 3 };
 
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
-        var result = await eventService.GetAllEvents(query);
+        var result = eventService.GetAllEvents(query);
         // Assert
         Assert.Equal(11, result.TotalCount);
         Assert.Equal(3, result.PageSize);
@@ -211,14 +214,15 @@ public class EventServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -234,15 +238,16 @@ public class EventServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options
+        services.AddDbContext<EventDbContext>(options
             => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Assert
@@ -256,14 +261,15 @@ public class EventServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -286,14 +292,15 @@ public class EventServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         // Act
 
         // Assert
@@ -309,18 +316,41 @@ public class EventServiceTests
 
     [Fact]
     [Trait("Category", "EventService")]
+    public async Task UpdateEvent_InvalidatesCache()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockEventRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        await eventService.UpdateEvent(_events[0].Id,
+            new EventUpdateDto
+            {
+                Title = "Updated Event",
+                StartAt = new DateTime(0),
+                EndAt = new DateTime(1)
+            });
+        // Assert
+        mockCacheRepository.Verify(c => c.DeleteByIdAsync(_events[0].Id), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
     public async Task DeleteEvent_ExistingId_ReturnsTrue()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -335,14 +365,15 @@ public class EventServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDbContext<EventDbContext>(options => options.UseInMemoryDatabase(dbName));
         var serviceProvider = services.BuildServiceProvider();
         var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
         IEventRepository eventRepository = new EventRepository(context);
-        var eventService = new EventService(eventRepository, mockLogger.Object);
+        var eventService = new EventService(eventRepository, mockCacheRepository.Object, mockLogger.Object);
         context.Events.AddRange(_events);
         context.SaveChanges();
         // Act
@@ -350,5 +381,60 @@ public class EventServiceTests
         // Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await eventService.DeleteEvent(Guid.NewGuid()));
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task DeleteEvent_InvalidatesCache()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockEventRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        await eventService.DeleteEvent(_events[0].Id);
+        // Assert
+        mockCacheRepository.Verify(c => c.DeleteByIdAsync(_events[0].Id), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task GetEvent_CacheHit_ReturnsEventFromCache()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockCacheRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        var result = await eventService.GetEvent(_events[0].Id);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(_events[0].Id, result.Id);
+        mockCacheRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Once);
+        mockEventRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Never);
+    }
+
+    [Fact]
+    [Trait("Category", "EventService")]
+    public async Task GetEvent_CacheMiss_ReturnsEventFromRepository()
+    {
+        // Arrange
+        var mockLogger = new Mock<ILogger<EventService>>();
+        var mockCacheRepository = new Mock<ICacheRepository>();
+        var mockEventRepository = new Mock<IEventRepository>();
+        var eventService = new EventService(mockEventRepository.Object, mockCacheRepository.Object, mockLogger.Object);
+        mockCacheRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync((Event?)null);
+        mockEventRepository.Setup(c => c.GetByIdAsync(_events[0].Id)).ReturnsAsync(_events[0]);
+        // Act
+        var result = await eventService.GetEvent(_events[0].Id);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(_events[0].Id, result.Id);
+        mockCacheRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Once);
+        mockEventRepository.Verify(c => c.GetByIdAsync(_events[0].Id), Times.Once);
     }
 }

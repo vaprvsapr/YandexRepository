@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace EventMicroService.Infrastructure;
 
@@ -23,9 +24,21 @@ public static partial class DependencyInjectionExtensions
             options.UseNpgsql(configuration.GetConnectionString("EventDbConnection"));
         });
 
+        // Redis
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var redisConnectionString = configuration.GetConnectionString("RedisConnection") ?? 
+                throw new ArgumentNullException(nameof(configuration));
+            return ConnectionMultiplexer.Connect(redisConnectionString);
+        });
+
         // Сервис событий и его репозиторий
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IEventBookingRepository, EventBookingRepository>();
+
+        services.AddScoped<ICacheRepository, CacheRepository>();
+
+
         services.AddScoped<IEventService, EventService>();
 
         var config = configuration.GetSection("KafkaSettings");

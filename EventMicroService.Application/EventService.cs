@@ -13,10 +13,12 @@ namespace EventMicroService.Application;
 /// <param name="logger"></param>
 public class EventService(
     IEventRepository eventRepository,
+    ICacheRepository cacheRepository,
     ILogger<EventService> logger) : IEventService
 {
     private readonly ILogger<EventService> _logger = logger;
     private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly ICacheRepository _cacheRepository = cacheRepository;
 
     /// <inheritdoc/>
     public async Task<EventInfoDto> CreateEvent(EventCreateDto eventCreateDto)
@@ -48,13 +50,14 @@ public class EventService(
         var existingEvent = await GetEventByIdAsync(id);
 
         await _eventRepository.DeleteAsync(existingEvent);
+        await _cacheRepository.DeleteByIdAsync(id);
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event with ID:{id} was deleted.", id);
     }
 
     /// <inheritdoc/>
-    public async Task<PaginatedResultDto> GetAllEvents(GetEventQuery getQuery)
+    public  PaginatedResultDto GetAllEvents(GetEventQuery getQuery)
     {
         IQueryable<Event> events = _eventRepository.GetAll();
 
@@ -81,9 +84,41 @@ public class EventService(
     }
 
     /// <inheritdoc/>
+    public async Task<List<EventInfoDto>> GetTop10Events()
+    {
+        var cached = await _cacheRepository.GetTop10Async();
+        if (cached != null)
+        {
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Top 10 events were obtained from cache.");
+            return [.. cached.Select(EventMapper.ToEventInfoDto)];
+        }
+
+        List<Event> top10Events = [.. _eventRepository.GetAll()
+            .OrderByDescending(e => (e.TotalSeats - e.AvailableSeats) / (double)e.TotalSeats)
+            .Take(10)];
+        await _cacheRepository.SaveTop10Async(top10Events);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Top 10 events were obtained from database and saved to cache.");
+        return [.. top10Events.Select(EventMapper.ToEventInfoDto)];
+    }
+
+    /// <inheritdoc/>
     public async Task<EventInfoDto> GetEvent(Guid id)
     {
-        return EventMapper.ToEventInfoDto(await GetEventByIdAsync(id));
+        var cached = await _cacheRepository.GetByIdAsync(id);
+        if (cached != null)
+        {
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Event with ID:{id} was obtained from cache.", id);
+            return EventMapper.ToEventInfoDto(cached);
+        }
+
+        var @event = await GetEventByIdAsync(id);
+        await _cacheRepository.SaveEventAsync(@event);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Event with ID:{id} was obtained from database and saved to cache.", id);
+        return EventMapper.ToEventInfoDto(@event);
     }
 
     /// <inheritdoc/>
@@ -100,12 +135,14 @@ public class EventService(
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Event with ID:{id} was updated.", id);
 
+        await _cacheRepository.DeleteByIdAsync(id); // Удаляем из кэша, чтобы при следующем запросе получить обновленные данные
+
         return await GetEvent(id);
     }
 
     private async Task<Event> GetEventByIdAsync(Guid id)
     {
-        return await _eventRepository.GetByIdAsync(id) ??
+        return await _eventRepository.GetByIdAsync(id) ?? 
             throw new KeyNotFoundException($"Событие с ID:{id} не найдено.");
     }
 }

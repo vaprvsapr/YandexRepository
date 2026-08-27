@@ -12,7 +12,8 @@ WORKDIR /src
 COPY ["EventMicroService.Presentation/EventMicroService.Presentation.csproj", "EventMicroService.Presentation/"]
 COPY ["EventMicroService.Application/EventMicroService.Application.csproj", "EventMicroService.Application/"]
 COPY ["EventMicroService.Domain/EventMicroService.Domain.csproj", "EventMicroService.Domain/"]
-COPY ["Common/Common.csproj", "Common/"]
+COPY ["Common.Web/Common.Web.csproj", "Common.Web/"]
+COPY ["Common/Common.Contracts.csproj", "Common.Contracts/"]
 COPY ["EventMicroService.Infrastructure/EventMicroService.Infrastructure.csproj", "EventMicroService.Infrastructure/"]
 
 RUN dotnet restore "EventMicroService.Presentation/EventMicroService.Presentation.csproj"
