@@ -13,7 +13,15 @@ public static partial class DependencyInjectionExtensions
     {
         services.AddOpenTelemetry()
             .WithTracing(tracing => tracing
-                .AddAspNetCoreInstrumentation()
+                .AddAspNetCoreInstrumentation(options =>
+                {
+                    options.Filter = httpContext =>
+                    {
+                        var path = httpContext.Request.Path;
+                        return !path.StartsWithSegments("/health") &&
+                               !path.StartsWithSegments("/metrics");
+                    };
+                })
                 .AddHttpClientInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
                 .AddOtlpExporter(o => o.Endpoint = new Uri(configuration["Otlp:Endpoint"]!)))

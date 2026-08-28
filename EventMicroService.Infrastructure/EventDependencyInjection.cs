@@ -27,7 +27,7 @@ public static partial class DependencyInjectionExtensions
         // Redis
         services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            var redisConnectionString = configuration.GetConnectionString("RedisConnection") ?? 
+            var redisConnectionString = configuration.GetConnectionString("RedisConnection") ??
                 throw new ArgumentNullException(nameof(configuration));
             return ConnectionMultiplexer.Connect(redisConnectionString);
         });
