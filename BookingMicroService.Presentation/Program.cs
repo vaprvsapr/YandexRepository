@@ -1,14 +1,22 @@
 using BookingMicroService.Infrastructure;
 using BookingMicroService.Presentation;
+using Common.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Common.Web;
+using Serilog;
+using Serilog.Formatting.Compact;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddBookingInfrastructure(builder.Configuration);
+
+// Добавление сервисов для логирования, мониторинга и трейсинга
 builder.Services.AddObservability(builder.Configuration);
+builder.Host.UseSerilog((ctx, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration)
+       .WriteTo.Console(new CompactJsonFormatter()));
+
 builder.Services.AddControllers();
 
 // Добавление сервисов для визуализации и документации API только в режиме разработки

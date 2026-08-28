@@ -112,7 +112,7 @@ services:
     ports:
       - "5001:8080"
 
-  events-service:
+  event-service:
     build:
       context: .
       dockerfile: EventMicroService.Presentation/Dockerfile
@@ -129,7 +129,7 @@ services:
     ports:
       - "5002:8080"
 
-  users-service:
+  user-service:
     build:
       context: .
       dockerfile: UserMicroService.Presentation/Dockerfile
