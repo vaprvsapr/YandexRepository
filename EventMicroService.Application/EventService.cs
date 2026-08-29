@@ -57,7 +57,7 @@ public class EventService(
     }
 
     /// <inheritdoc/>
-    public  PaginatedResultDto GetAllEvents(GetEventQuery getQuery)
+    public PaginatedResultDto GetAllEvents(GetEventQuery getQuery)
     {
         IQueryable<Event> events = _eventRepository.GetAll();
 
@@ -142,7 +142,7 @@ public class EventService(
 
     private async Task<Event> GetEventByIdAsync(Guid id)
     {
-        return await _eventRepository.GetByIdAsync(id) ?? 
+        return await _eventRepository.GetByIdAsync(id) ??
             throw new KeyNotFoundException($"Событие с ID:{id} не найдено.");
     }
 }

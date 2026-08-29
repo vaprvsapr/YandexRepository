@@ -24,6 +24,8 @@
   </Folder>
   <Folder Name="/Элементы решения/">
     <File Path="docker-compose.yml" />
+    <File Path="GrafanaDashboard.json" />
+    <File Path="prometheus.yml" />
     <File Path="README.md" />
   </Folder>
 </Solution>

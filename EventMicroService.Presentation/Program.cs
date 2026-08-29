@@ -1,13 +1,22 @@
+using Common.Web;
 using EventMicroService.Infrastructure;
 using EventMicroService.Presentation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Formatting.Compact;
 using System.Text;
-using Common.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEventInfrastructure(builder.Configuration);
+
+// Добавление сервисов для логирования, мониторинга и трейсинга
+builder.Services.AddObservability(builder.Configuration);
+builder.Host.UseSerilog((ctx, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration)
+       .WriteTo.Console(new CompactJsonFormatter()));
+
 builder.Services.AddControllers();
 
 // Добавление сервисов для визуализации и документации API только в режиме разработки
@@ -57,6 +66,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapPrometheusScrapingEndpoint(); // доступен по /metrics
 // Пайплайн обработки запросов, включая глобальный обработчик исключений
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseAuthentication();

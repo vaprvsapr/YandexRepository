@@ -64,7 +64,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpGet("top")]
     public async Task<ActionResult<List<EventInfoDto>?>> GetTop10Events()
     {
-        var top10Events =  await _eventService.GetTop10Events();
+        var top10Events = await _eventService.GetTop10Events();
         return Ok(top10Events);
     }
 

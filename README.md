@@ -278,6 +278,16 @@ BookingProcessRequestBackgroundService — это фоновый сервис, �
 - Применение миграций к базе данных: `dotnet ef database update`
 - Откат миграции: `dotnet ef database update PreviousMigrationName`
 
+## Наблюдаемость
+Подключена интеграция с OpenTelemetry для сбора метрик и трассировки запросов.
+
+Prometheus, Grafana и Jaeger доступны через docker-compose по адресам:
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (логин: admin, пароль: admin)
+- Jaeger: `http://localhost:16686`
+
+Создан GrafanaDashboard.json для визуализации метрик микросервисов EventMicroService, BookingMicroService и UserMicroService.
+
 ---
 ## Тестирование
 Тестирование реализовано только для микросервиса EventMicroService.
